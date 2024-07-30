@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.uread"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.google.accompanist.permissions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,4 +69,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.readium.shared)
+    implementation(libs.readium.streamer)
+    implementation(libs.readium.navigator)
+
+    //Optional modules, uncomment as needed
+    implementation(libs.readium.opds)
+    implementation(libs.readium.lcp)
+    //implementation(libs.readium.navigator.media.audio)
+    //implementation(libs.readium.adapter.pdfium)
+    implementation(libs.easypermissions)
+
+
 }
