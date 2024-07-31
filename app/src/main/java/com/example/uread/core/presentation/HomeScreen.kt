@@ -1,18 +1,10 @@
 package com.example.uread.core.presentation
 
-import android.Manifest
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.content.pm.PackageManager
-import android.database.Cursor
+import android.content.Intent
 import android.net.Uri
-import android.os.Environment
 import android.provider.DocumentsContract
-import android.provider.MediaStore
-import android.util.Log
-import android.webkit.MimeTypeMap
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -32,56 +24,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.NavHostController
 import com.example.uread.books.presentation.book_shelf.ShelfPageScreen
 import com.example.uread.core.presentation.components.Shelves
 import com.example.uread.util.Navigation
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
+import com.example.uread.util.SharedPreferencesUtil
 
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
-    ExperimentalPermissionsApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
-
-
     val context = LocalContext.current
-    var books by remember { mutableStateOf<List<File>>(emptyList()) }
+    val sharedPreferencesUtil = SharedPreferencesUtil()
+    var books by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
     var selectedTab by remember { mutableIntStateOf(0) }
     val shelves = remember { mutableStateListOf("All Books") }
     val pagerState = rememberPagerState { shelves.size }
@@ -90,51 +52,45 @@ fun HomeScreen(navController: NavHostController) {
         if (isExpanded) Color.Black.copy(alpha = 0.6f) else Color.Transparent, label = ""
     )
 
+    fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
+        val booksList = mutableListOf<DocumentFile>()
+        val treeUri = DocumentFile.fromTreeUri(context, uri)
+        val children = treeUri?.listFiles()
 
-
-    fun getBooksFromDirectory(contentResolver: ContentResolver, uri: Uri): List<File> {
-        val booksList = mutableListOf<File>()
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri))
-        val cursor: Cursor? = contentResolver.query(childrenUri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)
-
-        cursor?.use {
-            val idIndex = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-            val nameIndex = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-
-            while (it.moveToNext()) {
-                val documentId = it.getString(idIndex)
-                val displayName = it.getString(nameIndex)
-                val documentUri = DocumentsContract.buildDocumentUriUsingTree(uri, documentId)
-
-                // Filter for EPUB files
-                if (displayName.endsWith(".epub", ignoreCase = true)) {
-                    booksList.add(File(documentUri.path))
-                }
+        children?.forEach { documentFile ->
+            if (documentFile.isFile && documentFile.name?.endsWith(".epub", ignoreCase = true) == true) {
+                booksList.add(documentFile)
             }
         }
 
         return booksList
     }
 
+    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+        uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            val booksList = getBooksFromDirectory(context, it)
+            books = booksList
+            sharedPreferencesUtil.saveDirectoryUri(context, it.toString())
+            sharedPreferencesUtil.setFirstLaunch(context, false)
+        }
+    }
 
-    // Handle the directory picker result
-    val getContent =
-        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
-            uri?.let {
-                val booksList = getBooksFromDirectory(context.contentResolver, it)
+    LaunchedEffect(Unit) {
+        if (sharedPreferencesUtil.isFirstLaunch(context)) {
+            getContent.launch(null)
+        } else {
+            val uriString = sharedPreferencesUtil.getDirectoryUri(context)
+            uriString?.let {
+                val uri = Uri.parse(it)
+                val booksList = getBooksFromDirectory(context, uri)
                 books = booksList
             }
         }
-
-
-
-    // Launch the directory picker when the composable is first launched
-    LaunchedEffect(Unit) {
-            getContent.launch(null)
     }
-
-
-
 
     LaunchedEffect(selectedTab) {
         pagerState.animateScrollToPage(selectedTab)
@@ -158,8 +114,7 @@ fun HomeScreen(navController: NavHostController) {
         },
         floatingActionButton = {
             Column(
-                modifier = Modifier
-                    .wrapContentSize(),
+                modifier = Modifier.wrapContentSize(),
                 horizontalAlignment = Alignment.End,
             ) {
                 AnimatedVisibility(
@@ -168,8 +123,7 @@ fun HomeScreen(navController: NavHostController) {
                     exit = fadeOut(),
                 ) {
                     Column(
-                        modifier = Modifier
-                            .padding(4.dp),
+                        modifier = Modifier.padding(4.dp),
                         horizontalAlignment = Alignment.End,
                     ) {
                         Row {
@@ -240,13 +194,11 @@ fun HomeScreen(navController: NavHostController) {
             ) { index ->
                 when (index) {
                     0 -> {
-
-                            // Display the list of EPUB files
-                            LazyColumn {
-                                items(books) { file ->
-                                    Text(text = file.name, modifier = Modifier.padding(16.dp))
-                                }
+                        LazyColumn {
+                            items(books) { documentFile ->
+                                Text(text = documentFile.name ?: "Unknown", modifier = Modifier.padding(16.dp))
                             }
+                        }
                     }
                     else -> ShelfPageScreen(index)
                 }

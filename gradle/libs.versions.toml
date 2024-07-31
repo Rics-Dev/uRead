@@ -15,6 +15,7 @@ materialIconsExtended = "1.7.0-beta02"
 navigationCompose = "2.8.0-beta02"
 readium = "2.4.0"
 googleAccompanistPermissions = "0.35.1-alpha"
+documentfile = "1.0.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -44,6 +45,7 @@ readium-lcp = { module = "org.readium.kotlin-toolkit:readium-lcp", version.ref =
 readium-navigator-media-audio = { module = "org.readium.kotlin-toolkit:readium-navigator-media-audio", version.ref = "readium" }
 readium-adapter-pdfium = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium", version.ref = "readium" }
 google-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "googleAccompanistPermissions" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
