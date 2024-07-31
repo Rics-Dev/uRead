@@ -3,6 +3,7 @@ package com.example.uread.core.presentation
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,9 +14,13 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,14 +34,43 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.example.uread.R
 import com.example.uread.books.presentation.book_shelf.ShelfPageScreen
 import com.example.uread.core.presentation.components.Shelves
+import com.example.uread.util.Book
 import com.example.uread.util.Navigation
 import com.example.uread.util.SharedPreferencesUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.cover
+import org.readium.r2.shared.util.ErrorException
+import org.readium.r2.shared.util.asset.AssetRetriever
+import org.readium.r2.shared.util.getOrElse
+import org.readium.r2.shared.util.getOrThrow
+import org.readium.r2.shared.util.http.DefaultHttpClient
+import org.readium.r2.shared.util.toAbsoluteUrl
+import org.readium.r2.streamer.PublicationOpener
+import org.readium.r2.streamer.parser.DefaultPublicationParser
+import java.io.File
+
+
+data class BookMetadata(
+    val title: String,
+    val authors: List<String>,
+    val description: String?,
+    val coverBitmap: Bitmap?
+)
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -51,6 +85,47 @@ fun HomeScreen(navController: NavHostController) {
     val backgroundColor by animateColorAsState(
         if (isExpanded) Color.Black.copy(alpha = 0.6f) else Color.Transparent, label = ""
     )
+
+    val httpClient = DefaultHttpClient()
+    val assetRetriever = AssetRetriever(context.contentResolver, httpClient)
+
+    val publicationParser = DefaultPublicationParser(context, httpClient, assetRetriever, null)
+    val publicationOpener = PublicationOpener(publicationParser)
+
+    var booksWithMetadata by remember { mutableStateOf<List<Pair<DocumentFile, BookMetadata?>>>(emptyList()) }
+
+
+    suspend fun extractMetadata(publication: Publication?): BookMetadata? {
+        return publication?.let {
+            BookMetadata(
+                title = it.metadata.title ?: "Unknown Title",
+                authors = it.metadata.authors.map { author -> author.name },
+                description = it.metadata.description,
+                coverBitmap = it.cover()?.let { cover -> cover as? Bitmap }
+            )
+        }
+    }
+
+    suspend fun getBookMetadata(documentFile: DocumentFile): BookMetadata? = withContext(Dispatchers.IO) {
+        try {
+            val url = documentFile.uri.toAbsoluteUrl()
+            val asset = url?.let { assetRetriever.retrieve(it)
+                .getOrElse { throw ErrorException(it) } }
+            val publication = asset?.let { publicationOpener.open(it, allowUserInteraction = false)
+                .getOrElse { throw ErrorException(it) } }
+            extractMetadata(publication)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
+
+    LaunchedEffect(books) {
+        booksWithMetadata = books.map { documentFile ->
+            documentFile to getBookMetadata(documentFile)
+        }
+    }
 
     fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
         val booksList = mutableListOf<DocumentFile>()
@@ -194,15 +269,73 @@ fun HomeScreen(navController: NavHostController) {
             ) { index ->
                 when (index) {
                     0 -> {
-                        LazyColumn {
-                            items(books) { documentFile ->
-                                Text(text = documentFile.name ?: "Unknown", modifier = Modifier.padding(16.dp))
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 120.dp),
+                            contentPadding = PaddingValues(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(booksWithMetadata) { (documentFile, metadata) ->
+                                BookItem(documentFile, metadata)
                             }
                         }
                     }
                     else -> ShelfPageScreen(index)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun BookItem(documentFile: DocumentFile, metadata: BookMetadata?) {
+    Card(
+        modifier = Modifier
+            .width(120.dp)
+            .height(180.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+//            Box(
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .fillMaxWidth()
+//            ) {
+//                AsyncImage(
+//                    model = metadata?.coverUrl,
+//                    contentDescription = "Book cover",
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentScale = ContentScale.Crop,
+//                    error = painterResource(id = R.drawable.placeholder_cover) // Replace with your placeholder image resource
+//                )
+//            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(Color.LightGray) // This serves as the placeholder
+            ) {
+                metadata?.coverBitmap?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Book cover",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+            Text(
+                text = metadata?.title ?: (documentFile.name ?: "Unknown"),
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
