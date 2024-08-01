@@ -1,4 +1,7 @@
 package com.example.uread
 
-class BookApplication {
-}
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class BookApplication : Application()

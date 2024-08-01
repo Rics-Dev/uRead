@@ -1,4 +1,4 @@
-package com.example.uread.books.data.datasource.local
+package com.example.uread.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

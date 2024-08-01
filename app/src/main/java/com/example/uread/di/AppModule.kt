@@ -1,4 +1,94 @@
 package com.example.uread.di
 
+import android.content.Context
+import androidx.room.Room
+import com.example.uread.data.repository.BooksRepositoryImpl
+import com.example.uread.data.source.local.AppDatabase
+import com.example.uread.data.source.local.BookDao
+import com.example.uread.data.source.local.SharedPreferencesUtil
+import com.example.uread.domain.repository.BooksRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import org.readium.r2.shared.util.asset.AssetRetriever
+import org.readium.r2.shared.util.http.DefaultHttpClient
+import org.readium.r2.shared.util.http.HttpClient
+import org.readium.r2.streamer.PublicationOpener
+import org.readium.r2.streamer.parser.DefaultPublicationParser
+import javax.inject.Singleton
+
+
+@Module
+@InstallIn(SingletonComponent::class) //live as long as our application
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "book_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookDao(appDatabase: AppDatabase): BookDao {
+        return appDatabase.bookDao()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesUtil(@ApplicationContext context: Context): SharedPreferencesUtil {
+        return SharedPreferencesUtil(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBooksRepository ( bookDao: BookDao): BooksRepository {
+        return BooksRepositoryImpl(bookDao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient {
+        return DefaultHttpClient()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAssetRetriever(
+        @ApplicationContext context: Context,
+        httpClient: HttpClient
+    ): AssetRetriever {
+        return AssetRetriever(context.contentResolver, httpClient)
+    }
+
+    @Provides
+    @Singleton
+    fun providePublicationParser(
+        @ApplicationContext context: Context,
+        httpClient: HttpClient,
+        assetRetriever: AssetRetriever
+    ): DefaultPublicationParser {
+        return DefaultPublicationParser(context, httpClient, assetRetriever, null)
+    }
+
+    @Provides
+    @Singleton
+    fun providePublicationOpener(publicationParser: DefaultPublicationParser): PublicationOpener {
+        return PublicationOpener(publicationParser)
+    }
+
 }

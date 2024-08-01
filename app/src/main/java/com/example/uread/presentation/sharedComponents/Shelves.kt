@@ -1,4 +1,4 @@
-package com.example.uread.core.presentation.components
+package com.example.uread.presentation.sharedComponents
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons

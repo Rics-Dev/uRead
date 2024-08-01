@@ -1,4 +1,4 @@
-package com.example.uread.books.presentation.book_shelf
+package com.example.uread.presentation.book_shelf
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

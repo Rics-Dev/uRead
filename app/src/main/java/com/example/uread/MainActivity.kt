@@ -7,11 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.uread.books.presentation.search_book.SearchBookOpenLibrary
-import com.example.uread.core.presentation.HomeScreen
+import com.example.uread.presentation.home.HomeScreen
 import com.example.uread.ui.theme.UReadTheme
 import com.example.uread.util.Navigation
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,16 +30,11 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Navigation.HomeScreen.route
                     ){
-                        HomeScreen(navController = navController)
-                    }
-                    composable(
-                        route = Navigation.SearchBookOLScreen.route
-                    ){
-                        SearchBookOpenLibrary(navController = navController)
+                        HomeScreen(
+//                            navController = navController
+                        )
                     }
                 }
-
-
             }
         }
     }
