@@ -31,4 +31,18 @@ class SharedPreferencesUtil {
         return sharedPreferences.getString("directory_uri", null)
     }
 
+
+    fun getLastUpdateTime(context: Context): Long {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getLong("last_update_time", 0)
+    }
+
+    fun saveLastUpdateTime(context: Context, time: Long) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putLong("last_update_time", time)
+            apply()
+        }
+    }
+
 }

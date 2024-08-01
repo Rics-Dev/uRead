@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -82,9 +84,13 @@ dependencies {
     //Optional modules, uncomment as needed
     implementation(libs.readium.opds)
     implementation(libs.readium.lcp)
-    //implementation(libs.readium.navigator.media.audio)
-    //implementation(libs.readium.adapter.pdfium)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+//    implementation(libs.readium.navigator.media.audio)
+//    implementation(libs.readium.adapter.pdfium)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.coil.compose)
+    implementation(libs.room.runtime)
+//    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    kapt("androidx.room:room-compiler:2.6.1")
 
 }

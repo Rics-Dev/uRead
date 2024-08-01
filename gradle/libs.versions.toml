@@ -3,6 +3,8 @@ accompanistPermissions = "<latest_version>"
 accompanistPermissionsVersion = "<version>"
 agp = "8.5.1"
 chaquopy = "15.0.0"
+coilCompose = "2.7.0"
+desugar_jdk_libs = "2.0.4"
 easypermissions = "3.0.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -14,15 +16,21 @@ activityCompose = "1.9.0"
 composeBom = "2023.08.00"
 materialIconsExtended = "1.7.0-beta02"
 navigationCompose = "2.8.0-beta02"
-readium = "2.2.1"
 googleAccompanistPermissions = "0.35.1-alpha"
 documentfile = "1.0.1"
+roomCompiler = "2.6.1"
+readium = "3.0.0-beta.2"
+roomRuntimeVersion = "2.6.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-permissions-vversion = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissionsVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomCompiler" }
 chaquopy = { module = "com.chaquo.python:chaquopy", version.ref = "chaquopy" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 easypermissions = { module = "pub.devrel:easypermissions", version.ref = "easypermissions" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -39,15 +47,16 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version = "3.0.0-beta.2" }
-readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version = "3.0.0-beta.2" }
-readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version = "3.0.0-beta.2" }
-readium-opds = { module = "org.readium.kotlin-toolkit:readium-opds", version = "3.0.0-beta.2" }
-readium-lcp = { module = "org.readium.kotlin-toolkit:readium-lcp", version = "3.0.0-beta.2" }
+readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version.ref = "readium" }
+readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
+readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version.ref = "readium" }
+readium-opds = { module = "org.readium.kotlin-toolkit:readium-opds", version.ref = "readium" }
+readium-lcp = { module = "org.readium.kotlin-toolkit:readium-lcp", version.ref = "readium" }
 readium-navigator-media-audio = { module = "org.readium.kotlin-toolkit:readium-navigator-media-audio", version.ref = "readium" }
 readium-adapter-pdfium = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium", version.ref = "readium" }
 google-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "googleAccompanistPermissions" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntimeVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
