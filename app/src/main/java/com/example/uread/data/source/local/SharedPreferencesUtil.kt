@@ -23,19 +23,8 @@ class SharedPreferencesUtil @Inject constructor(
         sharedPreferences.edit().putBoolean("is_first_launch", isFirstLaunch).apply()
     }
 
-
-    fun saveLastUpdateTime(context: Context, time: Long) {
-        sharedPreferences.edit().putLong("last_update_time", time).apply()
-    }
-
-
-
     fun getDirectoryUri(context: Context): String? {
         return sharedPreferences.getString("directory_uri", null)
     }
 
-
-    fun getLastUpdateTime(context: Context): Long {
-        return sharedPreferences.getLong("last_update_time", 0)
-    }
 }

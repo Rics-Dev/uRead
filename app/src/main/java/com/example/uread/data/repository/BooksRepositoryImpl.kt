@@ -22,6 +22,10 @@ class BooksRepositoryImpl @Inject constructor(
         bookDao.insertBook(book)
     }
 
+    override suspend fun insertBooks(books: List<Book>) = withContext(Dispatchers.IO) {
+        bookDao.insertBooks(books)
+    }
+
     override suspend fun deleteBookByUri(uri: String) = withContext(Dispatchers.IO) {
         bookDao.deleteBookByUri(uri)
     }

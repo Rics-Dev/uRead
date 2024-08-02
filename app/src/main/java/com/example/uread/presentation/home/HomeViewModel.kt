@@ -36,6 +36,7 @@ import org.readium.r2.shared.util.toAbsoluteUrl
 import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
 import java.io.File
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,6 +54,7 @@ class HomeViewModel @Inject constructor(
     private val appContext: Context = application.applicationContext
 
     private val _books = MutableStateFlow<List<Book>>(emptyList())
+    private val _bookCache = MutableStateFlow<Map<String, Book>>(emptyMap()) // Cache for loaded books
 
     val books: Flow<PagingData<Book>> = Pager(
         config = PagingConfig(
@@ -79,12 +81,23 @@ class HomeViewModel @Inject constructor(
             if (sharedPreferencesUtil.isFirstLaunch()) {
                 onFirstLaunch()
             } else {
-                val uriString = sharedPreferencesUtil.getDirectoryUri(getApplication())
-                if (uriString != null) {
+                sharedPreferencesUtil.getDirectoryUri(getApplication())?.let { uriString ->
                     val uri = Uri.parse(uriString)
                     checkForMissingBooks(uri)
                 }
             }
+        }
+    }
+
+    // for first time launch
+    fun handleDirectorySelection(uri: Uri) {
+        viewModelScope.launch {
+            _isLoadingNewBooks.value = true
+            checkForMissingBooks(uri)
+            sharedPreferencesUtil.saveDirectoryUri(uri.toString())
+            sharedPreferencesUtil.setFirstLaunch(false)
+            _isLoadingNewBooks.value = false
+
         }
     }
 
@@ -97,7 +110,13 @@ class HomeViewModel @Inject constructor(
         val booksList = getBooksFromDirectory(appContext, uri)
 
         // Filter the booksList to only include books not already in the database
-        val newBooks = booksList.filter { it.uri.toString() !in existingUris }
+//        val newBooks = booksList.filter { it.uri.toString() !in existingUris }
+
+        val newBooks = booksList.filter { documentFile ->
+            val bookUriString = documentFile.uri.toString()
+            bookUriString !in existingUris && bookUriString !in _bookCache.value.keys
+        }
+
 
         // Add only the missing books
         newBooks.forEach { documentFile ->
@@ -107,17 +126,8 @@ class HomeViewModel @Inject constructor(
         _isLoadingNewBooks.value = false
     }
 
-    // for first time launch
-    fun handleDirectorySelection(uri: Uri) {
-        viewModelScope.launch {
-            _isLoadingNewBooks.value = true
-            checkForMissingBooks(uri)
-            _isLoadingNewBooks.value = false
-            sharedPreferencesUtil.saveDirectoryUri(uri.toString())
-            sharedPreferencesUtil.setFirstLaunch(false)
-            sharedPreferencesUtil.saveLastUpdateTime(appContext, System.currentTimeMillis())
-        }
-    }
+
+
 
 
     private suspend fun addNewBook(documentFile: DocumentFile) {
@@ -125,6 +135,8 @@ class HomeViewModel @Inject constructor(
         _books.value += book
         _snackbarMessage.value = "Adding new book: ${documentFile.name}"
         insertBookUseCase(book)
+
+        _bookCache.value += (book.uri to book)
     }
 
     private suspend fun getBookInfo(documentFile: DocumentFile): Book = withContext(Dispatchers.IO) {
@@ -163,10 +175,13 @@ class HomeViewModel @Inject constructor(
         val file = File(appContext.filesDir, "covers/${uri.hashCode()}.png")
         file.parentFile?.mkdirs()
         file.outputStream().use { out ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            if (!bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 90, out)) {
+                throw IOException("Failed to save cover")
+            }
         }
         return file.absolutePath
     }
+
 
 
     //retrieve epub files from the directory

@@ -18,7 +18,10 @@ interface BookDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertBook(book: Book)
+    fun insertBook(books: Book)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertBooks(books: List<Book>)
 
     @Query("DELETE FROM books WHERE uri = :uri")
     fun deleteBookByUri(uri: String)
