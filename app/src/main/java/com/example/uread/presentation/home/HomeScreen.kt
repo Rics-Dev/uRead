@@ -10,29 +10,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.uread.data.source.local.SharedPreferencesUtil
 //import androidx.navigation.NavHostController
 import com.example.uread.presentation.book_shelf.ShelfPageScreen
 import com.example.uread.presentation.home.components.AddBookSnackbar
 import com.example.uread.presentation.home.components.BookCard
-import com.example.uread.presentation.home.components.BookCardSkeleton
 import com.example.uread.presentation.sharedComponents.Shelves
-import com.example.uread.util.Navigation
+import com.example.uread.util.ScreenNavigation
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,30 +121,27 @@ fun HomeScreen(
             ) { index ->
                 when (index) {
                     0 -> {
-                            LazyVerticalGrid(
-                                columns = GridCells.Adaptive(100.dp),
-                                contentPadding = PaddingValues(10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(
-                                    count = books.itemCount,
-                                    key = { index -> books[index]?.uri ?: index }
-                                ) { index ->
-                                    val book = books[index]
-                                    BookCard(
-                                        book,
-                                        openBook = { openedBook ->
-                                            openedBook.uri.let { uri ->
-                                                navController.navigate(Navigation.BookReaderScreen.createRoute(uri.toString()))
-                                            }
-
-                                        }
-                                    )
-                                }
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(100.dp),
+                            contentPadding = PaddingValues(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(
+                                count = books.itemCount,
+                                key = { index -> books[index]?.uri ?: index }
+                            ) { index ->
+                                val book = books[index]
+                                BookCard(
+                                    book,
+                                    openBook = { openedBook ->
+                                        navController.navigate(ScreenNavigation.BookReaderScreen.route + "/${Uri.encode(openedBook.uri)}")
+                                    }
+                                )
                             }
                         }
+                    }
 
                     else -> ShelfPageScreen(index)
                 }

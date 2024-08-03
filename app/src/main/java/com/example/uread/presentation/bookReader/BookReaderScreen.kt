@@ -23,16 +23,16 @@ import org.readium.r2.shared.publication.Publication
 @Composable
 fun BookReaderScreen(
     viewModel: BookReaderViewModel = hiltViewModel(),
-    bookUri: String
+//    bookUri: String
 ) {
     val publication by viewModel.publication.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(bookUri) {
-        viewModel.openBook(bookUri)
-    }
+//    LaunchedEffect(bookUri) {
+//        viewModel.openBook(bookUri)
+//    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
