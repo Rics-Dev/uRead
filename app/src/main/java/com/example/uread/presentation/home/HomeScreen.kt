@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.uread.data.source.local.SharedPreferencesUtil
@@ -31,12 +32,13 @@ import com.example.uread.presentation.home.components.AddBookSnackbar
 import com.example.uread.presentation.home.components.BookCard
 import com.example.uread.presentation.home.components.BookCardSkeleton
 import com.example.uread.presentation.sharedComponents.Shelves
+import com.example.uread.util.Navigation
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-//    navController: NavHostController,
+    navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -138,7 +140,15 @@ fun HomeScreen(
                                     key = { index -> books[index]?.uri ?: index }
                                 ) { index ->
                                     val book = books[index]
-                                    BookCard(book)
+                                    BookCard(
+                                        book,
+                                        openBook = { openedBook ->
+                                            openedBook.uri.let { uri ->
+                                                navController.navigate(Navigation.BookReaderScreen.createRoute(uri.toString()))
+                                            }
+
+                                        }
+                                    )
                                 }
                             }
                         }

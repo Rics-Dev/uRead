@@ -1,0 +1,55 @@
+package com.example.uread.presentation.bookReader
+
+import android.app.Application
+import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.util.ErrorException
+import org.readium.r2.shared.util.asset.AssetRetriever
+import org.readium.r2.shared.util.getOrElse
+import org.readium.r2.shared.util.toAbsoluteUrl
+import org.readium.r2.streamer.PublicationOpener
+import javax.inject.Inject
+
+@HiltViewModel
+class BookReaderViewModel @Inject constructor(
+    private val context: Application,
+    private val assetRetriever: AssetRetriever,
+    private val publicationOpener: PublicationOpener
+) : AndroidViewModel(context) {
+
+    private val _publication = MutableStateFlow<Publication?>(null)
+    val publication: StateFlow<Publication?> = _publication.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    fun openBook(bookUri: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val asset = Uri.parse(bookUri).toAbsoluteUrl()?.let {
+                    assetRetriever.retrieve(it)
+                        .getOrElse { throw ErrorException(it) }
+                }
+
+                val pub = asset?.let {
+                    publicationOpener.open(it, allowUserInteraction = true)
+                        .getOrElse { throw ErrorException(it) }
+                }
+
+                _publication.value = pub
+                _isLoading.value = false
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+}

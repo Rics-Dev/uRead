@@ -3,6 +3,7 @@ package com.example.uread.presentation.home.components
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,11 +34,15 @@ import coil.transform.RoundedCornersTransformation
 import com.example.uread.data.model.Book
 
 @Composable
-fun BookCard(book: Book?) {
+fun BookCard(
+    book: Book?,
+    openBook: (Book) -> Unit
+) {
     Card(
         modifier = Modifier
             .width(120.dp)
-            .height(210.dp),
+            .height(210.dp)
+            .clickable { book?.let { openBook(it) } },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(

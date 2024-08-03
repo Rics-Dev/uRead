@@ -139,7 +139,7 @@ class HomeViewModel @Inject constructor(
         _bookCache.value += (book.uri to book)
     }
 
-    private suspend fun getBookInfo(documentFile: DocumentFile): Book = withContext(Dispatchers.IO) {
+     suspend fun getBookInfo(documentFile: DocumentFile): Book = withContext(Dispatchers.IO) {
         try {
             val url = documentFile.uri.toAbsoluteUrl()
             val asset = url?.let { it -> assetRetriever.retrieve(it).getOrElse { throw ErrorException(it) } }
