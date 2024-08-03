@@ -152,7 +152,7 @@ class HomeViewModel @Inject constructor(
                 authors = "",
                 description = null,
                 coverPath = null,
-                lastModified = documentFile.lastModified()
+                locator = "",
             )
         }
     }
@@ -167,7 +167,7 @@ class HomeViewModel @Inject constructor(
             authors = publication?.metadata?.authors?.joinToString(",") { it.name } ?: "",
             description = publication?.metadata?.description,
             coverPath = coverPath,
-            lastModified = documentFile.lastModified()
+            locator = "",
         )
     }
 

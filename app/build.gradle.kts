@@ -2,9 +2,17 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
+    id("androidx.room")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+
 }
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+
 
 android {
     namespace = "com.example.uread"
@@ -103,6 +111,9 @@ dependencies {
     kapt(libs.hilt.android.compiler)
     kapt(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+
+    implementation(libs.kotlinx.serialization.json)
 
 
 }

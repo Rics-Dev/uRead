@@ -6,6 +6,7 @@ import com.example.uread.data.source.local.BookDao
 import com.example.uread.domain.repository.BooksRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.readium.r2.shared.publication.Locator
 import javax.inject.Inject
 
 
@@ -29,4 +30,17 @@ class BooksRepositoryImpl @Inject constructor(
     override suspend fun deleteBookByUri(uri: String) = withContext(Dispatchers.IO) {
         bookDao.deleteBookByUri(uri)
     }
+
+
+    override suspend fun setReadingProgress(uri: String, locator: String) = withContext(Dispatchers.IO) {
+        bookDao.setReadingProgress(uri, locator)
+    }
+
+
+    override suspend fun getReadingProgress(uri: String): String = withContext(Dispatchers.IO) {
+        bookDao.getReadingProgress(uri)
+    }
+
+
+
 }
