@@ -1,14 +1,15 @@
 package com.example.uread.presentation.bookReader
 
-import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.content.Context
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
@@ -19,15 +20,15 @@ import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Publication
 
-
 @Composable
 fun BookReaderScreen(
     viewModel: BookReaderViewModel = hiltViewModel(),
     bookUri: String
 ) {
-    val context = LocalContext.current
     val publication by viewModel.publication.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(bookUri) {
         viewModel.openBook(bookUri)
@@ -37,16 +38,19 @@ fun BookReaderScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else {
-            publication?.let { pub ->
-                BookReaderFragment(publication = pub, context = context , modifier = Modifier.fillMaxSize())
+        when {
+            isLoading -> {
+                CircularProgressIndicator()
+            }
+            error != null -> {
+                Text(error!!)
+            }
+            publication != null -> {
+                BookReaderFragment(publication = publication!!, context = context , modifier = Modifier.fillMaxSize())
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalReadiumApi::class)
 @Composable

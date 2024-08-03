@@ -30,6 +30,9 @@ class BookReaderViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     fun openBook(bookUri: String) {
         _isLoading.value = true
         viewModelScope.launch {
@@ -47,9 +50,9 @@ class BookReaderViewModel @Inject constructor(
                 _publication.value = pub
                 _isLoading.value = false
             } catch (e: Exception) {
-                // Handle error
+                _error.value = e.message
+                _isLoading.value = false
             }
         }
     }
-
 }
