@@ -45,19 +45,42 @@ class BookReaderViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<BookReaderUiState>(BookReaderUiState.Loading)
     val uiState: StateFlow<BookReaderUiState> = _uiState.asStateFlow()
 
-    private var currentBookUri: String? = null
+    private val _currentBookUri = MutableStateFlow<String?>(null)
+    val currentBookUri: StateFlow<String?> = _currentBookUri.asStateFlow()
 
+    private val _initialLocator = MutableStateFlow<Locator?>(null)
+    val initialLocator: StateFlow<Locator?> = _initialLocator.asStateFlow()
 
 
     init {
         savedStateHandle.get<String>("bookUri")?.let { bookUri ->
-            currentBookUri = bookUri
-            Uri.parse(bookUri).toAbsoluteUrl()?.let { openBook(it) }
+            _currentBookUri.value = bookUri
+            viewModelScope.launch {
+                _initialLocator.value = getInitialLocator(bookUri)
+                Uri.parse(bookUri).toAbsoluteUrl()?.let { openBook(it) }
+            }
+//            Uri.parse(bookUri).toAbsoluteUrl()?.let { openBook(it) }
         }
     }
 
 
+    fun saveReadingProgress(locator: Locator) {
+        viewModelScope.launch {
+            currentBookUri.value?.let { uri ->
+                setReadingProgressUseCase(uri, locator.toJSON().toString())
+            }
+        }
+    }
 
+    private suspend fun getInitialLocator(bookUri: String): Locator? {
+        return getReadingProgressUseCase(bookUri).let { progressJson ->
+            if (progressJson.isNotEmpty()) {
+                Locator.fromJSON(JSONObject(progressJson))
+            } else {
+                null
+            }
+        }
+    }
 
     private fun openBook(bookUri: AbsoluteUrl) {
         viewModelScope.launch {
@@ -72,6 +95,7 @@ class BookReaderViewModel @Inject constructor(
             }
         }
     }
+
 }
 
 
