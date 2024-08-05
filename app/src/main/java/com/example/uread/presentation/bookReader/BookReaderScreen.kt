@@ -1,5 +1,6 @@
 package com.example.uread.presentation.bookReader
 
+import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
@@ -10,45 +11,77 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.sharp.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.uread.presentation.bookReader.components.BottomToolbar
+import com.example.uread.presentation.bookReader.components.TopToolbar
+import com.example.uread.util.SetFullScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.readium.r2.navigator.HyperlinkNavigator
+import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubDefaults
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.epub.EpubSettings
+import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
-import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
-import org.readium.r2.shared.util.AbsoluteUrl
-import org.readium.r2.shared.util.Url
-import org.readium.r2.shared.util.data.ReadError
+import org.readium.r2.shared.publication.services.locateProgression
+
 
 @Composable
 fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
+    val context = LocalContext.current
+    SetFullScreen(context)
+
     val uiState by viewModel.uiState.collectAsState()
     val initialLocator by viewModel.initialLocator.collectAsState()
-
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (uiState) {
@@ -65,9 +98,10 @@ fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
                 )
             }
         }
-
     }
 }
+
+
 
 
 @OptIn(ExperimentalReadiumApi::class)
@@ -79,19 +113,42 @@ fun EpubReaderView(
 ) {
     val fragmentActivity = LocalContext.current as FragmentActivity
     var navigatorFragment by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
-    var showFontSizeSettings by remember { mutableStateOf(false) }
-    var fontSize by remember { mutableStateOf(1.0) }
+    var showToolbar by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
+
+
+    // New state variables
+    var progression by remember { mutableStateOf(1.0) }
+    var currentChapter by remember { mutableStateOf("") }
+    var currentFontSize by remember { mutableStateOf(100) }
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
             navigator.currentLocator.collect { locator ->
                 onLocatorChange(locator)
+                progression = locator.locations.totalProgression ?: 0.0
+                currentChapter = locator.title ?: ""
             }
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    fun onPageChange(newPage: Double) {
+        navigatorFragment?.let { navigator ->
+            coroutineScope.launch {
+                val locator = publication.locateProgression(newPage)
+                locator?.let {
+                    navigator.go(locator)
+                }
+            }
+
+        }
+    }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+    ) {
         AndroidView(
             factory = { context ->
                 FrameLayout(context).apply {
@@ -99,8 +156,7 @@ fun EpubReaderView(
                 }
             },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 56.dp),
+                .fillMaxSize(),
             update = { view ->
                 if (navigatorFragment == null) {
                     val factory = EpubNavigatorFactory(
@@ -108,8 +164,7 @@ fun EpubReaderView(
                         configuration = EpubNavigatorFactory.Configuration(
                             defaults = EpubDefaults(
                                 pageMargins = 1.4,
-                                scroll = true,
-                                fontSize = fontSize
+                                scroll = false,
                             )
                         )
                     )
@@ -128,31 +183,78 @@ fun EpubReaderView(
                     fragmentActivity.supportFragmentManager.beginTransaction()
                         .replace(view.id, fragment)
                         .commitAllowingStateLoss()
+
+                    // Set up the directional navigation adapter
+                    (navigatorFragment as? OverflowableNavigator)?.apply {
+                        addInputListener(DirectionalNavigationAdapter(this))
+                    }
                 }
             }
         )
 
-        // Toolbar
-        Row(
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(48.dp)
                 .align(Alignment.BottomCenter)
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigatorFragment?.goBackward() }) {
-                Icon(Icons.Default.Remove, contentDescription = "Previous page")
-            }
-            IconButton(onClick = { showFontSizeSettings = true }) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
-            }
-            IconButton(onClick = { navigatorFragment?.goForward() }) {
-                Icon(Icons.Default.Add, contentDescription = "Next page")
-            }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            showToolbar = !showToolbar
+//                            if (showToolbar) {
+//                                coroutineScope.launch {
+//                                    delay(3000)
+//                                    showToolbar = false
+//                                }
+//                            }
+                        }
+                    )
+                }
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .align(Alignment.TopCenter)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            showToolbar = !showToolbar
+//                            if (showToolbar) {
+//                                coroutineScope.launch {
+//                                    delay(5000)
+//                                    showToolbar = false
+//                                }
+//                            }
+                        }
+                    )
+                }
+        )
+
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            BottomToolbar(
+                showToolbar = showToolbar,
+                progression = progression,
+                currentChapter = currentChapter,
+                onFontSizeChange = { newPreferences ->
+                    currentFontSize = (newPreferences.fontSize?.times(100) ?: 100).toInt()
+                    navigatorFragment?.let { navigator ->
+                        coroutineScope.launch {
+                            navigator.submitPreferences(newPreferences)
+                        }
+                    }
+                },
+                currentFontSize = currentFontSize,
+                onPageChange = ::onPageChange
+            )
         }
+
+
+        TopToolbar(showToolbar, publication, fragmentActivity)
+
     }
+
 
     DisposableEffect(Unit) {
         onDispose {
@@ -198,3 +300,10 @@ fun FontSizeSettingsSheet(
         }
     }
 }
+
+//            if (newPage in 1..totalPages) {
+//                val newLocator =
+//                coroutineScope.launch {
+//                    navigator.go(newLocator)
+//                }
+//            }
