@@ -14,11 +14,13 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import com.example.uread.data.model.Book
+import com.example.uread.data.source.local.BookDao
 import com.example.uread.data.source.local.SharedPreferencesUtil
 import com.example.uread.domain.use_case.DeleteBookUseCase
 import com.example.uread.domain.use_case.GetBookUrisUseCase
 import com.example.uread.domain.use_case.GetBooksUseCase
 import com.example.uread.domain.use_case.InsertBookUseCase
+import com.example.uread.pagingSource.BookPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +43,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val bookDao: BookDao,
     private val getBooksUseCase: GetBooksUseCase,
     private val getBookUrisUseCase: GetBookUrisUseCase,
     private val insertBookUseCase: InsertBookUseCase,
@@ -64,6 +67,16 @@ class HomeViewModel @Inject constructor(
     ) {
         getBooksUseCase()
     }.flow.cachedIn(viewModelScope)
+
+//    val books: Flow<PagingData<Book>> = Pager(
+//        config = PagingConfig(
+//            pageSize = 9,
+//            enablePlaceholders = false,
+//            maxSize = 100
+//        )
+//    ) {
+//        BookPagingSource(bookDao)
+//    }.flow.cachedIn(viewModelScope)
 
 
 

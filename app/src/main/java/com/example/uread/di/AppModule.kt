@@ -38,7 +38,9 @@ object AppModule {
             appContext,
             AppDatabase::class.java,
             "book_database"
-        ).build()
+        )
+//            .addMigrations(AppDatabase.MIGRATION_1_2) // Add your migration here
+            .build()
     }
 
     @Provides
