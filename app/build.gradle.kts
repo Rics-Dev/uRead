@@ -115,6 +115,9 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+
 
 
 

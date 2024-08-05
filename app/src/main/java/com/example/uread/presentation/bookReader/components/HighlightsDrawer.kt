@@ -1,5 +1,7 @@
 package com.example.uread.presentation.bookReader.components
 
+
+import android.text.Highlights
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -40,13 +42,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun NotesDrawer(
+fun HighlightsDrawer(
     modifier: Modifier = Modifier,
     isOpen: Boolean,
     onClose: () -> Unit,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabTitles by remember { mutableStateOf(listOf("Notes")) }
+    val tabTitles by remember { mutableStateOf(listOf("Highlights")) }
 
     AnimatedVisibility(
         visible = isOpen,
@@ -71,7 +73,7 @@ fun NotesDrawer(
                         IconButton(onClick = onClose) {
                             Icon(Icons.Default.Close, contentDescription = "Close Notes")
                         }
-                        Text( "Notes" , style = MaterialTheme.typography.titleLarge)
+                        Text( "Highlights" , style = MaterialTheme.typography.titleLarge)
 
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +97,7 @@ fun NotesDrawer(
                     when (selectedTabIndex) {
                         0 -> {
                             // Your Notes content here
-                            Text("Notes Content")
+                            Text("Highlights Content")
                         }
                     }
                 }

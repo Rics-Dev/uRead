@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.uread.data.repository.BooksRepositoryImpl
 import com.example.uread.data.source.local.AppDatabase
 import com.example.uread.data.source.local.BookDao
+import com.example.uread.data.source.local.ReaderPreferencesUtil
 import com.example.uread.data.source.local.SharedPreferencesUtil
 import com.example.uread.domain.repository.BooksRepository
 import dagger.Module
@@ -51,6 +52,12 @@ object AppModule {
     @Singleton
     fun provideSharedPreferencesUtil(@ApplicationContext context: Context): SharedPreferencesUtil {
         return SharedPreferencesUtil(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReaderPreferences(@ApplicationContext context: Context): ReaderPreferencesUtil {
+        return ReaderPreferencesUtil(context)
     }
 
     @Provides

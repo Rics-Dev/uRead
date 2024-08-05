@@ -2,7 +2,6 @@ package com.example.uread.presentation.bookReader
 
 import android.view.View
 import android.widget.FrameLayout
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -13,31 +12,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.uread.data.model.ReaderPreferences
 import com.example.uread.presentation.bookReader.components.BottomToolbar
 import com.example.uread.presentation.bookReader.components.TopToolbar
 import com.example.uread.presentation.bookReader.components.ChaptersDrawer
+import com.example.uread.presentation.bookReader.components.FontSettings
+import com.example.uread.presentation.bookReader.components.HighlightsDrawer
 import com.example.uread.presentation.bookReader.components.NotesDrawer
-import com.example.uread.presentation.bookReader.components.ReaderSettings
 import com.example.uread.util.SetFullScreen
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubDefaults
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
+import org.readium.r2.navigator.preferences.Color as ReadiumColor
 
-
+@OptIn(ExperimentalReadiumApi::class)
 @Composable
 fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -45,6 +48,10 @@ fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
 
     val uiState by viewModel.uiState.collectAsState()
     val initialLocator by viewModel.initialLocator.collectAsState()
+
+    val readerPreferences by viewModel.readerPreferences.collectAsState()
+    val epubPreferences by viewModel.epubPreferences.collectAsState()
+
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (uiState) {
@@ -57,7 +64,10 @@ fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
                     onLocatorChange = { locator ->
                         viewModel.saveReadingProgress(locator)
                     },
-                    initialLocator = initialLocator
+                    initialLocator = initialLocator,
+                    readerPreferences = readerPreferences,
+                    epubPreferences = epubPreferences,
+                    viewModel = viewModel
                 )
             }
         }
@@ -70,29 +80,38 @@ fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
 fun EpubReaderView(
     publication: Publication,
     initialLocator: Locator?,
-    onLocatorChange: (Locator) -> Unit
+    onLocatorChange: (Locator) -> Unit,
+    readerPreferences: ReaderPreferences,
+    epubPreferences: EpubPreferences,
+    viewModel: BookReaderViewModel,
+
 ) {
     val fragmentActivity = LocalContext.current as FragmentActivity
     var navigatorFragment by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
-    var showToolbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    var showReaderSettings by remember { mutableStateOf(false) }
 
+
+
+    var showToolbar by remember { mutableStateOf(false) }
+    var showReaderSettings by remember { mutableStateOf(false) }
+    var showFontSettings by remember { mutableStateOf(false) }
+    var showUiSettings by remember { mutableStateOf(false) }
     var isChaptersDrawerOpen by remember { mutableStateOf(false) }
     var isNotesDrawerOpen by remember { mutableStateOf(false) }
+    var isHighlightsDrawerOpen  by remember { mutableStateOf(false) }
 
 
-    // New state variables
+    // Custom state variables
     var progression by remember { mutableDoubleStateOf(1.0) }
     var currentChapter by remember { mutableStateOf("") }
-    var currentFontSize by remember { mutableIntStateOf(100) }
-    var currentPageMargins by remember { mutableDoubleStateOf(1.4) }
-    var currentScrollMode by remember { mutableStateOf(false) }
-    var currentFontWeight by remember { mutableDoubleStateOf(1.0) }
+
+
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
+
+
             navigator.currentLocator.collect { locator ->
                 onLocatorChange(locator)
                 progression = locator.locations.totalProgression ?: 0.0
@@ -134,10 +153,10 @@ fun EpubReaderView(
                         publication = publication,
                         configuration = EpubNavigatorFactory.Configuration(
                             defaults = EpubDefaults(
-                                pageMargins = 1.4,
-                                fontSize = currentFontSize / 100.0,
-                                fontWeight = currentFontWeight,
-                                scroll = false,
+                                pageMargins = epubPreferences.pageMargins,
+                                fontSize = epubPreferences.fontSize,
+                                fontWeight = epubPreferences.fontWeight,
+                                scroll = epubPreferences.scroll
                             )
                         )
                     )
@@ -157,9 +176,15 @@ fun EpubReaderView(
                         .replace(view.id, fragment)
                         .commitAllowingStateLoss()
 
+
                     // Set up the directional navigation adapter
                     (navigatorFragment as? OverflowableNavigator)?.apply {
                         addInputListener(DirectionalNavigationAdapter(this))
+                    }
+                }
+                navigatorFragment?.let { navigator ->
+                    if (navigator.isAdded) {// Check if the fragment is added
+                        navigator.submitPreferences(epubPreferences)
                     }
                 }
             }
@@ -175,12 +200,6 @@ fun EpubReaderView(
                     detectTapGestures(
                         onTap = {
                             showToolbar = !showToolbar
-//                            if (showToolbar) {
-//                                coroutineScope.launch {
-//                                    delay(3000)
-//                                    showToolbar = false
-//                                }
-//                            }
                         }
                     )
                 }
@@ -194,12 +213,6 @@ fun EpubReaderView(
                     detectTapGestures(
                         onTap = {
                             showToolbar = !showToolbar
-//                            if (showToolbar) {
-//                                coroutineScope.launch {
-//                                    delay(5000)
-//                                    showToolbar = false
-//                                }
-//                            }
                         }
                     )
                 }
@@ -213,9 +226,8 @@ fun EpubReaderView(
                 navigatorFragment = navigatorFragment,
                 showToolbar = showToolbar,
                 progression = progression,
-
                 onPageChange = ::onPageChange,
-                onSettingsClick = { showReaderSettings = true },
+                onToggleFontSettings = { showFontSettings = true },
             )
         }
 
@@ -225,8 +237,10 @@ fun EpubReaderView(
             publication,
             fragmentActivity,
             currentChapter = currentChapter,
+            onChaptersClick = { isChaptersDrawerOpen = true },
             onNotesDrawerToggle = { isNotesDrawerOpen = true },
-            onChaptersClick = { isChaptersDrawerOpen = true })
+            onHighlightsDrawerToggle = { isHighlightsDrawerOpen = true }
+        )
 
 
 
@@ -252,23 +266,31 @@ fun EpubReaderView(
             onClose = { isNotesDrawerOpen = false }
         )
 
+        HighlightsDrawer(isOpen = isHighlightsDrawerOpen,
+            onClose = { isHighlightsDrawerOpen = false }
+        )
 
 
-
-        if (showReaderSettings) {
-            ReaderSettings(
-                navigatorFragment = navigatorFragment,
-                initialFontSize = currentFontSize,
-                initialFontWeight = currentFontWeight,
-                initialPageMargins = currentPageMargins,
-                initialScrollMode = currentScrollMode,
-                onFontSizeChange = { newSize -> currentFontSize = newSize },
-                onFontWeightChange = { newWeight -> currentFontWeight = newWeight },
-                onPageMarginsChange = { newMargins -> currentPageMargins = newMargins },
-                onScrollModeChange = { newMode -> currentScrollMode = newMode },
-                onDismiss = { showReaderSettings = false }
+        if (showFontSettings) {
+            FontSettings(
+                readerPreferences = readerPreferences,
+                onPreferencesChanged = { newPreferences ->
+                    viewModel.updateReaderPreferences(newPreferences)
+                },
+                onDismiss = { showFontSettings = false }
             )
         }
+
+        if(showUiSettings){
+
+        }
+
+        if (showReaderSettings) {
+        }
+
+
+
+
 
     }
 

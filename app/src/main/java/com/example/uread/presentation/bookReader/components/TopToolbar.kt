@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.BorderColor
+import androidx.compose.material.icons.outlined.StickyNote2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +40,8 @@ fun TopToolbar(
     fragmentActivity: FragmentActivity,
     currentChapter: String,
     onChaptersClick: () -> Unit,
-    onNotesDrawerToggle: () -> Unit
+    onNotesDrawerToggle: () -> Unit,
+    onHighlightsDrawerToggle: () -> Unit
 ) {
     AnimatedVisibility(
         visible = showToolbar,
@@ -92,11 +95,11 @@ fun TopToolbar(
                 IconButton(onClick = { onChaptersClick() }) {
                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Chapters")
                 }
-                IconButton(onClick = { }) {
-                    Icon(Icons.Outlined.BookmarkBorder, contentDescription = "BookMark")
-                }
                 IconButton(onClick = { onNotesDrawerToggle() }) {
-                    Icon(Icons.Outlined.BorderColor, contentDescription = "Notes and Highlights")
+                    Icon(Icons.AutoMirrored.Outlined.StickyNote2, contentDescription = "Notes")
+                }
+                IconButton(onClick = { onHighlightsDrawerToggle() }) {
+                    Icon(Icons.Outlined.BorderColor, contentDescription = "Highlights")
                 }
 
             }

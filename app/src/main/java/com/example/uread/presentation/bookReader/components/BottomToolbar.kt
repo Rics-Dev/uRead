@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.ChromeReaderMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material.icons.sharp.ArrowBack
 import androidx.compose.material3.Button
@@ -70,7 +71,7 @@ fun BottomToolbar(
     showToolbar: Boolean,
     progression: Double,
     onPageChange: (Double) -> Unit,  // Add this parameter
-    onSettingsClick: () -> Unit,
+    onToggleFontSettings: () -> Unit,
 ) {
 
     var sliderPosition by remember(progression) { mutableDoubleStateOf(progression) }
@@ -188,13 +189,13 @@ fun BottomToolbar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { /* Handle Add Button Click */ }) {
-                    Icon(Icons.AutoMirrored.Outlined.ChromeReaderMode, contentDescription = "Add")
+                    Icon(Icons.AutoMirrored.Outlined.ChromeReaderMode, contentDescription = "Reader Settings", modifier = Modifier.size(28.dp))
                 }
                 IconButton(onClick = { /* Handle Settings Button Click */ }) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    Icon(Icons.Filled.SettingsBrightness, contentDescription = "UI Settings", modifier = Modifier.size(28.dp))
                 }
-                IconButton(onClick = { onSettingsClick() }) {
-                    Icon(Icons.Filled.TextFormat, contentDescription = "Reader Settings")
+                IconButton(onClick = { onToggleFontSettings() }) {
+                    Icon(Icons.Filled.TextFormat, contentDescription = "Font Settings", modifier = Modifier.size(28.dp))
                 }
             }
         }
