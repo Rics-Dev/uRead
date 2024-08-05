@@ -6,19 +6,29 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
+import androidx.compose.material.icons.automirrored.sharp.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TextFormat
+import androidx.compose.material.icons.sharp.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -27,93 +37,169 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Publication
 import java.util.Locale
+import androidx.compose.runtime.setValue
+
 
 @OptIn(ExperimentalReadiumApi::class)
 @Composable
 fun BottomToolbar(
+    navigatorFragment: EpubNavigatorFragment?,
     showToolbar: Boolean,
     progression: Double,
-    currentChapter: String,
-    onFontSizeChange: (EpubPreferences) -> Unit,
-    currentFontSize: Int,  // Change this to Int
-    onPageChange: (Double) -> Unit  // Add this parameter
+    onPageChange: (Double) -> Unit,  // Add this parameter
+    onSettingsClick: () -> Unit,
 ) {
+
+    var sliderPosition by remember(progression) { mutableDoubleStateOf(progression) }
+
 
     AnimatedVisibility(
         visible = showToolbar,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
         modifier = Modifier
-            .shadow(4.dp)
-            .background(Color.White.copy(alpha = 1f))
             .fillMaxWidth()
-            .height(120.dp)
-
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
-
-
+                .fillMaxWidth()
+                .background(Color.Transparent)
         ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Chapter: $currentChapter", maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-
-
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),// Add some padding to the sides if needed
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = "${(progression * 100).toInt()}%",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
-                Slider(
-                    value = (progression * 100).toFloat(),
-                    onValueChange = { value ->
-                        onPageChange((value / 100).toDouble())
-                    },
-                    valueRange = 0f..100f,
-                    steps = 0,
-                    colors = SliderDefaults.colors(
-                        activeTrackColor = Color.DarkGray,
-                        inactiveTrackColor = Color.LightGray
-                    ),
-                    modifier = Modifier.weight(6f) // Adjust weight to make Slider proportionally larger
-                )
-                Text(
-                    text = "100%",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
-                )
+                IconButton(
+                    onClick = { navigatorFragment?.goBackward() },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(50.dp))
+                        .background(Color.White.copy(alpha = 1f), RoundedCornerShape(50.dp))
+                        .padding(0.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Sharp.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .height(46.dp)
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(50.dp))
+                        .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(50.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(50.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 0.dp)
+                        .weight(1f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${(sliderPosition * 100).toInt()}%",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Slider(
+                            value = sliderPosition.toFloat(),
+                            onValueChange = { newValue ->
+                                sliderPosition = newValue.toDouble()
+                            },
+                            onValueChangeFinished = {
+                                onPageChange(sliderPosition)
+                            },
+                            valueRange = 0f..1f,
+                            colors = SliderDefaults.colors(
+                                activeTrackColor = Color.DarkGray,
+                                inactiveTrackColor = Color.LightGray
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp)
+                        )
+                        Text(
+                            text = "100%",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = { navigatorFragment?.goForward() },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(50.dp))
+                        .background(Color.White.copy(alpha = 1f), RoundedCornerShape(50.dp))
+                        .padding(0.dp)
+
+                ) {
+                    Icon(Icons.AutoMirrored.Sharp.ArrowForward, contentDescription = "Forward")
+                }
             }
 
 
+            // Buttons Row
+            Row(
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        clip = true
+                    )
+                    .offset(y = (15).dp)
+                    .padding(bottom = 15.dp)
+                    .background(Color.White.copy(alpha = 1f))
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { /* Handle Add Button Click */ }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                }
+                IconButton(onClick = { /* Handle Settings Button Click */ }) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                }
+                IconButton(onClick = { onSettingsClick() }) {
+                    Icon(Icons.Filled.TextFormat, contentDescription = "Reader Settings")
+                }
+            }
+        }
+    }
+}
 
 
-            // Font size buttons
+
+
+// Font size buttons
 //            Row(
 //                modifier = Modifier.fillMaxWidth(),
 //                horizontalArrangement = Arrangement.SpaceBetween,
@@ -145,9 +231,6 @@ fun BottomToolbar(
 //                    }
 //                }
 //            }
-        }
-    }
-}
 
 
 // Current page and chapter info
@@ -159,3 +242,14 @@ fun BottomToolbar(
 //                Text("Chapter: $currentChapter", maxLines = 1, overflow = TextOverflow.Ellipsis)
 //            }
 //navigatorFragment?.goBackward()
+
+
+
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.Center
+//            ) {
+//                Text("Chapter: $currentChapter", maxLines = 1, overflow = TextOverflow.Ellipsis)
+//            }

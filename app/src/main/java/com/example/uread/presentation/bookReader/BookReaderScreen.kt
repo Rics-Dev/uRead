@@ -40,11 +40,13 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.sharp.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -59,6 +61,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.uread.presentation.bookReader.components.BottomToolbar
 import com.example.uread.presentation.bookReader.components.TopToolbar
+import com.example.uread.presentation.home.components.ChaptersDrawer
+import com.example.uread.presentation.home.components.ReaderSettings
 import com.example.uread.util.SetFullScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -72,7 +76,9 @@ import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.locate
 import org.readium.r2.shared.publication.services.locateProgression
+import org.readium.r2.shared.publication.toLocator
 
 
 @Composable
@@ -102,8 +108,6 @@ fun BookReaderScreen(viewModel: BookReaderViewModel = hiltViewModel()) {
 }
 
 
-
-
 @OptIn(ExperimentalReadiumApi::class)
 @Composable
 fun EpubReaderView(
@@ -116,12 +120,18 @@ fun EpubReaderView(
     var showToolbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    var showReaderSettings by remember { mutableStateOf(false) }
+    var showChapters by remember { mutableStateOf(false) }
+
+    var isChaptersDrawerOpen by remember { mutableStateOf(false) }
 
 
     // New state variables
     var progression by remember { mutableStateOf(1.0) }
     var currentChapter by remember { mutableStateOf("") }
     var currentFontSize by remember { mutableStateOf(100) }
+    var currentPageMargins by remember { mutableStateOf(1.4) }
+    var currentScrollMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
@@ -129,6 +139,7 @@ fun EpubReaderView(
                 onLocatorChange(locator)
                 progression = locator.locations.totalProgression ?: 0.0
                 currentChapter = locator.title ?: ""
+
             }
         }
     }
@@ -146,8 +157,10 @@ fun EpubReaderView(
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+
     ) {
         AndroidView(
             factory = { context ->
@@ -164,6 +177,7 @@ fun EpubReaderView(
                         configuration = EpubNavigatorFactory.Configuration(
                             defaults = EpubDefaults(
                                 pageMargins = 1.4,
+                                fontSize = currentFontSize / 100.0,
                                 scroll = false,
                             )
                         )
@@ -232,26 +246,62 @@ fun EpubReaderView(
                 }
         )
 
+
+
+
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             BottomToolbar(
+                navigatorFragment = navigatorFragment,
                 showToolbar = showToolbar,
                 progression = progression,
-                currentChapter = currentChapter,
-                onFontSizeChange = { newPreferences ->
-                    currentFontSize = (newPreferences.fontSize?.times(100) ?: 100).toInt()
-                    navigatorFragment?.let { navigator ->
-                        coroutineScope.launch {
-                            navigator.submitPreferences(newPreferences)
-                        }
-                    }
-                },
-                currentFontSize = currentFontSize,
-                onPageChange = ::onPageChange
+
+                onPageChange = ::onPageChange,
+                onSettingsClick = { showReaderSettings = true },
             )
         }
 
+        // Top toolbar
+        TopToolbar(
+            showToolbar,
+            publication,
+            fragmentActivity,
+            currentChapter = currentChapter,
+            onChaptersClick = { isChaptersDrawerOpen = true })
 
-        TopToolbar(showToolbar, publication, fragmentActivity)
+
+
+        ChaptersDrawer(
+            isOpen = isChaptersDrawerOpen,
+            currentChapter = currentChapter,
+            tableOfContents = publication.tableOfContents,
+            onChapterSelect = { selectedChapter ->
+                coroutineScope.launch {
+                    navigatorFragment?.let { navigator ->
+                        val locator = publication.locatorFromLink(selectedChapter)
+                        locator?.let {
+                            navigator.go(it)
+                            isChaptersDrawerOpen = false
+                        }
+                    }
+                }
+            },
+            onClose = { isChaptersDrawerOpen = false }
+        )
+
+
+
+        if (showReaderSettings) {
+            ReaderSettings(
+                navigatorFragment = navigatorFragment,
+                initialFontSize = currentFontSize,
+                initialPageMargins = currentPageMargins,
+                initialScrollMode = currentScrollMode,
+                onFontSizeChange = { newSize -> currentFontSize = newSize },
+                onPageMarginsChange = { newMargins -> currentPageMargins = newMargins },
+                onScrollModeChange = { newMode -> currentScrollMode = newMode },
+                onDismiss = { showReaderSettings = false }
+            )
+        }
 
     }
 
@@ -266,44 +316,3 @@ fun EpubReaderView(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FontSizeSettingsSheet(
-    currentFontSize: Double,
-    onFontSizeChange: (Double) -> Unit,
-    onDismiss: () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Font Size", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { onFontSizeChange(currentFontSize - 1) }) {
-                    Icon(Icons.Default.Remove, contentDescription = "Decrease font size")
-                }
-                Text("${currentFontSize.toInt()}sp", style = MaterialTheme.typography.bodyLarge)
-                IconButton(onClick = { onFontSizeChange(currentFontSize + 1) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Increase font size")
-                }
-            }
-        }
-    }
-}
-
-//            if (newPage in 1..totalPages) {
-//                val newLocator =
-//                coroutineScope.launch {
-//                    navigator.go(newLocator)
-//                }
-//            }
