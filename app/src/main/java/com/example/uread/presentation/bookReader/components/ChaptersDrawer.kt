@@ -1,4 +1,4 @@
-package com.example.uread.presentation.home.components
+package com.example.uread.presentation.bookReader.components
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.readium.r2.shared.publication.Link
-import org.readium.r2.shared.publication.Locator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +31,8 @@ fun ChaptersDrawer(
         enter = slideInHorizontally(initialOffsetX = { -it }),
         exit = slideOutHorizontally(targetOffsetX = { -it })
     ) {
-        ModalDrawerSheet {
+        ModalDrawerSheet(
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

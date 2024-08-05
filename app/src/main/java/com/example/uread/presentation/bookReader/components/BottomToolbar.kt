@@ -19,9 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ChromeReaderMode
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.ChromeReaderMode
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.automirrored.sharp.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChromeReaderMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
@@ -183,7 +188,7 @@ fun BottomToolbar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { /* Handle Add Button Click */ }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                    Icon(Icons.AutoMirrored.Outlined.ChromeReaderMode, contentDescription = "Add")
                 }
                 IconButton(onClick = { /* Handle Settings Button Click */ }) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")

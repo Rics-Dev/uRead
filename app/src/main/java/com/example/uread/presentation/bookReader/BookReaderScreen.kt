@@ -1,8 +1,8 @@
 package com.example.uread.presentation.bookReader
 
-import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -10,75 +10,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.sharp.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.sharp.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.uread.presentation.bookReader.components.BottomToolbar
 import com.example.uread.presentation.bookReader.components.TopToolbar
-import com.example.uread.presentation.home.components.ChaptersDrawer
-import com.example.uread.presentation.home.components.ReaderSettings
+import com.example.uread.presentation.bookReader.components.ChaptersDrawer
+import com.example.uread.presentation.bookReader.components.NotesDrawer
+import com.example.uread.presentation.bookReader.components.ReaderSettings
 import com.example.uread.util.SetFullScreen
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.readium.r2.navigator.HyperlinkNavigator
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubDefaults
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
-import org.readium.r2.navigator.epub.EpubSettings
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
-import org.readium.r2.shared.publication.services.locate
 import org.readium.r2.shared.publication.services.locateProgression
-import org.readium.r2.shared.publication.toLocator
 
 
 @Composable
@@ -121,17 +78,18 @@ fun EpubReaderView(
     val coroutineScope = rememberCoroutineScope()
 
     var showReaderSettings by remember { mutableStateOf(false) }
-    var showChapters by remember { mutableStateOf(false) }
 
     var isChaptersDrawerOpen by remember { mutableStateOf(false) }
+    var isNotesDrawerOpen by remember { mutableStateOf(false) }
 
 
     // New state variables
-    var progression by remember { mutableStateOf(1.0) }
+    var progression by remember { mutableDoubleStateOf(1.0) }
     var currentChapter by remember { mutableStateOf("") }
-    var currentFontSize by remember { mutableStateOf(100) }
-    var currentPageMargins by remember { mutableStateOf(1.4) }
+    var currentFontSize by remember { mutableIntStateOf(100) }
+    var currentPageMargins by remember { mutableDoubleStateOf(1.4) }
     var currentScrollMode by remember { mutableStateOf(false) }
+    var currentFontWeight by remember { mutableDoubleStateOf(1.0) }
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
@@ -178,6 +136,7 @@ fun EpubReaderView(
                             defaults = EpubDefaults(
                                 pageMargins = 1.4,
                                 fontSize = currentFontSize / 100.0,
+                                fontWeight = currentFontWeight,
                                 scroll = false,
                             )
                         )
@@ -266,6 +225,7 @@ fun EpubReaderView(
             publication,
             fragmentActivity,
             currentChapter = currentChapter,
+            onNotesDrawerToggle = { isNotesDrawerOpen = true },
             onChaptersClick = { isChaptersDrawerOpen = true })
 
 
@@ -288,15 +248,22 @@ fun EpubReaderView(
             onClose = { isChaptersDrawerOpen = false }
         )
 
+        NotesDrawer(isOpen = isNotesDrawerOpen,
+            onClose = { isNotesDrawerOpen = false }
+        )
+
+
 
 
         if (showReaderSettings) {
             ReaderSettings(
                 navigatorFragment = navigatorFragment,
                 initialFontSize = currentFontSize,
+                initialFontWeight = currentFontWeight,
                 initialPageMargins = currentPageMargins,
                 initialScrollMode = currentScrollMode,
                 onFontSizeChange = { newSize -> currentFontSize = newSize },
+                onFontWeightChange = { newWeight -> currentFontWeight = newWeight },
                 onPageMarginsChange = { newMargins -> currentPageMargins = newMargins },
                 onScrollModeChange = { newMode -> currentScrollMode = newMode },
                 onDismiss = { showReaderSettings = false }

@@ -15,12 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.TextFormat
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +28,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import org.readium.r2.shared.publication.Publication
 
@@ -42,7 +37,8 @@ fun TopToolbar(
     publication: Publication,
     fragmentActivity: FragmentActivity,
     currentChapter: String,
-    onChaptersClick: () -> Unit
+    onChaptersClick: () -> Unit,
+    onNotesDrawerToggle: () -> Unit
 ) {
     AnimatedVisibility(
         visible = showToolbar,
@@ -95,6 +91,12 @@ fun TopToolbar(
             Row {
                 IconButton(onClick = { onChaptersClick() }) {
                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Chapters")
+                }
+                IconButton(onClick = { }) {
+                    Icon(Icons.Outlined.BookmarkBorder, contentDescription = "BookMark")
+                }
+                IconButton(onClick = { onNotesDrawerToggle() }) {
+                    Icon(Icons.Outlined.BorderColor, contentDescription = "Notes and Highlights")
                 }
 
             }

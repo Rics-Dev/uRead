@@ -1,4 +1,4 @@
-package com.example.uread.presentation.home.components
+package com.example.uread.presentation.bookReader.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -21,21 +21,25 @@ import java.util.Locale
 fun ReaderSettings(
     navigatorFragment: EpubNavigatorFragment?,
     initialFontSize: Int,
+    initialFontWeight: Double,
     initialPageMargins: Double,
     initialScrollMode: Boolean,
     onFontSizeChange: (Int) -> Unit,
+    onFontWeightChange: (Double) -> Unit,
     onPageMarginsChange: (Double) -> Unit,
     onScrollModeChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     var currentFontSize by remember { mutableIntStateOf(initialFontSize) }
-    var currentPageMargins by remember { mutableStateOf(initialPageMargins) }
+    var currentFontWight by remember { mutableDoubleStateOf(initialFontWeight) }
+    var currentPageMargins by remember { mutableDoubleStateOf(initialPageMargins) }
     var currentScrollMode by remember { mutableStateOf(initialScrollMode) }
     val coroutineScope = rememberCoroutineScope()
 
     fun updatePreferences() {
         val newPreferences = EpubPreferences(
             fontSize = currentFontSize / 100.0,
+            fontWeight = currentFontWight,
             pageMargins = currentPageMargins,
             scroll = currentScrollMode
         )
@@ -84,9 +88,47 @@ fun ReaderSettings(
                 }
             }
 
+
+              // Font Weight
+//            Spacer(modifier = Modifier.height(10.dp))
+//            HorizontalDivider()
+//            Spacer(modifier = Modifier.height(10.dp))
+//
+//
+//
+//            Text(
+//                "Font Weight",
+//                style = MaterialTheme.typography.titleMedium,
+//                textAlign = TextAlign.Center
+//            )
+//            Spacer(modifier = Modifier.height(10.dp))
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceAround,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                IconButton(onClick = {
+//                    currentFontWight = (currentFontWight - 1.0).coerceAtLeast(1.0)
+//                    onFontWeightChange(currentFontWight)
+//                    updatePreferences()
+//                }) {
+//                    Icon(Icons.Default.Remove, contentDescription = "Decrease font weight")
+//                }
+//                Text("$currentFontWight", style = MaterialTheme.typography.bodyLarge)
+//                IconButton(onClick = {
+//                    currentFontWight = (currentFontWight + 1.0).coerceAtMost(9.0)
+//                    onFontWeightChange(currentFontWight)
+//                    updatePreferences()
+//                }) {
+//                    Icon(Icons.Default.Add, contentDescription = "Increase font size")
+//                }
+//            }
+
             Spacer(modifier = Modifier.height(10.dp))
             HorizontalDivider()
             Spacer(modifier = Modifier.height(10.dp))
+
+
             // Page Margins
             Text(
                 "Page Margins",
@@ -119,6 +161,7 @@ fun ReaderSettings(
                     Icon(Icons.Default.Add, contentDescription = "Increase page margins")
                 }
             }
+
 
             Spacer(modifier = Modifier.height(10.dp))
             HorizontalDivider()
