@@ -25,6 +25,8 @@ import com.example.uread.presentation.bookReader.components.drawers.ChaptersDraw
 import com.example.uread.presentation.bookReader.components.modals.FontSettings
 import com.example.uread.presentation.bookReader.components.drawers.HighlightsDrawer
 import com.example.uread.presentation.bookReader.components.drawers.NotesDrawer
+import com.example.uread.presentation.bookReader.components.modals.ReaderSettings
+import com.example.uread.presentation.bookReader.components.modals.UiSettings
 import com.example.uread.util.SetFullScreen
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.OverflowableNavigator
@@ -83,21 +85,19 @@ fun EpubReaderView(
     epubPreferences: EpubPreferences,
     viewModel: BookReaderViewModel,
 
-) {
+    ) {
     val fragmentActivity = LocalContext.current as FragmentActivity
     var navigatorFragment by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
 
-
-
     var showToolbar by remember { mutableStateOf(false) }
     var showReaderSettings by remember { mutableStateOf(false) }
     var showFontSettings by remember { mutableStateOf(false) }
-    var showUiSettings by remember { mutableStateOf(false) }
+    var showUISettings by remember { mutableStateOf(false) }
     var isChaptersDrawerOpen by remember { mutableStateOf(false) }
     var isNotesDrawerOpen by remember { mutableStateOf(false) }
-    var isHighlightsDrawerOpen  by remember { mutableStateOf(false) }
+    var isHighlightsDrawerOpen by remember { mutableStateOf(false) }
 
 
     // Custom state variables
@@ -108,8 +108,6 @@ fun EpubReaderView(
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
-
-
             navigator.currentLocator.collect { locator ->
                 onLocatorChange(locator)
                 progression = locator.locations.totalProgression ?: 0.0
@@ -226,6 +224,8 @@ fun EpubReaderView(
                 progression = progression,
                 onPageChange = ::onPageChange,
                 onToggleFontSettings = { showFontSettings = true },
+                onToggleReaderSettings = { showReaderSettings = true },
+                onToggleUISettings = { showUISettings = true }
             )
         }
 
@@ -279,15 +279,25 @@ fun EpubReaderView(
             )
         }
 
-        if(showUiSettings){
-
+        if (showUISettings) {
+            UiSettings(
+                readerPreferences = readerPreferences,
+                onPreferencesChanged = { newPreferences ->
+                    viewModel.updateReaderPreferences(newPreferences)
+                },
+                onDismiss = { showUISettings = false }
+            )
         }
 
         if (showReaderSettings) {
+            ReaderSettings(
+                readerPreferences = readerPreferences,
+                onPreferencesChanged = { newPreferences ->
+                    viewModel.updateReaderPreferences(newPreferences)
+                },
+                onDismiss = { showReaderSettings = false }
+            )
         }
-
-
-
 
 
     }

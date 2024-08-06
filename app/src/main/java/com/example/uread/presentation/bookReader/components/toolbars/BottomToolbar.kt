@@ -52,6 +52,8 @@ fun BottomToolbar(
     progression: Double,
     onPageChange: (Double) -> Unit,  // Add this parameter
     onToggleFontSettings: () -> Unit,
+    onToggleUISettings: () -> Unit,
+    onToggleReaderSettings: () -> Unit
 ) {
 
     var sliderPosition by remember(progression) { mutableDoubleStateOf(progression) }
@@ -168,10 +170,10 @@ fun BottomToolbar(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { /* Handle Add Button Click */ }) {
+                IconButton(onClick = { onToggleReaderSettings() }) {
                     Icon(Icons.AutoMirrored.Outlined.ChromeReaderMode, contentDescription = "Reader Settings", modifier = Modifier.size(28.dp))
                 }
-                IconButton(onClick = { /* Handle Settings Button Click */ }) {
+                IconButton(onClick = { onToggleUISettings() }) {
                     Icon(Icons.Filled.SettingsBrightness, contentDescription = "UI Settings", modifier = Modifier.size(28.dp))
                 }
                 IconButton(onClick = { onToggleFontSettings() }) {

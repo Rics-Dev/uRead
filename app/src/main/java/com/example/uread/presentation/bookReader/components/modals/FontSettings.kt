@@ -116,37 +116,6 @@ fun FontSettings(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Background Color
-            Text(
-                "Background Color",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                listOf(Color.White, Color.Black, Color.LightGray, Color(0xFFFFF8DC)).forEach { color ->
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(color)
-                            .clickable {
-                                updatePreference {
-                                    copy(
-                                        backgroundColor = color,
-                                        textColor = if (color == Color.Black) Color.White else Color.Black
-                                    )
-                                }
-                            }
-                    )
-                }
-            }
         }
     }
 }
