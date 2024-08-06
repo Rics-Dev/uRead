@@ -15,6 +15,7 @@ import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import com.example.uread.data.model.Book
 import com.example.uread.data.source.local.BookDao
+import com.example.uread.data.source.local.DataStoreUtil
 import com.example.uread.data.source.local.SharedPreferencesUtil
 import com.example.uread.domain.use_case.DeleteBookUseCase
 import com.example.uread.domain.use_case.GetBookUrisUseCase
@@ -26,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.readium.r2.shared.publication.Publication
@@ -50,6 +52,7 @@ class HomeViewModel @Inject constructor(
     private val deleteBookUseCase: DeleteBookUseCase,
     private val assetRetriever: AssetRetriever,
     private val publicationOpener: PublicationOpener,
+    private val dataStoreUtil: DataStoreUtil,
     application: Application,
     private val sharedPreferencesUtil: SharedPreferencesUtil
 ) : AndroidViewModel(application) {
@@ -91,27 +94,35 @@ class HomeViewModel @Inject constructor(
 
     fun initializeApp(onFirstLaunch: () -> Unit) {
         viewModelScope.launch {
-            if (sharedPreferencesUtil.isFirstLaunch()) {
-                onFirstLaunch()
-            } else {
-                sharedPreferencesUtil.getDirectoryUri(getApplication())?.let { uriString ->
-                    val uri = Uri.parse(uriString)
-                    checkForMissingBooks(uri)
+            dataStoreUtil.getAppState().collect { (isFirstLaunch, uriString) ->
+                if (isFirstLaunch) {
+                    onFirstLaunch()
+                } else {
+                    uriString?.let {
+                        val uri = Uri.parse(it)
+                        checkForMissingBooks(uri)
+                    } ?: onFirstLaunch() // If uriString is null, treat as first launch
                 }
             }
         }
     }
 
+
     // for first time launch
     fun handleDirectorySelection(uri: Uri) {
         viewModelScope.launch {
-            _isLoadingNewBooks.value = true
-            checkForMissingBooks(uri)
-            sharedPreferencesUtil.saveDirectoryUri(uri.toString())
-            sharedPreferencesUtil.setFirstLaunch(false)
-            _isLoadingNewBooks.value = false
-
+            if (!isDirectoryAlreadySet(uri)) {
+                _isLoadingNewBooks.value = true
+                checkForMissingBooks(uri)
+                dataStoreUtil.saveDirectoryUri(uri.toString())
+                dataStoreUtil.setFirstLaunch(false)
+                _isLoadingNewBooks.value = false
+            }
         }
+    }
+
+    private suspend fun isDirectoryAlreadySet(newUri: Uri): Boolean {
+        return dataStoreUtil.getDirectoryUri().firstOrNull() == newUri.toString()
     }
 
 

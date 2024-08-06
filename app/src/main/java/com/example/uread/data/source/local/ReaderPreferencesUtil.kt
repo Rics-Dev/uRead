@@ -1,10 +1,9 @@
+// In ReaderPreferencesUtil.kt
 package com.example.uread.data.source.local
 
 import android.content.Context
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
@@ -16,12 +15,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "reader_preferences")
+private val Context.readerPreferencesDataStore by preferencesDataStore(name = "reader_preferences")
 
 class ReaderPreferencesUtil @Inject constructor(
     context: Context
 ) {
-    private val dataStore = context.dataStore
+    private val dataStore = context.readerPreferencesDataStore
 
     companion object {
         val FONT_SIZE = doublePreferencesKey("font_size")

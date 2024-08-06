@@ -46,6 +46,7 @@ fun HomeScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var hasInitialized by remember { mutableStateOf(false) }
 
 
     val getContent =
@@ -59,10 +60,16 @@ fun HomeScreen(
             }
         }
 
+
     LaunchedEffect(Unit) {
-        viewModel.initializeApp(
-            onFirstLaunch = { getContent.launch(null) }
-        )
+        if (!hasInitialized) {
+            viewModel.initializeApp(
+                onFirstLaunch = {
+                    getContent.launch(null)
+                    hasInitialized = true
+                }
+            )
+        }
     }
 
     LaunchedEffect(selectedTab) {

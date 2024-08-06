@@ -2,9 +2,12 @@ package com.example.uread.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.uread.data.repository.BooksRepositoryImpl
 import com.example.uread.data.source.local.AppDatabase
 import com.example.uread.data.source.local.BookDao
+import com.example.uread.data.source.local.DataStoreUtil
 import com.example.uread.data.source.local.ReaderPreferencesUtil
 import com.example.uread.data.source.local.SharedPreferencesUtil
 import com.example.uread.domain.repository.BooksRepository
@@ -31,15 +34,25 @@ object AppModule {
         return context
     }
 
-    @Provides
+//    @Provides
+//    @Singleton
+//    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+////        return Room.databaseBuilder(
+////            appContext,
+////            AppDatabase::class.java,
+////            "book_database"
+////        )
+//////            .addMigrations(AppDatabase.MIGRATION_1_2) // Add your migration here
+////            .build()
+//
+//        return Room.inMemoryDatabaseBuilder(appContext, AppDatabase::class.java).build()
+//    }
+
     @Singleton
-    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
-        return Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java,
-            "book_database"
-        )
-//            .addMigrations(AppDatabase.MIGRATION_1_2) // Add your migration here
+    @Provides
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(context, AppDatabase::class.java, "book_database")
+            .fallbackToDestructiveMigration()  //for debug useful
             .build()
     }
 
@@ -60,6 +73,12 @@ object AppModule {
     @Singleton
     fun provideReaderPreferences(@ApplicationContext context: Context): ReaderPreferencesUtil {
         return ReaderPreferencesUtil(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDataStoreUtils(@ApplicationContext context: Context): DataStoreUtil {
+        return DataStoreUtil(context)
     }
 
     @Provides
@@ -101,3 +120,17 @@ object AppModule {
     }
 
 }
+//
+//@Singleton
+//@Provides
+//fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+//    return Room.databaseBuilder(context, AppDatabase::class.java, "YourDatabaseName.db")
+//        .addCallback(object : RoomDatabase.Callback() {
+//            override fun onCreate(db: SupportSQLiteDatabase) {
+//                super.onCreate(db)
+//                // Check some condition here if needed
+//                context.deleteDatabase("YourDatabaseName.db")
+//            }
+//        })
+//        .build()
+//}
