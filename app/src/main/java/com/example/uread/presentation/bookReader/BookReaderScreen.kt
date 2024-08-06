@@ -173,9 +173,11 @@ fun EpubReaderView(
                         .commitAllowingStateLoss()
 
 
-                    // Set up the directional navigation adapter
-                    (navigatorFragment as? OverflowableNavigator)?.apply {
-                        addInputListener(DirectionalNavigationAdapter(this))
+
+                    if(readerPreferences.tapNavigation){
+                        (navigatorFragment as? OverflowableNavigator)?.apply {
+                            addInputListener(DirectionalNavigationAdapter(this))
+                        }
                     }
                 }
                 navigatorFragment?.let { navigator ->

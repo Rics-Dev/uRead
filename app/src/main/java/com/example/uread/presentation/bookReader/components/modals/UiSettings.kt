@@ -126,6 +126,7 @@ fun UiSettings(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(20.dp))
 
+
             if (isPaletteVisible) {
                 Spacer(modifier = Modifier.height(0.dp))
                 Text(
@@ -142,9 +143,9 @@ fun UiSettings(
                     buttonSize = 70.dp,
                     swatches = Presets.material(),
                     innerRadius = 200f,
-                    strokeWidth = 90f,
-                    spacerRotation = 5f,
-                    spacerOutward = 2f,
+                    strokeWidth = 80f,
+                    spacerRotation = 0f,
+                    spacerOutward = 3f,
                     verticalAlignment = VerticalAlignment.Bottom,
                     horizontalAlignment = HorizontalAlignment.Center,
                     onColorSelected = { color ->

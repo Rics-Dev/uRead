@@ -25,17 +25,21 @@ class ReaderPreferencesUtil @Inject constructor(
     companion object {
         val FONT_SIZE = doublePreferencesKey("font_size")
         val PAGE_MARGINS = doublePreferencesKey("page_margins")
-        val SCROLL = booleanPreferencesKey("scroll")
         val BACKGROUND_COLOR = intPreferencesKey("background_color")
         val TEXT_COLOR = intPreferencesKey("text_color")
+        val TAP_NAVIGATION =  booleanPreferencesKey("tap_navigation")
+        val SCROLL = booleanPreferencesKey("scroll")
+
 
         // Default values
         val defaultPreferences = ReaderPreferences(
             fontSize = 1.0,
             pageMargins = 1.4,
-            scroll = false,
             backgroundColor = Color.White,
-            textColor = Color.Black
+            textColor = Color.Black,
+            tapNavigation = false,
+            scroll = false,
+
         )
     }
 
@@ -43,9 +47,11 @@ class ReaderPreferencesUtil @Inject constructor(
         ReaderPreferences(
             fontSize = preferences[FONT_SIZE] ?: defaultPreferences.fontSize,
             pageMargins = preferences[PAGE_MARGINS] ?: defaultPreferences.pageMargins,
-            scroll = preferences[SCROLL] ?: defaultPreferences.scroll,
             backgroundColor = Color(preferences[BACKGROUND_COLOR] ?: defaultPreferences.backgroundColor.toArgb()),
-            textColor = Color(preferences[TEXT_COLOR] ?: defaultPreferences.textColor.toArgb())
+            textColor = Color(preferences[TEXT_COLOR] ?: defaultPreferences.textColor.toArgb()),
+            tapNavigation = preferences[TAP_NAVIGATION] ?: defaultPreferences.tapNavigation,
+            scroll = preferences[SCROLL] ?: defaultPreferences.scroll,
+
         )
     }
 
@@ -53,9 +59,10 @@ class ReaderPreferencesUtil @Inject constructor(
         dataStore.edit { preferences ->
             preferences[FONT_SIZE] = newPreferences.fontSize
             preferences[PAGE_MARGINS] = newPreferences.pageMargins
-            preferences[SCROLL] = newPreferences.scroll
             preferences[BACKGROUND_COLOR] = newPreferences.backgroundColor.toArgb()
             preferences[TEXT_COLOR] = newPreferences.textColor.toArgb()
+            preferences[TAP_NAVIGATION] = newPreferences.tapNavigation
+            preferences[SCROLL] = newPreferences.scroll
         }
     }
 }

@@ -10,9 +10,12 @@ import org.readium.r2.navigator.preferences.Color as ReadiumColor
 data class ReaderPreferences(
     val fontSize: Double,
     val pageMargins: Double,
-    val scroll: Boolean,
+    //ui Settings
     val backgroundColor: Color,
-    val textColor: Color
+    val textColor: Color,
+    //Reader Settings
+    val tapNavigation: Boolean,
+    val scroll: Boolean,
 )
 
 // Extension function to convert ReaderPreferences to EpubPreferences
@@ -21,8 +24,10 @@ fun ReaderPreferences.toEpubPreferences(): EpubPreferences {
     return EpubPreferences(
         fontSize = this.fontSize,
         pageMargins = this.pageMargins,
-        scroll = this.scroll,
+        //ui Settings
         backgroundColor = ReadiumColor(this.backgroundColor.toArgb()),
         textColor = ReadiumColor(this.textColor.toArgb()),
+        //Reader Settings
+        scroll = this.scroll,
     )
 }
