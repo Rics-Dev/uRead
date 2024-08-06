@@ -6,7 +6,6 @@ import com.elixer.palette.composables.LaunchButton
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -40,25 +39,10 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.atan2
 
-/**
- *@param defaultColor default color of the button
- * @param buttonSize size of the FAB
- * @param swatches list of swatches
- * @param innerRadius the starting radius of the wheel from the center
- * @param strokeWidth the stroke width of each color Arc
- * @param selectorColor border color for the color arc selected
- * @param spacerRotation the gap between swatches in circular direction
- * @param spacerOutward the gap between color arcs in outward circular direction
- * @param verticalAlignment placing center of wheel in y axis
- * @param horizontalAlignment placeing center of wheel in x axis
- * @param buttonColorChangeAnimationDuration duration of color change animation of button
- * @param selectedArchAnimationDuration duration of selected color arc shoot to center animation
- * @param onColorSelected function triggered when color is selected
- */
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun  Palette(
+fun  ColorPicker(
     isVisible: Boolean,
     defaultColor: Color = Color(0xFFFF9800),
     buttonSize: Dp = 100.dp,
@@ -323,7 +307,7 @@ fun getCenterYCoordinate(verticalAxis: VerticalAlignment, maxY: Float): Float {
 @Preview(showBackground = true, widthDp = 500, heightDp = 900)
 @Composable
 fun PreviewPalette() {
-    Palette(
+    ColorPicker(
         isVisible = true,
         defaultColor = Blue,
         swatches = Presets.material(),
