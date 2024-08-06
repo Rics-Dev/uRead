@@ -1,4 +1,4 @@
-package com.example.uread.presentation.bookReader.components
+package com.example.uread.presentation.bookReader.components.modals
 
 
 import androidx.compose.foundation.background

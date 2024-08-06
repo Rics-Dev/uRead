@@ -18,8 +18,6 @@ interface BookDao {
     @Query("SELECT * FROM books ORDER BY title ASC")
     fun getAllBooks(): PagingSource<Int, Book>
 
-    @Query("SELECT * FROM books ORDER BY title ASC LIMIT :limit OFFSET :offset")
-    suspend fun getPagedBooks(offset: Int, limit: Int): List<Book>
 
 
     @Query("SELECT uri FROM books")

@@ -1,4 +1,4 @@
-package com.example.uread.presentation.bookReader.components
+package com.example.uread.presentation.bookReader.components.drawers
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable

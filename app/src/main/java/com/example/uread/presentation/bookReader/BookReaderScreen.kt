@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -20,12 +19,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.uread.data.model.ReaderPreferences
-import com.example.uread.presentation.bookReader.components.BottomToolbar
-import com.example.uread.presentation.bookReader.components.TopToolbar
-import com.example.uread.presentation.bookReader.components.ChaptersDrawer
-import com.example.uread.presentation.bookReader.components.FontSettings
-import com.example.uread.presentation.bookReader.components.HighlightsDrawer
-import com.example.uread.presentation.bookReader.components.NotesDrawer
+import com.example.uread.presentation.bookReader.components.toolbars.BottomToolbar
+import com.example.uread.presentation.bookReader.components.toolbars.TopToolbar
+import com.example.uread.presentation.bookReader.components.drawers.ChaptersDrawer
+import com.example.uread.presentation.bookReader.components.modals.FontSettings
+import com.example.uread.presentation.bookReader.components.drawers.HighlightsDrawer
+import com.example.uread.presentation.bookReader.components.drawers.NotesDrawer
 import com.example.uread.util.SetFullScreen
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.OverflowableNavigator
@@ -38,7 +37,6 @@ import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
-import org.readium.r2.navigator.preferences.Color as ReadiumColor
 
 @OptIn(ExperimentalReadiumApi::class)
 @Composable

@@ -36,13 +36,14 @@ import com.example.uread.data.model.Book
 @Composable
 fun BookCard(
     book: Book?,
+    isLoading: Boolean,
     openBook: (Book) -> Unit
 ) {
     Card(
         modifier = Modifier
             .width(120.dp)
             .height(210.dp)
-            .clickable { book?.let { openBook(it) } },
+            .clickable(enabled = !isLoading) { book?.let { openBook(it) } },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(

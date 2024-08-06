@@ -1,6 +1,4 @@
-package com.example.uread.presentation.bookReader.components
-
-import org.readium.r2.navigator.epub.EpubPreferences
+package com.example.uread.presentation.bookReader.components.modals
 
 //
 //import androidx.compose.foundation.background

@@ -2,14 +2,11 @@ package com.example.uread.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.uread.data.repository.BooksRepositoryImpl
 import com.example.uread.data.source.local.AppDatabase
 import com.example.uread.data.source.local.BookDao
-import com.example.uread.data.source.local.DataStoreUtil
+import com.example.uread.data.source.local.AppPreferencesUtil
 import com.example.uread.data.source.local.ReaderPreferencesUtil
-import com.example.uread.data.source.local.SharedPreferencesUtil
 import com.example.uread.domain.repository.BooksRepository
 import dagger.Module
 import dagger.Provides
@@ -65,20 +62,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSharedPreferencesUtil(@ApplicationContext context: Context): SharedPreferencesUtil {
-        return SharedPreferencesUtil(context)
-    }
-
-    @Provides
-    @Singleton
     fun provideReaderPreferences(@ApplicationContext context: Context): ReaderPreferencesUtil {
         return ReaderPreferencesUtil(context)
     }
 
     @Provides
     @Singleton
-    fun provideDataStoreUtils(@ApplicationContext context: Context): DataStoreUtil {
-        return DataStoreUtil(context)
+    fun provideAppPreferencesUtil(@ApplicationContext context: Context): AppPreferencesUtil {
+        return AppPreferencesUtil(context)
     }
 
     @Provides

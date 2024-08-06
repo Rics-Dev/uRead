@@ -1,5 +1,3 @@
-// File: presentation/main/HomeScreen.kt
-
 package com.example.uread.presentation.home
 
 import android.content.Intent
@@ -38,6 +36,7 @@ fun HomeScreen(
     val books = viewModel.books.collectAsLazyPagingItems()
     val isLoadingNewBook by viewModel.isLoadingNewBooks.collectAsState()
     val snackbarMessage by viewModel.snackbarMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val shelves = remember { mutableStateListOf("All Books") }
@@ -47,6 +46,9 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var hasInitialized by remember { mutableStateOf(false) }
+
+
+
 
 
     val getContent =
@@ -142,6 +144,7 @@ fun HomeScreen(
                                 val book = books[index]
                                 BookCard(
                                     book,
+                                    isLoading = isLoading,
                                     openBook = { openedBook ->
                                         navController.navigate(ScreenNavigation.BookReaderScreen.route + "/${Uri.encode(openedBook.uri)}")
                                     }

@@ -10,23 +10,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import com.example.uread.data.model.Book
-import com.example.uread.data.source.local.BookDao
-import com.example.uread.data.source.local.DataStoreUtil
-import com.example.uread.data.source.local.SharedPreferencesUtil
-import com.example.uread.domain.use_case.DeleteBookUseCase
+import com.example.uread.data.source.local.AppPreferencesUtil
 import com.example.uread.domain.use_case.GetBookUrisUseCase
 import com.example.uread.domain.use_case.GetBooksUseCase
 import com.example.uread.domain.use_case.InsertBookUseCase
-import com.example.uread.pagingSource.BookPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,26 +30,21 @@ import org.readium.r2.shared.publication.services.cover
 import org.readium.r2.shared.util.ErrorException
 import org.readium.r2.shared.util.asset.AssetRetriever
 import org.readium.r2.shared.util.getOrElse
-import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.shared.util.toAbsoluteUrl
 import org.readium.r2.streamer.PublicationOpener
-import org.readium.r2.streamer.parser.DefaultPublicationParser
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val bookDao: BookDao,
     private val getBooksUseCase: GetBooksUseCase,
     private val getBookUrisUseCase: GetBookUrisUseCase,
     private val insertBookUseCase: InsertBookUseCase,
-    private val deleteBookUseCase: DeleteBookUseCase,
     private val assetRetriever: AssetRetriever,
     private val publicationOpener: PublicationOpener,
-    private val dataStoreUtil: DataStoreUtil,
+    private val appPreferencesUtil: AppPreferencesUtil,
     application: Application,
-    private val sharedPreferencesUtil: SharedPreferencesUtil
 ) : AndroidViewModel(application) {
 
     private val appContext: Context = application.applicationContext
@@ -62,25 +52,9 @@ class HomeViewModel @Inject constructor(
     private val _books = MutableStateFlow<List<Book>>(emptyList())
     private val _bookCache = MutableStateFlow<Map<String, Book>>(emptyMap()) // Cache for loaded books
 
-    val books: Flow<PagingData<Book>> = Pager(
-        config = PagingConfig(
-            pageSize = 9,
-            enablePlaceholders = true,
-        )
-    ) {
-        getBooksUseCase()
-    }.flow.cachedIn(viewModelScope)
 
-//    val books: Flow<PagingData<Book>> = Pager(
-//        config = PagingConfig(
-//            pageSize = 9,
-//            enablePlaceholders = false,
-//            maxSize = 100
-//        )
-//    ) {
-//        BookPagingSource(bookDao)
-//    }.flow.cachedIn(viewModelScope)
-
+    val books: Flow<PagingData<Book>> = getBooksUseCase()
+        .cachedIn(viewModelScope)
 
 
     private val _snackbarMessage = MutableStateFlow<String?>(null)
@@ -89,21 +63,25 @@ class HomeViewModel @Inject constructor(
     private val _isLoadingNewBooks = MutableStateFlow(false)
     val isLoadingNewBooks = _isLoadingNewBooks.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
 
 
 
     fun initializeApp(onFirstLaunch: () -> Unit) {
         viewModelScope.launch {
-            dataStoreUtil.getAppState().collect { (isFirstLaunch, uriString) ->
-                if (isFirstLaunch) {
-                    onFirstLaunch()
-                } else {
-                    uriString?.let {
-                        val uri = Uri.parse(it)
-                        checkForMissingBooks(uri)
-                    } ?: onFirstLaunch() // If uriString is null, treat as first launch
-                }
+            _isLoading.value = true
+            val (isFirstLaunch, uriString) = appPreferencesUtil.getAppState().first()
+            if (isFirstLaunch) {
+                onFirstLaunch()
+            } else {
+                uriString?.let {
+                    val uri = Uri.parse(it)
+                    checkForMissingBooks(uri)
+                } ?: onFirstLaunch() // If uriString is null, treat as first launch
             }
+            _isLoading.value = false
         }
     }
 
@@ -112,29 +90,31 @@ class HomeViewModel @Inject constructor(
     fun handleDirectorySelection(uri: Uri) {
         viewModelScope.launch {
             if (!isDirectoryAlreadySet(uri)) {
+                _isLoading.value = true
                 _isLoadingNewBooks.value = true
                 checkForMissingBooks(uri)
-                dataStoreUtil.saveDirectoryUri(uri.toString())
-                dataStoreUtil.setFirstLaunch(false)
+                appPreferencesUtil.setFirstLaunch(false)
+                appPreferencesUtil.saveDirectoryUri(uri.toString())
                 _isLoadingNewBooks.value = false
+                _isLoading.value = false
             }
         }
     }
 
     private suspend fun isDirectoryAlreadySet(newUri: Uri): Boolean {
-        return dataStoreUtil.getDirectoryUri().firstOrNull() == newUri.toString()
+        return appPreferencesUtil.getDirectoryUri().firstOrNull() == newUri.toString()
     }
 
 
     private suspend fun checkForMissingBooks(uri: Uri) {
         _isLoadingNewBooks.value = true
+        _isLoading.value = true
 
         // Get existing book URIs from the database directly
         val existingUris = getBookUrisUseCase()
         val booksList = getBooksFromDirectory(appContext, uri)
 
-        // Filter the booksList to only include books not already in the database
-//        val newBooks = booksList.filter { it.uri.toString() !in existingUris }
+
 
         val newBooks = booksList.filter { documentFile ->
             val bookUriString = documentFile.uri.toString()
@@ -148,6 +128,7 @@ class HomeViewModel @Inject constructor(
         }
 
         _isLoadingNewBooks.value = false
+        _isLoading.value = false
     }
 
 
@@ -163,7 +144,7 @@ class HomeViewModel @Inject constructor(
         _bookCache.value += (book.uri to book)
     }
 
-     suspend fun getBookInfo(documentFile: DocumentFile): Book = withContext(Dispatchers.IO) {
+     private suspend fun getBookInfo(documentFile: DocumentFile): Book = withContext(Dispatchers.IO) {
         try {
             val url = documentFile.uri.toAbsoluteUrl()
             val asset = url?.let { it -> assetRetriever.retrieve(it).getOrElse { throw ErrorException(it) } }
@@ -222,3 +203,41 @@ class HomeViewModel @Inject constructor(
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    val books: Flow<PagingData<Book>> = Pager(
+//        config = PagingConfig(
+//            pageSize = 9,
+//            enablePlaceholders = true,
+//        )
+//    ) {
+//        getBooksUseCase()
+//    }.flow.cachedIn(viewModelScope)
+//
+////    val books: Flow<PagingData<Book>> = Pager(
+////        config = PagingConfig(
+////            pageSize = 9,
+////            enablePlaceholders = false,
+////            maxSize = 100
+////        )
+////    ) {
+////        BookPagingSource(bookDao)
+////    }.flow.cachedIn(viewModelScope)

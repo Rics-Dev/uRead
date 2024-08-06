@@ -12,41 +12,41 @@ import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore(name = "app_prefs")
 
-class DataStoreUtil @Inject constructor(
-    private val context: Context
+class AppPreferencesUtil @Inject constructor(
+    context: Context
 ) {
     private val dataStore = context.dataStore
 
-    private val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
-    private val BOOKS_DIRECTORY = stringPreferencesKey("directory_uri")
+    private val isFirstLaunchKey = booleanPreferencesKey("is_first_launch")
+    private val booksDirectoryKey = stringPreferencesKey("directory_uri")
 
     fun isFirstLaunch(): Flow<Boolean> =
         dataStore.data.map { preferences ->
-            preferences[IS_FIRST_LAUNCH] ?: true
+            preferences[isFirstLaunchKey] ?: true
         }
 
     suspend fun saveDirectoryUri(uri: String) {
         dataStore.edit { preferences ->
-            preferences[BOOKS_DIRECTORY] = uri
+            preferences[booksDirectoryKey] = uri
         }
     }
 
     suspend fun setFirstLaunch(isFirstLaunch: Boolean) {
         dataStore.edit { preferences ->
-            preferences[IS_FIRST_LAUNCH] = isFirstLaunch
+            preferences[isFirstLaunchKey] = isFirstLaunch
         }
     }
 
     fun getDirectoryUri(): Flow<String?> =
         dataStore.data.map { preferences ->
-            preferences[BOOKS_DIRECTORY]
+            preferences[booksDirectoryKey]
         }
 
     fun getAppState(): Flow<Pair<Boolean, String?>> =
         dataStore.data.map { preferences ->
             Pair(
-                preferences[IS_FIRST_LAUNCH] ?: true,
-                preferences[BOOKS_DIRECTORY]
+                preferences[isFirstLaunchKey] ?: true,
+                preferences[booksDirectoryKey]
             )
         }
 }
