@@ -16,37 +16,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.uread.presentation.bookReader.BookAnnotation
 import com.example.uread.presentation.bookReader.Highlight
 import com.example.uread.presentation.bookReader.Underline
 import org.readium.r2.shared.publication.Locator
 
 @Composable
-fun <T : Annotation> AnnotationsDrawer(
-    annotations: List<T>,
-    onRemoveAnnotation: (Locator) -> Unit,
+fun AnnotationsDrawer(
+    annotations: List<BookAnnotation>,
+    onRemoveAnnotation: (BookAnnotation) -> Unit,
     isOpen: Boolean,
     onClose: () -> Unit,
-    tabTitles: List<String>
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabTitles = listOf("Highlights", "Underlines")
 
     AnimatedVisibility(
         visible = isOpen,
         enter = slideInHorizontally(initialOffsetX = { it }),
         exit = slideOutHorizontally(targetOffsetX = { it })
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             ModalDrawerSheet(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .clip(RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp))
             ) {
                 Column {
+                    // Header
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -59,8 +58,8 @@ fun <T : Annotation> AnnotationsDrawer(
                         }
                         Text(tabTitles[selectedTabIndex], style = MaterialTheme.typography.titleLarge)
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
 
+                    // Tab Row
                     TabRow(
                         selectedTabIndex = selectedTabIndex,
                         modifier = Modifier.fillMaxWidth(),
@@ -76,14 +75,22 @@ fun <T : Annotation> AnnotationsDrawer(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Annotation List
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        items(annotations.size) { index ->
+                        val filteredAnnotations = annotations.filter {
+                            when (selectedTabIndex) {
+                                0 -> it is Highlight
+                                1 -> it is Underline
+                                else -> false
+                            }
+                        }
+                        items(filteredAnnotations.size) { index ->
                             AnnotationItem(
-                                annotation = annotations[index],
+                                annotation = filteredAnnotations[index],
                                 onRemoveAnnotation = onRemoveAnnotation
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -96,20 +103,18 @@ fun <T : Annotation> AnnotationsDrawer(
 }
 
 @Composable
-fun <T : Annotation> AnnotationItem(
-    annotation: T,
-    onRemoveAnnotation: (Locator) -> Unit,
+fun AnnotationItem(
+    annotation: BookAnnotation,
+    onRemoveAnnotation: (BookAnnotation) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .shadow(
-                elevation = 10.dp
-            )
+            .shadow(elevation = 10.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(top = 16.dp, bottom = 16.dp, start = 8.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.Top
     ) {
         Box(
@@ -119,11 +124,9 @@ fun <T : Annotation> AnnotationItem(
                 .background(annotation.color)
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = annotation.note ?: "No note available",
                 style = MaterialTheme.typography.bodyMedium,
@@ -138,17 +141,8 @@ fun <T : Annotation> AnnotationItem(
             )
         }
 
-        IconButton(
-            onClick = { onRemoveAnnotation(annotation.locator) }
-        ) {
+        IconButton(onClick = { onRemoveAnnotation(annotation) }) {
             Icon(Icons.Default.DeleteOutline, contentDescription = "Remove Annotation")
         }
     }
-}
-
-
-interface Annotation {
-    val locator: Locator
-    val color: Color
-    val note: String?
 }

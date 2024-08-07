@@ -44,15 +44,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.uread.R
 import com.example.uread.data.model.ReaderPreferences
+import com.example.uread.presentation.bookReader.components.drawers.AnnotationsDrawer
 import com.example.uread.presentation.bookReader.components.toolbars.BottomToolbar
 import com.example.uread.presentation.bookReader.components.toolbars.TopToolbar
 import com.example.uread.presentation.bookReader.components.drawers.ChaptersDrawer
 import com.example.uread.presentation.bookReader.components.modals.FontSettings
-import com.example.uread.presentation.bookReader.components.drawers.HighlightsDrawer
 import com.example.uread.presentation.bookReader.components.drawers.NotesDrawer
 import com.example.uread.presentation.bookReader.components.modals.PageSettings
 import com.example.uread.presentation.bookReader.components.modals.ReaderSettings
 import com.example.uread.presentation.bookReader.components.modals.UiSettings
+import com.example.uread.presentation.bookReader.util.SelectionActionModeCallback
 import com.example.uread.util.SetFullScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -71,6 +72,7 @@ import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.locateProgression
+import java.util.UUID
 
 @OptIn(ExperimentalReadiumApi::class)
 @Composable
@@ -116,24 +118,10 @@ fun EpubReaderView(
     readerPreferences: ReaderPreferences,
     epubPreferences: EpubPreferences,
     viewModel: BookReaderViewModel,
-
-    ) {
-
-
-
-
-
-
-
-
-
-
-
-
+) {
     val fragmentActivity = LocalContext.current as FragmentActivity
     var navigatorFragment by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
     val coroutineScope = rememberCoroutineScope()
-
 
     var showToolbar by remember { mutableStateOf(false) }
     var showReaderSettings by remember { mutableStateOf(false) }
@@ -144,28 +132,21 @@ fun EpubReaderView(
     var isNotesDrawerOpen by remember { mutableStateOf(false) }
     var isHighlightsDrawerOpen by remember { mutableStateOf(false) }
 
-
-    // Custom state variables
     var progression by remember { mutableDoubleStateOf(1.0) }
     var currentChapter by remember { mutableStateOf("") }
     var selectedText by remember { mutableStateOf<String?>(null) }
 
-
     var currentDirectionalNavigationAdapter by remember {
-        mutableStateOf<DirectionalNavigationAdapter?>(
-            null
-        )
+        mutableStateOf<DirectionalNavigationAdapter?>(null)
     }
 
-
     val highlightColor by remember { mutableStateOf(Color.Yellow) }
+    val underlineColor by remember { mutableStateOf(Color.Blue) }
 
-    val highlights by viewModel.highlights.collectAsState()
 
+    val annotations by viewModel.annotations.collectAsState()
     var currentLocator by remember { mutableStateOf<Locator?>(null) }
 
-
-    //collect current locator
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
             navigator.currentLocator.collect { locator ->
@@ -173,61 +154,50 @@ fun EpubReaderView(
                 progression = locator.locations.totalProgression ?: 0.0
                 currentChapter = locator.title ?: ""
                 currentLocator = locator
-
             }
         }
     }
 
-    LaunchedEffect(highlights) {
+    LaunchedEffect(annotations) {
         navigatorFragment?.let { navigator ->
             if (navigator.isAdded) {
+                // Remove all existing decorations first
+                navigator.applyDecorations(emptyList(), "user-annotations")
+
+                // Then apply the current list of annotations
                 navigator.applyDecorations(
-                    highlights.map { highlight ->
-                        Decoration(
-                            id = "highlight-${highlight.locator.text}",
-                            locator = highlight.locator,
-                            style = Decoration.Style.Highlight(tint = highlight.color.toArgb())
-                        )
+                    annotations.map { annotation ->
+                        when (annotation) {
+                            is Highlight -> Decoration(
+                                id = annotation.id,
+                                locator = annotation.locator,
+                                style = Decoration.Style.Highlight(tint = annotation.color.toArgb())
+                            )
+                            is Underline -> Decoration(
+                                id = annotation.id,
+                                locator = annotation.locator,
+                                style = Decoration.Style.Underline(tint = annotation.color.toArgb())
+                            )
+                        }
                     },
-                    "user-highlights"
+                    "user-annotations"
                 )
             }
         }
     }
 
-
-// Update selected text when current selection changes
-    LaunchedEffect(navigatorFragment) {
-        while (isActive) {
-            navigatorFragment?.let { navigator ->
-                if (navigator.isAdded) {
-                    val selection = withContext(Dispatchers.Main) {
-                        navigator.currentSelection()  // Ensure this is called on the main thread
-                    }
-                    selectedText = selection?.locator?.text?.toString()
-                }
-            }
-            delay(100) // Add a delay to avoid excessive updates
-        }
-    }
-
-
-    // Update directional navigation adapter based on preferences
     LaunchedEffect(readerPreferences.tapNavigation) {
         navigatorFragment?.let { navigator ->
             if (navigator.isAdded) {
                 (navigator as? OverflowableNavigator)?.let { overflowableNavigator ->
                     if (readerPreferences.tapNavigation) {
-                        // Remove existing adapter if any
                         currentDirectionalNavigationAdapter?.let { adapter ->
                             overflowableNavigator.removeInputListener(adapter)
                         }
-                        // Create and add new adapter
                         val newAdapter = DirectionalNavigationAdapter(overflowableNavigator)
                         overflowableNavigator.addInputListener(newAdapter)
                         currentDirectionalNavigationAdapter = newAdapter
                     } else {
-                        // Remove existing adapter if any
                         currentDirectionalNavigationAdapter?.let { adapter ->
                             overflowableNavigator.removeInputListener(adapter)
                         }
@@ -238,9 +208,6 @@ fun EpubReaderView(
         }
     }
 
-
-
-
     fun onPageChange(newPage: Double) {
         navigatorFragment?.let { navigator ->
             coroutineScope.launch {
@@ -249,75 +216,67 @@ fun EpubReaderView(
                     navigator.go(locator)
                 }
             }
-
         }
     }
-
 
     fun handleHighlight() {
         coroutineScope.launch {
             val selection = navigatorFragment?.currentSelection()
             if (selection != null) {
                 val locator = selection.locator
-                selectedText = selection.locator.text.toString()
-                viewModel.addHighlight(locator, highlightColor, selectedText ?: "")
+                selectedText = locator.text.highlight.toString()
+
+                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
+                if (existingAnnotation is Highlight) {
+                    viewModel.removeAnnotation(existingAnnotation.id)
+                } else {
+                    val newHighlight = Highlight(
+                        id = UUID.randomUUID().toString(),
+                        locator = locator,
+                        color = highlightColor,
+                        note = selectedText ?: ""
+                    )
+                    viewModel.addAnnotation(newHighlight)
+                }
+                selectedText = null
+            }
+        }
+    }
+
+    fun handleUnderline() {
+        coroutineScope.launch {
+            val selection = navigatorFragment?.currentSelection()
+            if (selection != null) {
+                val locator = selection.locator
+                selectedText = locator.text.highlight.toString()
+
+                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
+                if (existingAnnotation is Underline) {
+                    viewModel.removeAnnotation(existingAnnotation.id)
+                } else {
+                    val newUnderline = Underline(
+                        id = UUID.randomUUID().toString(),
+                        locator = locator,
+                        color = highlightColor,
+                        note = selectedText ?: ""
+                    )
+                    viewModel.addAnnotation(newUnderline)
+                }
                 selectedText = null
             }
         }
     }
 
 
-    class SelectionActionModeCallback : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater.inflate(R.menu.text_selection_menu, menu)
-            return true
-        }
 
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            when (item.itemId) {
-                R.id.action_highlight -> {
-                    handleHighlight()
-                    mode.finish()
-                    return true
-                }
-//                R.id.underline -> {
-//                    handleUnderline()
-//                    mode.finish()
-//                    return true
-//                }
-//                R.id.note -> {
-//                    handleNote()
-//                    mode.finish()
-//                    return true
-//                }
-            }
-            return false
-        }
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            // Clear selection when action mode is destroyed
-            navigatorFragment?.clearSelection()
-        }
-    }
-
-
-
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             factory = { context ->
                 FrameLayout(context).apply {
                     id = View.generateViewId()
                 }
             },
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             update = { view ->
                 if (navigatorFragment == null) {
                     val factory = EpubNavigatorFactory(
@@ -336,7 +295,10 @@ fun EpubReaderView(
                         initialLocator = initialLocator,
                         listener = null,
                         configuration = EpubNavigatorFragment.Configuration(
-                            selectionActionModeCallback = SelectionActionModeCallback()
+                            selectionActionModeCallback = SelectionActionModeCallback(
+                                ::handleHighlight,
+                                ::handleUnderline
+                            )
                         )
                     ).instantiate(
                         fragmentActivity.classLoader,
@@ -348,45 +310,14 @@ fun EpubReaderView(
                     fragmentActivity.supportFragmentManager.beginTransaction()
                         .replace(view.id, fragment)
                         .commitAllowingStateLoss()
-
-
                 }
                 navigatorFragment?.let { navigator ->
-                    if (navigator.isAdded) {// Check if the fragment is added
+                    if (navigator.isAdded) {
                         navigator.submitPreferences(epubPreferences)
-
                     }
                 }
             }
         )
-
-
-        // UI Button to add highlight
-        if (selectedText != null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                Button(onClick = {
-                    coroutineScope.launch {
-                        val selection = navigatorFragment?.currentSelection()
-                        if (selection != null) {
-                            val locator = selection.locator
-                            selectedText = selection.locator.text.toString()
-                            viewModel.addHighlight(locator, highlightColor, selectedText ?: "")
-
-                            // Clear selection after highlighting
-                            selectedText = null // Clear selection after highlighting
-                        }
-                    }
-                }) {
-                    Text("Highlight")
-                }
-            }
-        }
-
-
 
         Box(
             modifier = Modifier
@@ -401,10 +332,19 @@ fun EpubReaderView(
                     )
                 }
         )
-
-
-
-
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .align(Alignment.TopCenter)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            showToolbar = !showToolbar
+                        }
+                    )
+                }
+        )
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             BottomToolbar(
@@ -419,8 +359,6 @@ fun EpubReaderView(
             )
         }
 
-
-        // Top toolbar
         TopToolbar(
             showToolbar,
             publication,
@@ -430,8 +368,6 @@ fun EpubReaderView(
             onNotesDrawerToggle = { isNotesDrawerOpen = true },
             onHighlightsDrawerToggle = { isHighlightsDrawerOpen = true }
         )
-
-
 
         ChaptersDrawer(
             isOpen = isChaptersDrawerOpen,
@@ -451,13 +387,21 @@ fun EpubReaderView(
             onClose = { isChaptersDrawerOpen = false }
         )
 
-        NotesDrawer(isOpen = isNotesDrawerOpen,
+        NotesDrawer(
+            isOpen = isNotesDrawerOpen,
             onClose = { isNotesDrawerOpen = false }
         )
 
-        HighlightsDrawer(isOpen = isHighlightsDrawerOpen,
+        AnnotationsDrawer(
+            annotations = viewModel.annotations.collectAsState().value,
+            onRemoveAnnotation = { annotation ->
+                viewModel.removeAnnotation(annotation.id)
+            },
+            isOpen = isHighlightsDrawerOpen,
             onClose = { isHighlightsDrawerOpen = false }
         )
+
+
 
 
         if (showFontSettings) {
@@ -480,9 +424,6 @@ fun EpubReaderView(
             )
         }
 
-
-
-
         if (showUISettings) {
             UiSettings(
                 readerPreferences = readerPreferences,
@@ -502,15 +443,7 @@ fun EpubReaderView(
                 onDismiss = { showReaderSettings = false }
             )
         }
-
-
     }
-
-
-
-
-
-
 
     DisposableEffect(Unit) {
         onDispose {
@@ -523,20 +456,26 @@ fun EpubReaderView(
     }
 }
 
-
-
-
+sealed class BookAnnotation(
+    open val id: String, // Add this line
+    open val locator: Locator,
+    open val color: Color,
+    open val note: String? = null
+)
 
 data class Highlight(
-    val locator: Locator,
-    val color: Color,
-    val note: String? = null
-)
+    override val id: String, // Add this line
+    override val locator: Locator,
+    override val color: Color,
+    override val note: String? = null
+) : BookAnnotation(id, locator, color, note)
 
-data class Annotation(
-    val locator: Locator,
-    val text: String
-)
+data class Underline(
+    override val id: String, // Add this line
+    override val locator: Locator,
+    override val color: Color,
+    override val note: String? = null
+) : BookAnnotation(id, locator, color, note)
 
 
 

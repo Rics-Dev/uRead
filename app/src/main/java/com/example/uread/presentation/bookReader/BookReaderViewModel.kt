@@ -42,33 +42,24 @@ class BookReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(context) {
 
+    private val _annotations = MutableStateFlow<List<BookAnnotation>>(emptyList())
+    val annotations: StateFlow<List<BookAnnotation>> = _annotations.asStateFlow()
 
-    private val _highlights = MutableStateFlow<List<Highlight>>(emptyList())
-    val highlights: StateFlow<List<Highlight>> = _highlights.asStateFlow()
-
-    fun addHighlight(locator: Locator, color: Color, text: String) {
-        val newHighlight = Highlight(locator, color, text)
-        _highlights.update { currentHighlights ->
-            currentHighlights + newHighlight
+    fun addAnnotation(annotation: BookAnnotation) {
+        _annotations.update { currentAnnotations ->
+            currentAnnotations + annotation
         }
-        // TODO: Persist the highlight to a database or storage
     }
 
-    fun removeHighlight(highlight: Highlight) {
-        _highlights.update { currentHighlights ->
-            currentHighlights - highlight
+    fun removeAnnotation(annotationId: String) {
+        _annotations.update { currentAnnotations ->
+            currentAnnotations.filter { it.id != annotationId }
         }
-        // TODO: Remove the highlight from the database or storage
     }
 
-    private val _annotations = MutableStateFlow<List<Annotation>>(emptyList())
-    val annotations: StateFlow<List<Annotation>> = _annotations.asStateFlow()
-
-
-    fun addAnnotation(annotation: Annotation) {
-        _annotations.value = _annotations.value + annotation
+    fun isTextAnnotated(locator: Locator): Boolean {
+        return _annotations.value.any { it.locator == locator }
     }
-
 
 
 
@@ -85,7 +76,8 @@ class BookReaderViewModel @Inject constructor(
     private val _readerPreferences = MutableStateFlow(ReaderPreferencesUtil.defaultPreferences)
     val readerPreferences: StateFlow<ReaderPreferences> = _readerPreferences.asStateFlow()
 
-    private val _epubPreferences = MutableStateFlow(ReaderPreferencesUtil.defaultPreferences.toEpubPreferences())
+    private val _epubPreferences =
+        MutableStateFlow(ReaderPreferencesUtil.defaultPreferences.toEpubPreferences())
     val epubPreferences: StateFlow<EpubPreferences> = _epubPreferences.asStateFlow()
 
 
@@ -104,7 +96,6 @@ class BookReaderViewModel @Inject constructor(
             }
         }
     }
-
 
 
     fun updateReaderPreferences(newPreferences: ReaderPreferences) {
@@ -138,7 +129,8 @@ class BookReaderViewModel @Inject constructor(
     private fun openBook(bookUri: AbsoluteUrl) {
         viewModelScope.launch {
             try {
-                val asset = assetRetriever.retrieve(bookUri).getOrElse { throw ErrorException(it) }
+                val asset =
+                    assetRetriever.retrieve(bookUri).getOrElse { throw ErrorException(it) }
                 val publication = publicationOpener.open(asset, allowUserInteraction = true)
                     .getOrElse { throw ErrorException(it) }
 
