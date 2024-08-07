@@ -37,6 +37,7 @@ import com.elixer.palette.constraints.HorizontalAlignment
 import com.elixer.palette.constraints.VerticalAlignment
 import com.example.uread.data.model.ReaderPreferences
 import com.example.uread.util.ColorPicker
+import org.readium.r2.shared.ExperimentalReadiumApi
 
 
 enum class ColorType(val displayName: String) {
@@ -46,7 +47,7 @@ enum class ColorType(val displayName: String) {
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalReadiumApi::class)
 @Composable
 fun UiSettings(
     readerPreferences: ReaderPreferences,

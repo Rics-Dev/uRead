@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -122,6 +123,11 @@ fun AnnotationItem(
                 .size(18.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(annotation.color)
+                .clickable(
+                    onClick = {
+
+                    }
+                )
         )
 
         Spacer(modifier = Modifier.width(16.dp))

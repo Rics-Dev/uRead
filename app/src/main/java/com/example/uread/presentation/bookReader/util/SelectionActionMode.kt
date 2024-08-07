@@ -3,11 +3,13 @@ package com.example.uread.presentation.bookReader.util
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import androidx.compose.ui.graphics.Color
 import com.example.uread.R
 
 class SelectionActionModeCallback(
-    private val onHighlight: () -> Unit,
-    private val onUnderline: () -> Unit,
+    private val onHighlight: (Color) -> Unit,
+    private val onUnderline: (Color) -> Unit,
+    private val showActionMode: (Boolean, (Color) -> Unit) -> Unit
 ) : ActionMode.Callback {
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.text_selection_menu, menu)
@@ -19,13 +21,17 @@ class SelectionActionModeCallback(
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_highlight -> {
-                onHighlight()
-                mode.finish()
+                showActionMode(true) { color ->
+                    onHighlight(color)
+                    mode.finish()
+                }
                 return true
             }
             R.id.action_underline -> {
-                onUnderline()
-                mode.finish()
+                showActionMode(true) { color ->
+                    onUnderline(color)
+                    mode.finish()
+                }
                 return true
             }
         }

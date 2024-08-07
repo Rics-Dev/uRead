@@ -117,6 +117,7 @@ dependencies {
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.github.Shivamdhuria:palette:0.0.4")
+    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
 
 
 

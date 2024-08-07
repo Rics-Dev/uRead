@@ -1,24 +1,40 @@
 package com.example.uread.presentation.bookReader
 
-import android.util.Log
-import android.view.ActionMode
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,20 +45,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.platform.TextToolbarStatus
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.uread.R
+import com.elixer.palette.Presets
+import com.elixer.palette.constraints.HorizontalAlignment
+import com.elixer.palette.constraints.VerticalAlignment
 import com.example.uread.data.model.ReaderPreferences
 import com.example.uread.presentation.bookReader.components.drawers.AnnotationsDrawer
 import com.example.uread.presentation.bookReader.components.toolbars.BottomToolbar
@@ -50,23 +65,26 @@ import com.example.uread.presentation.bookReader.components.toolbars.TopToolbar
 import com.example.uread.presentation.bookReader.components.drawers.ChaptersDrawer
 import com.example.uread.presentation.bookReader.components.modals.FontSettings
 import com.example.uread.presentation.bookReader.components.drawers.NotesDrawer
+import com.example.uread.presentation.bookReader.components.modals.ColorType
 import com.example.uread.presentation.bookReader.components.modals.PageSettings
 import com.example.uread.presentation.bookReader.components.modals.ReaderSettings
 import com.example.uread.presentation.bookReader.components.modals.UiSettings
 import com.example.uread.presentation.bookReader.util.SelectionActionModeCallback
+import com.example.uread.util.ColorPicker
 import com.example.uread.util.SetFullScreen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.OverflowableNavigator
-import org.readium.r2.navigator.SelectableNavigator
+import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubDefaults
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.input.DragEvent
+import org.readium.r2.navigator.input.InputListener
+import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -140,12 +158,102 @@ fun EpubReaderView(
         mutableStateOf<DirectionalNavigationAdapter?>(null)
     }
 
-    val highlightColor by remember { mutableStateOf(Color.Yellow) }
-    val underlineColor by remember { mutableStateOf(Color.Blue) }
-
-
     val annotations by viewModel.annotations.collectAsState()
     var currentLocator by remember { mutableStateOf<Locator?>(null) }
+
+    var showActionMode by remember { mutableStateOf(false) }
+    var isHighlightColorPicker by remember { mutableStateOf(true) }
+    var onColorSelected by remember { mutableStateOf<(Color) -> Unit>({}) }
+
+    fun showActionMode(isHighlight: Boolean, onSelected: (Color) -> Unit) {
+        isHighlightColorPicker = isHighlight
+        onColorSelected = onSelected
+        showActionMode = true
+    }
+
+    fun onPageChange(newPage: Double) {
+        navigatorFragment?.let { navigator ->
+            coroutineScope.launch {
+                val locator = publication.locateProgression(newPage)
+                locator?.let {
+                    navigator.go(locator)
+                }
+            }
+        }
+    }
+
+
+    fun handleHighlight(color: Color) {
+        coroutineScope.launch {
+            val selection = navigatorFragment?.currentSelection()
+            if (selection != null) {
+                val locator = selection.locator
+                selectedText = locator.text.highlight.toString()
+
+                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
+                if (existingAnnotation is Highlight) {
+                    viewModel.removeAnnotation(existingAnnotation.id)
+                } else {
+                    val newHighlight = Highlight(
+                        id = UUID.randomUUID().toString(),
+                        locator = locator,
+                        color = color,
+                        note = selectedText ?: ""
+                    )
+                    viewModel.addAnnotation(newHighlight)
+                }
+                selectedText = null
+            }
+        }
+    }
+
+    fun handleUnderline(color: Color) {
+        coroutineScope.launch {
+            val selection = navigatorFragment?.currentSelection()
+            if (selection != null) {
+                val locator = selection.locator
+                selectedText = locator.text.highlight.toString()
+
+                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
+                if (existingAnnotation is Underline) {
+                    viewModel.removeAnnotation(existingAnnotation.id)
+                } else {
+                    val newUnderline = Underline(
+                        id = UUID.randomUUID().toString(),
+                        locator = locator,
+                        color = color,
+                        note = selectedText ?: ""
+                    )
+                    viewModel.addAnnotation(newUnderline)
+                }
+                selectedText = null
+            }
+        }
+    }
+
+
+
+    // Set up the selection listener for the EpubNavigatorFragment
+    LaunchedEffect(navigatorFragment) {
+        navigatorFragment?.let { navigator ->
+            (navigator as? VisualNavigator)?.apply {
+                addInputListener(object : InputListener {
+                    override fun onTap(event: TapEvent): Boolean {
+                        // Toggle the toolbar visibility
+                        showToolbar = !showToolbar
+                        return true
+                    }
+
+                    override fun onDrag(event: DragEvent): Boolean {
+                        // Handle drag events if needed
+                        return false
+                    }
+                })
+            }
+        }
+    }
+
+
 
     LaunchedEffect(navigatorFragment) {
         navigatorFragment?.let { navigator ->
@@ -208,64 +316,8 @@ fun EpubReaderView(
         }
     }
 
-    fun onPageChange(newPage: Double) {
-        navigatorFragment?.let { navigator ->
-            coroutineScope.launch {
-                val locator = publication.locateProgression(newPage)
-                locator?.let {
-                    navigator.go(locator)
-                }
-            }
-        }
-    }
 
-    fun handleHighlight() {
-        coroutineScope.launch {
-            val selection = navigatorFragment?.currentSelection()
-            if (selection != null) {
-                val locator = selection.locator
-                selectedText = locator.text.highlight.toString()
 
-                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
-                if (existingAnnotation is Highlight) {
-                    viewModel.removeAnnotation(existingAnnotation.id)
-                } else {
-                    val newHighlight = Highlight(
-                        id = UUID.randomUUID().toString(),
-                        locator = locator,
-                        color = highlightColor,
-                        note = selectedText ?: ""
-                    )
-                    viewModel.addAnnotation(newHighlight)
-                }
-                selectedText = null
-            }
-        }
-    }
-
-    fun handleUnderline() {
-        coroutineScope.launch {
-            val selection = navigatorFragment?.currentSelection()
-            if (selection != null) {
-                val locator = selection.locator
-                selectedText = locator.text.highlight.toString()
-
-                val existingAnnotation = viewModel.annotations.value.find { it.locator == locator }
-                if (existingAnnotation is Underline) {
-                    viewModel.removeAnnotation(existingAnnotation.id)
-                } else {
-                    val newUnderline = Underline(
-                        id = UUID.randomUUID().toString(),
-                        locator = locator,
-                        color = highlightColor,
-                        note = selectedText ?: ""
-                    )
-                    viewModel.addAnnotation(newUnderline)
-                }
-                selectedText = null
-            }
-        }
-    }
 
 
 
@@ -296,8 +348,9 @@ fun EpubReaderView(
                         listener = null,
                         configuration = EpubNavigatorFragment.Configuration(
                             selectionActionModeCallback = SelectionActionModeCallback(
-                                ::handleHighlight,
-                                ::handleUnderline
+                                onHighlight = { handleHighlight(it) },
+                                onUnderline = { handleUnderline(it) },
+                                showActionMode = ::showActionMode
                             )
                         )
                     ).instantiate(
@@ -319,32 +372,25 @@ fun EpubReaderView(
             }
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .align(Alignment.BottomCenter)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            showToolbar = !showToolbar
-                        }
-                    )
-                }
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .align(Alignment.TopCenter)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            showToolbar = !showToolbar
-                        }
-                    )
-                }
-        )
+
+
+        // ActionModeLayout
+        if (showActionMode) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        showActionMode = false
+                    }
+            )
+            ActionModeLayout(
+                onColorSelected = onColorSelected
+            )
+        }
+
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             BottomToolbar(
@@ -455,6 +501,222 @@ fun EpubReaderView(
         }
     }
 }
+
+
+
+
+
+
+
+
+@Composable
+fun ActionModeLayout(
+    onColorSelected: (Color) -> Unit
+) {
+    var selectedColor by remember { mutableStateOf<Color?>(null) }
+    var isPaletteVisible by remember { mutableStateOf(false) }
+    // Create a controller for the color picker
+    val controller = rememberColorPickerController()
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .zIndex(9999f),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(top = 16.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .background(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    )
+                    .padding(0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ColorRadioGroup(
+                    onColorSelected = { color ->
+                        selectedColor = color
+                        onColorSelected(color)
+                    }
+                )
+                VerticalDivider()
+                CustomColor(onClick = {
+                    isPaletteVisible = true
+                })
+                VerticalDivider()
+                DeleteButton()
+            }
+        }
+
+        if (isPaletteVisible) {
+            HsvColorPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .padding(10.dp),
+                controller = controller,
+                initialColor = selectedColor ?: Color.White, // Set the initial color
+                onColorChanged = { colorEnvelope ->
+                    val color = colorEnvelope.color
+                    selectedColor = color
+                    onColorSelected(color)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ColorRadioGroup(onColorSelected: (Color) -> Unit) {
+    val colors = listOf(
+        Color(0xFF6DBA70),
+        Color(0xFFFFF176),
+        Color(0xFF618CFF),
+        Color(0xFFFF6B6B),
+    )
+    Row(
+        modifier = Modifier
+            .selectableGroup(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        colors.forEach { color ->
+            RadioButton(
+                selected = true,
+                onClick = { onColorSelected(color) },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = color,
+                    unselectedColor = color
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun VerticalDivider() {
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(50.dp)
+            .background(Color(0xFFB9B9B9))
+    )
+}
+
+@Composable
+fun CustomColor(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Colorize,
+            contentDescription = "Custom Color",
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+fun DeleteButton() {
+    IconButton(
+        onClick = { /* Your click handler */ },
+        modifier = Modifier.size(40.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Delete,
+            contentDescription = "Delete",
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@Composable
+fun AnnotationColorPicker(
+    isHighlight: Boolean,
+    onColorSelected: (Color) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val colors = listOf(
+        Color.Green, Color.Yellow,  Color.Blue, Color.Red,
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Choose ${if (isHighlight) "Highlight" else "Underline"} Color") },
+        text = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()), // Allow horizontal scrolling
+                horizontalArrangement = Arrangement.SpaceEvenly // Space colors evenly
+            ) {
+                colors.forEach { color ->
+                    ColorBoxAnnotation(
+                        color = color,
+                        onColorSelected = { selectedColor -> onColorSelected(selectedColor) },
+                        onDismiss = onDismiss
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun ColorBoxAnnotation(
+    color: Color,
+    onColorSelected: (Color) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(50.dp)
+            .shadow(elevation = 200.dp)
+            .clip(shape = RoundedCornerShape(50.dp))
+            .background(color)
+            .clickable {
+                onColorSelected(color)
+                onDismiss()
+            }
+    )
+}
+
+
+
 
 sealed class BookAnnotation(
     open val id: String, // Add this line
