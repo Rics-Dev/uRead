@@ -10,5 +10,5 @@ data class Book(
     val authors: String,
     val description: String?,
     val coverPath: String?,
-    val locator: String
+    val locator: String,
 )

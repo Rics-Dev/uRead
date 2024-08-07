@@ -2,6 +2,7 @@ package com.example.uread.presentation.bookReader
 
 import android.app.Application
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -14,8 +15,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.readium.r2.navigator.Selection
 import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -38,6 +41,36 @@ class BookReaderViewModel @Inject constructor(
     private val publicationOpener: PublicationOpener,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(context) {
+
+
+    private val _highlights = MutableStateFlow<List<Highlight>>(emptyList())
+    val highlights: StateFlow<List<Highlight>> = _highlights.asStateFlow()
+
+    fun addHighlight(locator: Locator, color: Color, text: String) {
+        val newHighlight = Highlight(locator, color, text)
+        _highlights.update { currentHighlights ->
+            currentHighlights + newHighlight
+        }
+        // TODO: Persist the highlight to a database or storage
+    }
+
+    fun removeHighlight(highlight: Highlight) {
+        _highlights.update { currentHighlights ->
+            currentHighlights - highlight
+        }
+        // TODO: Remove the highlight from the database or storage
+    }
+
+    private val _annotations = MutableStateFlow<List<Annotation>>(emptyList())
+    val annotations: StateFlow<List<Annotation>> = _annotations.asStateFlow()
+
+
+    fun addAnnotation(annotation: Annotation) {
+        _annotations.value = _annotations.value + annotation
+    }
+
+
+
 
     private val _uiState = MutableStateFlow<BookReaderUiState>(BookReaderUiState.Loading)
     val uiState: StateFlow<BookReaderUiState> = _uiState.asStateFlow()

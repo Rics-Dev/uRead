@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ChromeReaderMode
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.automirrored.sharp.ArrowForward
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material3.Icon
@@ -52,6 +53,7 @@ fun BottomToolbar(
     progression: Double,
     onPageChange: (Double) -> Unit,  // Add this parameter
     onToggleFontSettings: () -> Unit,
+    onTogglePageSettings: () -> Unit,
     onToggleUISettings: () -> Unit,
     onToggleReaderSettings: () -> Unit
 ) {
@@ -175,6 +177,9 @@ fun BottomToolbar(
                 }
                 IconButton(onClick = { onToggleUISettings() }) {
                     Icon(Icons.Filled.SettingsBrightness, contentDescription = "UI Settings", modifier = Modifier.size(28.dp))
+                }
+                IconButton(onClick = { onTogglePageSettings() }) {
+                    Icon(Icons.Filled.FormatSize, contentDescription = "Page Settings", modifier = Modifier.size(28.dp))
                 }
                 IconButton(onClick = { onToggleFontSettings() }) {
                     Icon(Icons.Filled.TextFormat, contentDescription = "Font Settings", modifier = Modifier.size(28.dp))

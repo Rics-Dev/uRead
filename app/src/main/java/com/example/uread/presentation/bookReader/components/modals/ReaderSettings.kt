@@ -1,5 +1,6 @@
 package com.example.uread.presentation.bookReader.components.modals
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,11 +39,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.uread.data.model.ReaderPreferences
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.preferences.ReadingProgression
 import org.readium.r2.shared.ExperimentalReadiumApi
 import java.util.Locale
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalReadiumApi::class)
 @Composable
 fun ReaderSettings(
     readerPreferences: ReaderPreferences,
@@ -46,6 +52,7 @@ fun ReaderSettings(
     onDismiss: () -> Unit,
 ) {
     var updatedPreferences by remember { mutableStateOf(readerPreferences) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     fun updatePreference(update: ReaderPreferences.() -> ReaderPreferences) {
         updatedPreferences = updatedPreferences.update()
@@ -53,7 +60,8 @@ fun ReaderSettings(
     }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
@@ -61,113 +69,98 @@ fun ReaderSettings(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Font Size
-            Text(
-                "Font Size",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {
-                    updatePreference { copy(fontSize = fontSize - 0.1) }
-                }) {
-                    Icon(Icons.Default.Remove, contentDescription = "Decrease font size")
-                }
-                Text("${(updatedPreferences.fontSize * 100).toInt()}%", style = MaterialTheme.typography.bodyLarge)
-                IconButton(onClick = {
-                    updatePreference { copy(fontSize = fontSize + 0.1) }
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Increase font size")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Page Margins
-            Text(
-                "Page Margins",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {
-                    updatePreference { copy(pageMargins = pageMargins - 0.1) }
-                }) {
-                    Icon(Icons.Default.Remove, contentDescription = "Decrease page margins")
-                }
-                Text(
-                    String.format(Locale.getDefault(), "%.1f", updatedPreferences.pageMargins),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                IconButton(onClick = {
-                    updatePreference { copy(pageMargins = pageMargins + 0.1) }
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Increase page margins")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(10.dp))
-
             // Scroll Mode
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Scroll Mode", style = MaterialTheme.typography.titleMedium)
-                Switch(
-                    checked = updatedPreferences.scroll,
-                    onCheckedChange = {
-                        updatePreference { copy(scroll = it) }
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Background Color
-            Text(
-                "Background Color",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
+            SettingsSwitch(
+                title = "Scroll Mode",
+                checked = updatedPreferences.scroll,
+                onCheckedChange = { updatePreference { copy(scroll = it) } }
             )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
+
+            // Tap Navigation
+            SettingsSwitch(
+                title = "Tap Navigation",
+                checked = updatedPreferences.tapNavigation,
+                onCheckedChange = { updatePreference { copy(tapNavigation = it) } }
+            )
+
+            //Reading Progression
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                listOf(Color.White, Color.Black, Color.LightGray, Color(0xFFFFF8DC)).forEach { color ->
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(color)
-                            .clickable {
-                                updatePreference {
-                                    copy(
-                                        backgroundColor = color,
-                                        textColor = if (color == Color.Black) Color.White else Color.Black
-                                    )
+                Text("Reading Progression", style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    listOf(
+                        ReadingProgression.LTR to "Left to Right",
+                        ReadingProgression.RTL to "Right to Left",
+                    ).forEach { (readingProgression, label) ->
+                        FilledTonalButton(
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (updatedPreferences.readingProgression == readingProgression) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
+                                contentColor = if (updatedPreferences.readingProgression == readingProgression) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                                 }
+                            ),
+                            onClick = {
+                                updatePreference { copy(readingProgression = readingProgression) }
                             }
-                    )
+                        ) {
+                            Text(text = label)
+                        }
+                    }
                 }
             }
+
+            // Vertical Text
+            SettingsSwitch(
+                title = "Vertical Text",
+                checked = updatedPreferences.verticalText,
+                onCheckedChange = { updatePreference { copy(verticalText = it) } }
+            )
+
+            // Publisher Styles
+            SettingsSwitch(
+                title = "Publisher Styles",
+                checked = updatedPreferences.publisherStyles,
+                onCheckedChange = { updatePreference { copy(publisherStyles = it) } }
+            )
+
+            // Text Normalisation
+            SettingsSwitch(
+                title = "Text Normalization",
+                checked = updatedPreferences.textNormalization,
+                onCheckedChange = { updatePreference { copy(textNormalization = it) } }
+            )
         }
     }
+}
+
+@Composable
+fun SettingsSwitch(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+    Spacer(modifier = Modifier.height(16.dp))
 }
