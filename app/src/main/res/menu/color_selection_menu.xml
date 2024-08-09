@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/color_red"
+        android:icon="@drawable/color_ball_red"
+        android:title=""
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/color_blue"
+        android:icon="@drawable/color_ball_blue"
+        android:title=""
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/color_green"
+        android:icon="@drawable/color_ball_green"
+        android:title=""
+        app:showAsAction="always" />
+</menu>

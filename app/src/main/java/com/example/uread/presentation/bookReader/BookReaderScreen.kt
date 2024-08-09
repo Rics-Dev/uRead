@@ -2,6 +2,9 @@ package com.example.uread.presentation.bookReader
 
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,8 +31,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,9 +59,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.elixer.palette.Presets
-import com.elixer.palette.constraints.HorizontalAlignment
-import com.elixer.palette.constraints.VerticalAlignment
 import com.example.uread.data.model.ReaderPreferences
 import com.example.uread.presentation.bookReader.components.drawers.AnnotationsDrawer
 import com.example.uread.presentation.bookReader.components.toolbars.BottomToolbar
@@ -65,12 +66,10 @@ import com.example.uread.presentation.bookReader.components.toolbars.TopToolbar
 import com.example.uread.presentation.bookReader.components.drawers.ChaptersDrawer
 import com.example.uread.presentation.bookReader.components.modals.FontSettings
 import com.example.uread.presentation.bookReader.components.drawers.NotesDrawer
-import com.example.uread.presentation.bookReader.components.modals.ColorType
 import com.example.uread.presentation.bookReader.components.modals.PageSettings
 import com.example.uread.presentation.bookReader.components.modals.ReaderSettings
 import com.example.uread.presentation.bookReader.components.modals.UiSettings
 import com.example.uread.presentation.bookReader.util.SelectionActionModeCallback
-import com.example.uread.util.ColorPicker
 import com.example.uread.util.SetFullScreen
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
@@ -168,6 +167,7 @@ fun EpubReaderView(
     fun showActionMode(isHighlight: Boolean, onSelected: (Color) -> Unit) {
         isHighlightColorPicker = isHighlight
         onColorSelected = onSelected
+        showToolbar = false
         showActionMode = true
     }
 
@@ -375,7 +375,7 @@ fun EpubReaderView(
 
 
         // ActionModeLayout
-        if (showActionMode) {
+        if (showActionMode || isHighlightsDrawerOpen || isChaptersDrawerOpen) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -384,8 +384,18 @@ fun EpubReaderView(
                         indication = null
                     ) {
                         showActionMode = false
+                        isNotesDrawerOpen = false
+                        isHighlightsDrawerOpen = false
+                        isChaptersDrawerOpen = false
                     }
             )
+        }
+
+        AnimatedVisibility(
+            visible = showActionMode,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
+        ) {
             ActionModeLayout(
                 onColorSelected = onColorSelected
             )
@@ -439,12 +449,14 @@ fun EpubReaderView(
         )
 
         AnnotationsDrawer(
+            navigator = navigatorFragment,
             annotations = viewModel.annotations.collectAsState().value,
             onRemoveAnnotation = { annotation ->
                 viewModel.removeAnnotation(annotation.id)
             },
             isOpen = isHighlightsDrawerOpen,
-            onClose = { isHighlightsDrawerOpen = false }
+            onClose = { isHighlightsDrawerOpen = false },
+            onUpdateAnnotation = viewModel::onUpdateAnnotation
         )
 
 
@@ -513,63 +525,116 @@ fun EpubReaderView(
 fun ActionModeLayout(
     onColorSelected: (Color) -> Unit
 ) {
-    var selectedColor by remember { mutableStateOf<Color?>(null) }
-    var isPaletteVisible by remember { mutableStateOf(false) }
+    var selectedColor by remember { mutableStateOf<Color?>(null) }  // Track the selected color
+    var isPaletteVisible by remember { mutableStateOf(false) }  // Track the visibility of the color picker
+
     // Create a controller for the color picker
     val controller = rememberColorPickerController()
 
+    // Main container for the layout
     Box(
-        modifier = Modifier.fillMaxSize()
-            .zIndex(9999f),
-        contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .zIndex(9999f)  // Ensure the layout is on top of other UI elements
+            .padding(bottom = 6.dp),
+        contentAlignment = Alignment.BottomCenter  // Position at the bottom center of the screen
     ) {
+        // Darken the background when the palette is visible
+        if (isPaletteVisible) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.7f))  // Semi-transparent black background
+            )
+        }
+
+        // Main column for action buttons and color picker
         Column(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(top = 16.dp),
+                .padding(top = 16.dp)
         ) {
+            // Row containing color options and custom color button
             Row(
                 modifier = Modifier
                     .wrapContentSize()
                     .background(
                         shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surface
+                        color = Color.DarkGray  // Background color of the action mode
                     )
                     .padding(0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically  // Align content vertically centered
             ) {
+                // Group of radio buttons for selecting predefined colors
                 ColorRadioGroup(
                     onColorSelected = { color ->
-                        selectedColor = color
-                        onColorSelected(color)
+                        selectedColor = color  // Update the selected color
+                        onColorSelected(color)  // Notify parent composable of the color change
                     }
                 )
+
+                // Divider between color options and the custom color button
                 VerticalDivider()
+
+                // Button to open the custom color picker
                 CustomColor(onClick = {
-                    isPaletteVisible = true
+                    isPaletteVisible = true  // Show the color picker when clicked
                 })
-                VerticalDivider()
-                DeleteButton()
+
+                // Optional: Add other actions like a delete button here
+                // VerticalDivider()
+                // DeleteButton()
             }
         }
 
+        // Conditional rendering of the color picker based on `isPaletteVisible`
         if (isPaletteVisible) {
-            HsvColorPicker(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(450.dp)
-                    .padding(10.dp),
-                controller = controller,
-                initialColor = selectedColor ?: Color.White, // Set the initial color
-                onColorChanged = { colorEnvelope ->
-                    val color = colorEnvelope.color
-                    selectedColor = color
-                    onColorSelected(color)
+            Box(
+                modifier = Modifier.fillMaxSize(),  // Fill the screen size
+                contentAlignment = Alignment.Center  // Center the color picker in the screen
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    // HSV color picker
+                    HsvColorPicker(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)  // Optional: Adjust the width to 80% of the screen width
+                            .height(350.dp)
+                            .padding(10.dp),  // Layout settings for the color picker
+                        controller = controller,
+                        initialColor = selectedColor ?: Color.White,  // Set the initial color for the picker
+                        onColorChanged = { colorEnvelope ->
+                            val color = colorEnvelope.color
+                            selectedColor = color  // Update the selected color
+                        }
+                    )
+
+
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(selectedColor ?: Color.White)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))  // Spacer to add space between the color picker and the button
+                    // Select button
+                    Button(
+                        onClick = {
+                            onColorSelected(selectedColor ?: Color.White)  // Notify parent composable of the color change
+                            isPaletteVisible = false  // Hide the color picker
+                        }
+                    ) {
+                        Text("Select")  // Button label
+                    }
                 }
-            )
+            }
         }
     }
 }
+
+
 
 @Composable
 fun ColorRadioGroup(onColorSelected: (Color) -> Unit) {
@@ -617,7 +682,7 @@ fun CustomColor(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Filled.Colorize,
             contentDescription = "Custom Color",
-            tint = MaterialTheme.colorScheme.onSurface
+            tint = Color.LightGray
         )
     }
 }

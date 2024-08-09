@@ -57,6 +57,18 @@ class BookReaderViewModel @Inject constructor(
         }
     }
 
+    fun onUpdateAnnotation(updatedAnnotation: BookAnnotation) {
+        _annotations.update { currentAnnotations ->
+            currentAnnotations.map { annotation ->
+                if (annotation.id == updatedAnnotation.id) {
+                    updatedAnnotation
+                } else {
+                    annotation
+                }
+            }
+        }
+    }
+
     fun isTextAnnotated(locator: Locator): Boolean {
         return _annotations.value.any { it.locator == locator }
     }

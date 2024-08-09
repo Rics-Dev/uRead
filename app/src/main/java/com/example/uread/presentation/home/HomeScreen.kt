@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
-//import androidx.navigation.NavHostController
 import com.example.uread.presentation.book_shelf.ShelfPageScreen
 import com.example.uread.presentation.home.components.AddBookSnackbar
 import com.example.uread.presentation.home.components.BookCard
@@ -46,9 +45,6 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var hasInitialized by remember { mutableStateOf(false) }
-
-
-
 
 
     val getContent =
@@ -131,7 +127,7 @@ fun HomeScreen(
                 when (index) {
                     0 -> {
                         LazyVerticalGrid(
-                            columns = GridCells.Adaptive(100.dp),
+                            columns = GridCells.Fixed(3),
                             contentPadding = PaddingValues(10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -142,15 +138,29 @@ fun HomeScreen(
                                 key = { index -> books[index]?.uri ?: index }
                             ) { index ->
                                 val book = books[index]
-                                BookCard(
-                                    book,
-                                    isLoading = isLoading,
-                                    openBook = { openedBook ->
-                                        navController.navigate(ScreenNavigation.BookReaderScreen.route + "/${Uri.encode(openedBook.uri)}")
-                                    }
-                                )
+
+                                // Wrap the BookCard with animateItemPlacement to animate its appearance
+                                Box(
+                                    modifier = Modifier.animateItem()
+                                ) {
+                                    BookCard(
+                                        book,
+                                        isLoading = isLoading,
+                                        openBook = { openedBook ->
+                                            navController.navigate(
+                                                ScreenNavigation.BookReaderScreen.route + "/${
+                                                    Uri.encode(
+                                                        openedBook.uri
+                                                    )
+                                                }"
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
+
+
                     }
 
                     else -> ShelfPageScreen(index)
