@@ -15,3 +15,4 @@
 local.properties
 apikey.properties
 app/src/main/res/values/appId.xml
+app/google-services.json
