@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 data class PurchaseHelper(val activity: Activity) {
 
     private lateinit var billingClient: BillingClient
-    private lateinit var productDetails: ProductDetails
+    private var productDetails: ProductDetails? = null
     private lateinit var purchase: Purchase
 
     private val productId = BuildConfig.PRODUCT_ID
@@ -81,7 +81,7 @@ data class PurchaseHelper(val activity: Activity) {
         billingClient.queryProductDetailsAsync(queryProductDetailsParams) { _, productDetailsList ->
             if (productDetailsList.isNotEmpty()) {
                 productDetails = productDetailsList[0]
-                _productName.value = "Product: " + productDetails.name
+                _productName.value = "Product: " + productDetails?.name
                 _buyEnabled.value = true
             } else {
                 _statusText.value = "No Matching Products Found"
@@ -117,17 +117,21 @@ data class PurchaseHelper(val activity: Activity) {
 
 
     fun makePurchase() {
-        val billingFlowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(
-                ImmutableList.of(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .build()
+        productDetails?.let { details ->
+            val billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(
+                    ImmutableList.of(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(details)
+                            .build()
+                    )
                 )
-            )
-            .build()
+                .build()
 
-        billingClient.launchBillingFlow(activity, billingFlowParams)
+            billingClient.launchBillingFlow(activity, billingFlowParams)
+        } ?: run {
+            _statusText.value = "Product details not available. Please try again."
+        }
     }
 
 

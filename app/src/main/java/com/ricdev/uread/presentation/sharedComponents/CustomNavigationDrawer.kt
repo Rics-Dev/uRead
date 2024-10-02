@@ -19,7 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ricdev.uread.MainViewModel
+import com.ricdev.uread.SplashViewModel
 import com.ricdev.uread.R
 import com.ricdev.uread.util.PurchaseHelper
 import com.ricdev.uread.navigation.Screens
@@ -32,7 +32,7 @@ fun CustomNavigationDrawer(
     purchaseHelper: PurchaseHelper,
     drawerState: DrawerState,
     navController: NavHostController,
-    viewModel: MainViewModel = hiltViewModel(),
+    viewModel: SplashViewModel = hiltViewModel(),
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()

@@ -231,7 +231,6 @@ fun SettingsScreen(
                             )
                             .clip(RoundedCornerShape(16.dp))
                             .clickable(onClick = {
-//                                showPremiumModal = true
                                 viewModel.purchasePremium(purchaseHelper)
                             })
                             .fillMaxWidth(),

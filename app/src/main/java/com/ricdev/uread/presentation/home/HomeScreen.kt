@@ -245,9 +245,9 @@ fun HomeScreen(
                                 tween<IntOffset>(durationMillis = 300)
                             val tweenInAnimationSpec = tween<Float>(durationMillis = 300)
 
-                            if (books.itemCount == 0 && appPreferences.readingStatus.isNotEmpty()) {
-                                EmptyShelfContent("Library")
-                            }
+//                            if (books.itemCount == 0) {
+//                                EmptyShelfContent("Library")
+//                            }
                             if (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly) {
                                 AnimatedVisibility(
                                     visible = visible,

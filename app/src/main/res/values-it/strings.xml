@@ -193,5 +193,6 @@
     <string name="speed">Velocità</string>
     <string name="pitch_x">Tono: %1$s</string>
     <string name="speed_x">Velocità: %1$sx</string>
+    <string name="skip">Passa</string>
 
 </resources>

@@ -4,11 +4,11 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-09-30T15:29:55.259794949Z">
+        <DropdownSelection timestamp="2024-10-02T11:35:17.985901940Z">
           <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/home/ric/.android/avd/Pixel_8a_API_34_Android_14.avd" />
-            </handle>
+            <template>
+              <DeviceId pluginId="FirebaseDirectAccess" type="TEMPLATE" identifier="model_id=SH-01L/28" />
+            </template>
           </Target>
         </DropdownSelection>
         <DialogSelection />

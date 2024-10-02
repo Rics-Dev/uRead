@@ -58,5 +58,8 @@
 <!--            </intent-filter>-->
 <!--        </service>-->
 
+<!--        android:theme="@style/Theme.App.Starting">-->
+
+
     </application>
 </manifest>

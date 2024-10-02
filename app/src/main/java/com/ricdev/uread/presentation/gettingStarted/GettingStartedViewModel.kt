@@ -97,6 +97,14 @@ class GettingStartedViewModel @Inject constructor(
     fun updateEnabledButton(isEnabled: Boolean) {
         _isButtonsEnabled.value = isEnabled
     }
+
+
+
+    fun skipGettingStarted() {
+        viewModelScope.launch {
+            updateAppPreferences(appPreferences.value.copy(isFirstLaunch = false))
+        }
+    }
 }
 
 

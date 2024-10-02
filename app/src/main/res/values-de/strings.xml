@@ -193,5 +193,6 @@
     <string name="speed">Geschwindigkeit</string>
     <string name="pitch_x">Tonhöhe: %1$s</string>
     <string name="speed_x">Geschwindigkeit: %1$sx</string>
+    <string name="skip">Auslassen</string>
 
 </resources>

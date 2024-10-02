@@ -193,4 +193,5 @@
     <string name="speed">Speed</string>
     <string name="pitch_x">Pitch: %1$s</string>
     <string name="speed_x">Speed: %1$sx</string>
+    <string name="skip">Skip</string>
 </resources>
