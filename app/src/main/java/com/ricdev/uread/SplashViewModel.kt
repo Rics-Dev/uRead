@@ -25,17 +25,9 @@ class SplashViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
 
-//    private val _isLoading = MutableStateFlow(true)
-//    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-
     private val _appPreferences = MutableStateFlow(AppPreferencesUtil.defaultPreferences)
     val appPreferences: StateFlow<AppPreferences> = _appPreferences.asStateFlow()
 
-
-
-//    private val _startDestination = MutableStateFlow(Screens.GettingStartedScreen.route)
-//    val startDestination: StateFlow<String> = _startDestination.asStateFlow()
 
     private val _startDestination = MutableStateFlow<String?>(null)
     val startDestination: StateFlow<String?> = _startDestination.asStateFlow()
@@ -47,6 +39,7 @@ class SplashViewModel @Inject constructor(
             try {
                 val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
                 determineStartDestination(initialPreferences)
+
                 _appPreferences.value = initialPreferences
                 languageHelper.changeLanguage(getApplication(), initialPreferences.language)
             } catch (e: Exception) {

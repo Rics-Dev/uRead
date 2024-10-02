@@ -1,13 +1,6 @@
 package com.ricdev.uread.presentation.gettingStarted
 
 import android.app.Application
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.Settings
-import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ricdev.uread.data.model.AppPreferences
@@ -53,50 +46,7 @@ class GettingStartedViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun checkForPermission(onPermissionNeeded: () -> Unit) {
-        if (Environment.isExternalStorageManager()) {
-            updateAppPreferences(
-                _appPreferences.value.copy(
-                    isFirstLaunch = false,
-                )
-            )
-        } else {
-            onPermissionNeeded()
-        }
-    }
 
-
-    fun handleStoragePermissionResult(isGranted: Boolean) {
-        if (isGranted) {
-            updateAppPreferences(
-                _appPreferences.value.copy(
-                    isFirstLaunch = false,
-                )
-            )
-        } else {
-            _isButtonsEnabled.value = true
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun handleStoragePermissionResult(launcher: ActivityResultLauncher<Intent>) {
-        _isButtonsEnabled.value = false
-        try {
-            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                data = Uri.fromParts("package", getApplication<Application>().packageName, null)
-            }
-            launcher.launch(intent)
-        } catch (e: Exception) {
-            launcher.launch(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
-        }
-    }
-
-
-
-    fun updateEnabledButton(isEnabled: Boolean) {
-        _isButtonsEnabled.value = isEnabled
-    }
 
 
 
@@ -106,23 +56,3 @@ class GettingStartedViewModel @Inject constructor(
         }
     }
 }
-
-
-
-
-//    fun handleStoragePermissionResult(launcher: ActivityResultLauncher<Intent>, asked: Boolean) {
-//        if (asked) {
-//            _isButtonsEnabled.value = false
-//            try {
-//                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-//                val uri = Uri.fromParts("package", application.packageName, null)
-//                intent.data = uri
-//                launcher.launch(intent)
-//            } catch (e: Exception) {
-//                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-//                launcher.launch(intent)
-//            }
-//        } else {
-//            _isButtonsEnabled.value = true
-//        }
-//    }

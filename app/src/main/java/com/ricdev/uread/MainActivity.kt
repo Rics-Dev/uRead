@@ -32,10 +32,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.startDestination.value == null
         }
 
+        /* TODO */
         // Background initialization of MobileAds
-        CoroutineScope(Dispatchers.IO).launch {
-            MobileAds.initialize(this@MainActivity)
-        }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            MobileAds.initialize(this@MainActivity)
+//        }
 
         val purchaseHelper = PurchaseHelper(this)
         purchaseHelper.billingSetup()

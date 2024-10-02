@@ -150,7 +150,9 @@ fun GridLayout(
                                 )
                             }
                             if (shouldShowAd) {
-                                showInterstitialAd(navigateToBook)
+                                navigateToBook()
+                                /* TODO */
+//                                showInterstitialAd(navigateToBook)
                             } else {
                                 navigateToBook()
                             }
