@@ -28,6 +28,7 @@ import com.ricdev.uread.presentation.home.components.ListLayout
 
 @Composable
 fun BookShelfScreen(
+    clearSearch: () -> Unit,
     shelf: Shelf,
     books: LazyPagingItems<Book>,
     homeViewModel: HomeViewModel,
@@ -47,6 +48,7 @@ fun BookShelfScreen(
 
         appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly -> {
             GridLayout(
+                clearSearch =  { clearSearch() },
                 books = books,
                 navController = navController,
                 selectedBooks = selectedBooks,
@@ -61,6 +63,7 @@ fun BookShelfScreen(
 
         else -> {
             ListLayout(
+                clearSearch = { clearSearch() },
                 books = books,
                 navController = navController,
                 selectedBooks = selectedBooks,

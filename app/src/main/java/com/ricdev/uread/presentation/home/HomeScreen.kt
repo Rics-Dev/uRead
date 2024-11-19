@@ -27,7 +27,6 @@ import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
-import com.ricdev.uread.presentation.bookShelf.EmptyShelfContent
 import com.ricdev.uread.presentation.home.components.AddBookSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
 import com.ricdev.uread.presentation.home.components.CustomSearchBar
@@ -256,6 +255,7 @@ fun HomeScreen(
                                         initialOffsetY = { it })
                                 ) {
                                     GridLayout(
+                                        clearSearch = { viewModel.updateSearchQuery("") },
                                         books = books,
                                         navController = navController,
                                         selectedBooks = selectedBooks,
@@ -276,6 +276,7 @@ fun HomeScreen(
                                         initialOffsetY = { it })
                                 ) {
                                     ListLayout(
+                                        clearSearch = { viewModel.updateSearchQuery("") },
                                         books = books,
                                         navController = navController,
                                         selectedBooks = selectedBooks,
@@ -295,6 +296,7 @@ fun HomeScreen(
                             val shelf = shelves.getOrNull(index - 1)
                             if (shelf != null) {
                                 BookShelfScreen(
+                                    clearSearch = { viewModel.updateSearchQuery("") },
                                     shelf = shelf,
                                     books = books,
                                     homeViewModel = viewModel,

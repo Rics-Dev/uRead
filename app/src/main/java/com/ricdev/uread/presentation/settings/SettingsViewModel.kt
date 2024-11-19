@@ -90,7 +90,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updatePremiumStatus(isPremium: Boolean) {
+    private fun updatePremiumStatus(isPremium: Boolean) {
         viewModelScope.launch {
             val currentPreferences = appPreferences.value
             if (currentPreferences.isPremium != isPremium) {

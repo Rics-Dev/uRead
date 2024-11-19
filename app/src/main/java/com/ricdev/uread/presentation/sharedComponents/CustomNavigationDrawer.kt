@@ -116,21 +116,21 @@ fun CustomNavigationDrawer(
                 )
                 Spacer(Modifier.height(16.dp))
 
-                NavigationItem(
-                    icon = Icons.Outlined.Language,
-                    label = stringResource(R.string.online_books),
-                    isSelected = currentRoute == Screens.OnlineBooksScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.OnlineBooksScreen.route,
-                            scope
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
+                //NavigationItem(
+                //    icon = Icons.Outlined.Language,
+                //    label = stringResource(R.string.online_books),
+                //    isSelected = currentRoute == Screens.OnlineBooksScreen.route,
+                //    onClick = {
+                //        navigateIfNeeded(
+                //            navController,
+                //            currentRoute,
+                //            drawerState,
+                //            Screens.OnlineBooksScreen.route,
+                //            scope
+                //        )
+                //    }
+                //)
+                //Spacer(Modifier.height(16.dp))
 
 
                 NavigationItem(
@@ -138,7 +138,7 @@ fun CustomNavigationDrawer(
                     label = stringResource(R.string.statistics),
                     isSelected = currentRoute == Screens.StatisticsScreen.route,
                     onClick = {
-                        if (appPreferences.isPremium) {
+                        //if (appPreferences.isPremium) {
                             navigateIfNeeded(
                                 navController,
                                 currentRoute,
@@ -146,13 +146,13 @@ fun CustomNavigationDrawer(
                                 Screens.StatisticsScreen.route,
                                 scope
                             )
-                        } else {
-                            viewModel.purchasePremium(purchaseHelper)
+                        //} else {
+                          //  viewModel.purchasePremium(purchaseHelper)
 //                            showPremiumModal = true
 //                            scope.launch {
 //                                drawerState.close()
 //                            }
-                        }
+                        //}
                     }
                 )
                 Spacer(Modifier.height(16.dp))

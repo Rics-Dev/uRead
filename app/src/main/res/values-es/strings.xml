@@ -194,5 +194,6 @@
     <string name="pitch_x">Tono: %1$s</string>
     <string name="speed_x">Velocidad: %1$sx</string>
     <string name="skip">Omitir</string>
+    <string name="last_added">Último añadido</string>
 
 </resources>

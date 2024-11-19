@@ -4,11 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ricdev.uread.data.model.AnnotationType
+import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.BookAnnotation
 import com.ricdev.uread.data.model.Note
 import com.ricdev.uread.data.model.ReadingActivity
 import com.ricdev.uread.data.model.ReadingStatus
+import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import com.ricdev.uread.domain.model.Author
 import com.ricdev.uread.domain.model.Genre
 import com.ricdev.uread.domain.model.Statistics
@@ -16,11 +18,13 @@ import com.ricdev.uread.domain.use_case.annotations.GetAllAnnotationsUseCase
 import com.ricdev.uread.domain.use_case.books.GetAllBooksUseCase
 import com.ricdev.uread.domain.use_case.notes.GetAllNotesUseCase
 import com.ricdev.uread.domain.use_case.reading_activity.GetAllReadingActivitiesUseCase
+import com.ricdev.uread.util.PurchaseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -30,12 +34,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
+    private val appPreferencesUtil: AppPreferencesUtil,
     private val getAllBooksUseCase: GetAllBooksUseCase,
     private val getAllNotesUseCase: GetAllNotesUseCase,
     private val getAllAnnotationsUseCase: GetAllAnnotationsUseCase,
     private val getAllReadingActivitiesUseCase: GetAllReadingActivitiesUseCase,
     application: Application,
 ) : AndroidViewModel(application) {
+
+
+    private val _appPreferences = MutableStateFlow(AppPreferencesUtil.defaultPreferences)
+    val appPreferences: StateFlow<AppPreferences> = _appPreferences.asStateFlow()
 
     private val _statistics = MutableStateFlow(Statistics())
     val statistics: StateFlow<Statistics> = _statistics.asStateFlow()
@@ -58,7 +67,35 @@ class StatisticsViewModel @Inject constructor(
 
 
     init {
+        viewModelScope.launch {
+            val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
+            _appPreferences.value = initialPreferences
+
+            appPreferencesUtil.appPreferencesFlow.collect { preferences ->
+                _appPreferences.value = preferences
+            }
+        }
         loadStatistics()
+    }
+
+    fun purchasePremium(purchaseHelper: PurchaseHelper) {
+        purchaseHelper.makePurchase()
+        viewModelScope.launch {
+            purchaseHelper.isPremium.collect { isPremium ->
+                updatePremiumStatus(isPremium)
+            }
+        }
+    }
+
+    fun updatePremiumStatus(isPremium: Boolean) {
+        viewModelScope.launch {
+            val currentPreferences = appPreferences.value
+            if (currentPreferences.isPremium != isPremium) {
+                val updatedPreferences = currentPreferences.copy(isPremium = isPremium)
+                appPreferencesUtil.updateAppPreferences(updatedPreferences)
+                _appPreferences.value = updatedPreferences
+            }
+        }
     }
 
     private fun loadStatistics() {

@@ -199,10 +199,17 @@ class BookReaderViewModel @Inject constructor(
                 }
             }
         }
+        savedStateHandle.get<Long>("currentBookId")?.let {
+            _currentBookId.value = it
+        }
+        savedStateHandle.get<Locator>("initialLocator")?.let {
+            _initialLocator.value = it
+        }
     }
 
 
-    fun initializeTtsNavigator(
+
+    private fun initializeTtsNavigator(
         navigatorFragment: EpubNavigatorFragment?,
         context: Context,
     ) {

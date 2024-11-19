@@ -1128,7 +1128,8 @@ fun EpubReaderView(
                 fragment.removeDecorationListener(decorationListener)
                 fragmentActivity.supportFragmentManager.beginTransaction()
                     .remove(fragment)
-                    .commit()
+                    //.commit()
+                    .commitAllowingStateLoss()
             }
         }
     }

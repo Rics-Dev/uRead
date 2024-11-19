@@ -35,6 +35,7 @@ import kotlin.random.Random
 
 @Composable
 fun ListLayout(
+    clearSearch: () -> Unit,
     books: LazyPagingItems<Book>,
     navController: NavHostController,
     selectedBooks: List<Book>,
@@ -120,6 +121,7 @@ fun ListLayout(
                         if (selectionMode) {
                             toggleSelection(book)
                         } else if (!isBookOpen) {  // Only open a book if no book is currently open
+                            clearSearch()
                             val shouldShowAd =
                                 !appPreferences.isPremium && Random.nextFloat() < 0.25f // 25% chance to show ad
                             val navigateToBook = {

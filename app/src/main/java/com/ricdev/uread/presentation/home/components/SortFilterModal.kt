@@ -225,6 +225,15 @@ fun SortContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         SortListItem(
+            text = stringResource(R.string.last_added),
+            selected = appPreferences.sortBy == SortOption.LAST_ADDED,
+            onClick = {
+                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.LAST_ADDED))
+                viewModel.sortBooks(SortOption.LAST_ADDED, appPreferences.sortOrder)
+            }
+        )
+
+        SortListItem(
             text = stringResource(R.string.last_opened),
             selected = appPreferences.sortBy == SortOption.LAST_OPENED,
             onClick = {
@@ -232,6 +241,7 @@ fun SortContent(
                 viewModel.sortBooks(SortOption.LAST_OPENED, appPreferences.sortOrder)
             }
         )
+
 
         SortListItem(
             text = stringResource(R.string.title),

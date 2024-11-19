@@ -1,13 +1,11 @@
 package com.ricdev.uread.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.presentation.annotations.AnnotationsScreen
 import com.ricdev.uread.presentation.audioBookReader.AudiobookReaderScreen
 import com.ricdev.uread.presentation.bookDetails.BookDetailsScreen
@@ -15,7 +13,7 @@ import com.ricdev.uread.presentation.bookReader.BookReaderScreen
 import com.ricdev.uread.presentation.gettingStarted.GettingStartedScreen
 import com.ricdev.uread.presentation.home.HomeScreen
 import com.ricdev.uread.presentation.notes.NotesScreen
-import com.ricdev.uread.presentation.onlineBooks.OnlineBooksScreen
+//import com.ricdev.uread.presentation.onlineBooks.OnlineBooksScreen
 import com.ricdev.uread.presentation.onlineBooks.WebViewScreen
 import com.ricdev.uread.presentation.pdfReader.PdfReaderScreen
 import com.ricdev.uread.presentation.settings.SettingsScreen
@@ -117,19 +115,19 @@ fun SetupNavGraph(
         ) {
             StatisticsScreen(navController, purchaseHelper)
         }
-        composable(
-            route = Screens.OnlineBooksScreen.route,
-        ) {
-            OnlineBooksScreen(navController, purchaseHelper)
-        }
-        composable(
-            route = "webview/{url}",
-            arguments = listOf(navArgument("url") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val encodedUrl = backStackEntry.arguments?.getString("url") ?: ""
-            val decodedUrl = URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString())
-            WebViewScreen(navController = navController, url = decodedUrl)
-        }
+        //composable(
+        //    route = Screens.OnlineBooksScreen.route,
+        //) {
+        //    OnlineBooksScreen(navController, purchaseHelper)
+        //}
+        //composable(
+        //    route = "webview/{url}",
+        //    arguments = listOf(navArgument("url") { type = NavType.StringType })
+        //) { backStackEntry ->
+        //    val encodedUrl = backStackEntry.arguments?.getString("url") ?: ""
+        //    val decodedUrl = URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString())
+        //    WebViewScreen(navController = navController, url = decodedUrl)
+        //}
     }
 
 

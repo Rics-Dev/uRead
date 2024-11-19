@@ -40,6 +40,7 @@ enum class SortOption {
     TITLE,
     AUTHOR,
     LAST_OPENED,
+    LAST_ADDED,
     RATING,
     PROGRESSION,
 }

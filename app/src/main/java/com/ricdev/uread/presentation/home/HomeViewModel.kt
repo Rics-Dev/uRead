@@ -199,7 +199,7 @@ class HomeViewModel
     }
 
 
-    fun updateCurrentTabRow(tab: Int){
+    fun updateCurrentTabRow(tab: Int) {
         _selectedTabRow.value = tab
     }
 
@@ -233,46 +233,50 @@ class HomeViewModel
 
     private fun observeBooks(preferences: AppPreferences) {
         viewModelScope.launch {
-            val existingUris = getBookUrisUseCase()
-            val newBooks: List<DocumentFile>
-            val currentUris: Set<String>
-
-            val documentFiles = preferences.scanDirectories.flatMap { directoryPath ->
-                val uri = Uri.parse(directoryPath)
-                getBooksFromDirectory(context, uri)
-            }
-
-            newBooks = documentFiles.distinctBy { it.uri.toString() }.filter { documentFile ->
-                val bookUriString = documentFile.uri.toString()
-                bookUriString !in existingUris
-            }
-
-            currentUris = documentFiles.map { it.uri.toString() }.toSet()
-
-
-            val deletedUris = existingUris.filter { it !in currentUris }
-
-            // Add new books
-            if (newBooks.isNotEmpty()) {
-                _isAddingBooks.value = true
-                showSnackbar("Adding new books to library, please wait.", true)
-                newBooks.forEach { documentFile ->
-                    addNewBook(documentFile)
+            try {
+                val existingUris = getBookUrisUseCase()
+                val documentFiles = preferences.scanDirectories.flatMap { directoryPath ->
+                    val uri = Uri.parse(directoryPath)
+                    getBooksFromDirectory(context, uri)
                 }
-                showSnackbar("Added ${newBooks.size} book(s)", false)
-                _isAddingBooks.value = false
-            }
 
-            // Remove deleted books
-            if (deletedUris.isNotEmpty()) {
-                showSnackbar("Removing books from library, please wait.", true)
-                deletedUris.forEach { bookUri ->
-                    deleteBookByUriUseCase(bookUri)
+                val newBooks = documentFiles.distinctBy { it.uri.toString() }.filter { documentFile ->
+                    val bookUriString = documentFile.uri.toString()
+                    bookUriString !in existingUris
                 }
-                showSnackbar("Removed ${deletedUris.size} book(s)", false)
-            }
 
-            loadBooks(appPreferences.value)
+                val currentUris = documentFiles.map { it.uri.toString() }.toSet()
+                val deletedUris = existingUris.filter { it !in currentUris }
+
+                // Add new books
+                if (newBooks.isNotEmpty()) {
+                    _isAddingBooks.value = true
+                    showSnackbar("Adding new books to library, please wait.", true)
+                    newBooks.chunked(10).forEach { chunk ->
+                        chunk.forEach { documentFile ->
+                            if (documentFile.uri.toString() !in existingUris) {
+                                addNewBook(documentFile)
+                            }
+                        }
+                    }
+                    showSnackbar("Added ${newBooks.size} book(s)", false)
+                    _isAddingBooks.value = false
+                }
+
+                // Remove deleted books
+                if (deletedUris.isNotEmpty()) {
+                    showSnackbar("Removing books from library, please wait.", true)
+                    deletedUris.forEach { bookUri ->
+                        deleteBookByUriUseCase(bookUri)
+                    }
+                    showSnackbar("Removed ${deletedUris.size} book(s)", false)
+                }
+
+                loadBooks(appPreferences.value)
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error observing books: ${e.message}")
+                showSnackbar("Error updating library: ${e.message}", false)
+            }
         }
     }
 
@@ -790,9 +794,6 @@ class HomeViewModel
             }
         }
     }
-
-
-
 
 
     fun purchasePremium(purchaseHelper: PurchaseHelper) {

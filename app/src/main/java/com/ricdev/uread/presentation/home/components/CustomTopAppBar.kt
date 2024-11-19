@@ -281,7 +281,6 @@ fun CustomTopAppBar(
 
 
 
-// Create a new file called SearchBar.kt in the same package
 @Composable
 fun CustomSearchBar(
     query: String,

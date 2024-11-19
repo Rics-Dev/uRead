@@ -28,6 +28,8 @@ interface BookDao {
         ORDER BY 
         CASE WHEN :sortBy = 'last_opened' AND :isAsc = 1 THEN lastOpened END ASC, 
         CASE WHEN :sortBy = 'last_opened' AND :isAsc = 0 THEN lastOpened END DESC, 
+        CASE WHEN :sortBy = 'last_added' AND :isAsc = 1 THEN id END ASC, 
+        CASE WHEN :sortBy = 'last_added' AND :isAsc = 0 THEN id END DESC, 
         CASE WHEN :sortBy = 'title' AND :isAsc = 1 THEN title END ASC, 
         CASE WHEN :sortBy = 'title' AND :isAsc = 0 THEN title END DESC, 
         CASE WHEN :sortBy = 'author' AND :isAsc = 1 THEN authors END ASC, 

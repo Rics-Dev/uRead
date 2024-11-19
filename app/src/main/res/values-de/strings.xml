@@ -194,5 +194,6 @@
     <string name="pitch_x">Tonhöhe: %1$s</string>
     <string name="speed_x">Geschwindigkeit: %1$sx</string>
     <string name="skip">Auslassen</string>
+    <string name="last_added">Zuletzt hinzugefügt</string>
 
 </resources>

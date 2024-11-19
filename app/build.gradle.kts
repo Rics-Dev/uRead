@@ -27,7 +27,7 @@ val apikeyProperties = Properties().apply {
 
 android {
     namespace = "com.ricdev.uread"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.ricdev.uread"
@@ -59,6 +59,7 @@ android {
         buildConfigField("String", "PRODUCT_ID", apikeyProperties["PRODUCT_ID"] as String)
 
     }
+
 
 
     buildTypes {
