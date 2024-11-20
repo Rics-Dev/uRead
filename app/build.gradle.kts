@@ -34,7 +34,7 @@ android {
         minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 34
-        versionCode = 1
+        versionCode = 4
         versionName = "1.0.1"
         multiDexEnabled = true
 
@@ -57,7 +57,7 @@ android {
         buildConfigField("String", "OPEN_BOOK_LIST_AD_UNIT", apikeyProperties["OPEN_BOOK_LIST_AD_UNIT"] as String)
         buildConfigField("String", "READER_SCREEN_AD_UNIT", apikeyProperties["READER_SCREEN_AD_UNIT"] as String)
         buildConfigField("String", "PRODUCT_ID", apikeyProperties["PRODUCT_ID"] as String)
-
+//        buildConfigField("String", "BASE_64_ENCODED_PUBLIC_KEY", apikeyProperties["BASE_64_ENCODED_PUBLIC_KEY"] as String)
     }
 
 
@@ -69,7 +69,7 @@ android {
             buildConfigField("String", "OPEN_BOOK_LIST_AD_UNIT", apikeyProperties["OPEN_BOOK_LIST_AD_UNIT"] as String)
             buildConfigField("String", "READER_SCREEN_AD_UNIT", apikeyProperties["READER_SCREEN_AD_UNIT"] as String)
             buildConfigField("String", "PRODUCT_ID", apikeyProperties["PRODUCT_ID"] as String)
-
+//            buildConfigField("String", "BASE_64_ENCODED_PUBLIC_KEY", apikeyProperties["BASE_64_ENCODED_PUBLIC_KEY"] as String)
 
             isMinifyEnabled = true
             isShrinkResources = true

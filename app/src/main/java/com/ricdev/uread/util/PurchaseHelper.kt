@@ -1,6 +1,8 @@
 package com.ricdev.uread.util
 
 import android.app.Activity
+import android.util.Base64
+import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
@@ -16,6 +18,10 @@ import com.ricdev.uread.BuildConfig
 import com.ricdev.uread.MainActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 
 data class PurchaseHelper(val activity: Activity) {
 
@@ -24,21 +30,48 @@ data class PurchaseHelper(val activity: Activity) {
     private lateinit var purchase: Purchase
 
     private val productId = BuildConfig.PRODUCT_ID
+//    private val base64Key = BuildConfig.BASE_64_ENCODED_PUBLIC_KEY
 
     private val _productName = MutableStateFlow("Searching...")
-//    val productName = _productName.asStateFlow()
-
     private val _buyEnabled = MutableStateFlow(false)
-//    val buyEnabled = _buyEnabled.asStateFlow()
-
     private val _isPremium = MutableStateFlow(false)
     val isPremium = _isPremium.asStateFlow()
-
-
     private val _statusText = MutableStateFlow("Initializing...")
-//    val statusText = _statusText.asStateFlow()
 
-
+//    private object Security {
+//        fun verifyPurchase(base64PublicKey: String, signedData: String, signature: String): Boolean {
+//            if (signedData.isEmpty() || base64PublicKey.isEmpty() || signature.isEmpty()) {
+//                return false
+//            }
+//            try {
+//                val key = generatePublicKey(base64PublicKey)
+//                return verify(key, signedData, signature)
+//            } catch (e: Exception) {
+//                return false
+//            }
+//        }
+//
+//        private fun generatePublicKey(encodedPublicKey: String): PublicKey {
+//            try {
+//                val decodedKey = Base64.decode(encodedPublicKey, Base64.DEFAULT)
+//                val keyFactory = KeyFactory.getInstance("RSA")
+//                return keyFactory.generatePublic(X509EncodedKeySpec(decodedKey))
+//            } catch (e: Exception) {
+//                throw RuntimeException("Error generating public key", e)
+//            }
+//        }
+//
+//        private fun verify(publicKey: PublicKey, signedData: String, signature: String): Boolean {
+//            try {
+//                val sig = Signature.getInstance("SHA1withRSA")
+//                sig.initVerify(publicKey)
+//                sig.update(signedData.toByteArray())
+//                return sig.verify(Base64.decode(signature, Base64.DEFAULT))
+//            } catch (e: Exception) {
+//                return false
+//            }
+//        }
+//    }
 
 
     fun billingSetup() {
@@ -107,12 +140,25 @@ data class PurchaseHelper(val activity: Activity) {
     private fun completePurchase(item: Purchase) {
         purchase = item
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            // Unlock the premium features
             _isPremium.value = true
             _buyEnabled.value = false
             _statusText.value = "Purchase Completed"
+
+            // Acknowledge the purchase
+            val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                .setPurchaseToken(purchase.purchaseToken)
+                .build()
+
+            billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    _statusText.value = "Purchase acknowledged"
+                } else {
+                    _statusText.value = "Failed to acknowledge purchase: ${billingResult.debugMessage}"
+                }
+            }
         }
     }
-
 
 
 
