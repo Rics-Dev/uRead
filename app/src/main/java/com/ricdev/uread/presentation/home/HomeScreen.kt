@@ -54,16 +54,19 @@ fun HomeScreen(
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
     val shelves by viewModel.shelves.collectAsStateWithLifecycle()
     val isAddingBooks by viewModel.isAddingBooks.collectAsStateWithLifecycle()
-    val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val booksInShelf by viewModel.booksInShelfSet.collectAsStateWithLifecycle()
     val books = viewModel.books.collectAsLazyPagingItems()
+
+
+    val importProgress by viewModel.importProgressState.collectAsStateWithLifecycle()
+    val snackbarState by viewModel.snackbarState.collectAsStateWithLifecycle()
+
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val selectedTabRow by viewModel.selectedTabRow.collectAsStateWithLifecycle()
 
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
 
@@ -109,16 +112,6 @@ fun HomeScreen(
             selectedTab = pagerState.currentPage
             selectionMode = false
             selectedBooks = emptyList()
-        }
-    }
-
-    LaunchedEffect(snackbarMessage) {
-        snackbarMessage?.let {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar(
-                    message = it,
-                )
-            }
         }
     }
 
@@ -201,8 +194,9 @@ fun HomeScreen(
             },
             snackbarHost = {
                 AddBookSnackbar(
-                    snackbarHostState = snackbarHostState,
-                    isAddingBooks = isAddingBooks,
+                    snackbarState = snackbarState,
+                    importProgressState = importProgress,
+                    onDismiss = { viewModel.hideSnackbar() }
                 )
             },
         ) { innerPadding ->

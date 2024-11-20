@@ -36,10 +36,13 @@ import com.ricdev.uread.domain.use_case.shelves.GetBooksForShelfUseCase
 import com.ricdev.uread.domain.use_case.shelves.GetShelvesUseCase
 import com.ricdev.uread.domain.use_case.shelves.RemoveBooksFromShelfUseCase
 import com.ricdev.uread.domain.use_case.shelves.RemoveShelfUseCase
+import com.ricdev.uread.presentation.home.states.ImportProgressState
+import com.ricdev.uread.presentation.home.states.SnackbarState
 import com.ricdev.uread.util.PurchaseHelper
 import com.ricdev.uread.util.event.AppEvent
 import com.ricdev.uread.util.event.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -95,9 +98,6 @@ class HomeViewModel
     private val _appPreferences = MutableStateFlow(AppPreferencesUtil.defaultPreferences)
     val appPreferences: StateFlow<AppPreferences> = _appPreferences.asStateFlow()
 
-    private val _snackbarMessage = MutableStateFlow<String?>(null)
-    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
-
 
     private val _isAddingBooks = MutableStateFlow(false)
     val isAddingBooks: StateFlow<Boolean> = _isAddingBooks.asStateFlow()
@@ -119,8 +119,22 @@ class HomeViewModel
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
 
-    private val snackbarDisplayDuration = 2000L
     private var refreshJob: Job? = null
+
+    private val _importProgressState = MutableStateFlow<ImportProgressState>(ImportProgressState.Idle)
+    val importProgressState: StateFlow<ImportProgressState> = _importProgressState.asStateFlow()
+
+    private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Hidden)
+    val snackbarState: StateFlow<SnackbarState> = _snackbarState.asStateFlow()
+
+    private var snackbarJob: Job? = null
+
+
+
+
+
+
+
 
 
     init {
@@ -232,54 +246,127 @@ class HomeViewModel
     }
 
     private fun observeBooks(preferences: AppPreferences) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+            _importProgressState.value =
+                ImportProgressState.Error(throwable.message ?: "Unknown error occurred")
+            _isAddingBooks.value = false
+            showSnackbar(
+                message = "Error during import: ${throwable.message}",
+                actionLabel = "Retry",
+                onActionClick = { observeBooks(preferences) }
+            )
+        }) {
             try {
+
                 val existingUris = getBookUrisUseCase()
-                val documentFiles = preferences.scanDirectories.flatMap { directoryPath ->
+
+
+                val documentFiles = mutableListOf<DocumentFile>()
+                preferences.scanDirectories.forEach { directoryPath ->
                     val uri = Uri.parse(directoryPath)
-                    getBooksFromDirectory(context, uri)
+                    val filesInDirectory = getBooksFromDirectory(context, uri)
+                    documentFiles.addAll(filesInDirectory)
                 }
 
-                val newBooks = documentFiles.distinctBy { it.uri.toString() }.filter { documentFile ->
+                val uniqueFiles = documentFiles.distinctBy { it.uri.toString() }
+
+
+                val newBooks = uniqueFiles.filter { documentFile ->
                     val bookUriString = documentFile.uri.toString()
-                    bookUriString !in existingUris
+                    !existingUris.contains(bookUriString)
                 }
 
-                val currentUris = documentFiles.map { it.uri.toString() }.toSet()
+                val currentUris = uniqueFiles.map { it.uri.toString() }.toSet()
                 val deletedUris = existingUris.filter { it !in currentUris }
 
-                // Add new books
+
                 if (newBooks.isNotEmpty()) {
                     _isAddingBooks.value = true
-                    showSnackbar("Adding new books to library, please wait.", true)
-                    newBooks.chunked(10).forEach { chunk ->
-                        chunk.forEach { documentFile ->
-                            if (documentFile.uri.toString() !in existingUris) {
-                                addNewBook(documentFile)
+                    _importProgressState.value = ImportProgressState.InProgress(0, newBooks.size)
+                    showSnackbar(
+                        message = "Adding new books to library",
+                        isIndefinite = true,
+                        showProgress = true
+                    )
+
+                    // Process books in smaller batches
+                    newBooks.chunked(5).forEachIndexed { batchIndex, batch ->
+                        // Add delay between batches to prevent overwhelming the system
+                        if (batchIndex > 0) delay(100)
+
+                        batch.forEachIndexed { index, documentFile ->
+                            try {
+                                val totalProcessed = (batchIndex * 5) + index + 1
+                                _importProgressState.value =
+                                    ImportProgressState.InProgress(totalProcessed, newBooks.size)
+
+
+                                // Update snackbar with progress
+                                showSnackbar(
+                                    message = "Adding books: $totalProcessed/${newBooks.size}",
+                                    isIndefinite = true,
+                                    showProgress = true
+                                )
+
+
+                                // Check if book already exists before adding
+                                val bookUriString = documentFile.uri.toString()
+                                if (!getBookUrisUseCase().contains(bookUriString)) {
+                                    addNewBook(documentFile)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("HomeViewModel", "Error adding book: ${documentFile.name}", e)
+                                // Continue with next book instead of stopping the whole process
                             }
                         }
                     }
-                    showSnackbar("Added ${newBooks.size} book(s)", false)
+
+                    _importProgressState.value = ImportProgressState.Complete
+                    showSnackbar(
+                        message = "Added ${newBooks.size} book(s)",
+                        isIndefinite = false
+                    )
                     _isAddingBooks.value = false
                 }
 
-                // Remove deleted books
+                // Handle deleted books in batches
                 if (deletedUris.isNotEmpty()) {
-                    showSnackbar("Removing books from library, please wait.", true)
-                    deletedUris.forEach { bookUri ->
-                        deleteBookByUriUseCase(bookUri)
+                    showSnackbar(
+                        message = "Removing ${deletedUris.size} books",
+                        isIndefinite = true,
+                        showProgress = true
+                    )
+                    deletedUris.chunked(10).forEach { batch ->
+                        batch.forEach { bookUri ->
+                            try {
+                                deleteBookByUriUseCase(bookUri)
+                            } catch (e: Exception) {
+                                Log.e("HomeViewModel", "Error deleting book: $bookUri", e)
+                            }
+                        }
+                        // Add small delay between batches
+                        delay(50)
                     }
-                    showSnackbar("Removed ${deletedUris.size} book(s)", false)
+                    showSnackbar(
+                        message = "Removed ${deletedUris.size} book(s)",
+                        isIndefinite = false
+                    )
                 }
 
                 loadBooks(appPreferences.value)
             } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error observing books: ${e.message}")
-                showSnackbar("Error updating library: ${e.message}", false)
+                _importProgressState.value = ImportProgressState.Error(e.message ?: "Unknown error occurred")
+                Log.e("HomeViewModel", "Error observing books", e)
+                showSnackbar(
+                    message = "Error updating library: ${e.message}",
+                    actionLabel = "Retry",
+                    onActionClick = { observeBooks(preferences) }
+                )
+            } finally {
+                _isAddingBooks.value = false
             }
         }
     }
-
 
     fun updateAppPreferences(newPreferences: AppPreferences) {
         viewModelScope.launch {
@@ -418,38 +505,122 @@ class HomeViewModel
     }
 
 
+//    private suspend fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
+//        return withContext(Dispatchers.IO) {
+//            val documentFile = DocumentFile.fromTreeUri(context, uri)
+//            documentFile?.let { scanDirectory(it) } ?: emptyList()
+//        }
+//    }
+
+
     private suspend fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
         return withContext(Dispatchers.IO) {
-            val documentFile = DocumentFile.fromTreeUri(context, uri)
-            documentFile?.let { scanDirectory(it) } ?: emptyList()
-        }
-    }
-
-    private fun scanDirectory(directory: DocumentFile): List<DocumentFile> {
-        val allowedExtensions = listOf("epub", "pdf", "mp3", "m4a", "m4b", "aac").let {
-            if (_appPreferences.value.enablePdfSupport) it else it - "pdf"
-        }
-
-        return directory.listFiles().filter { file ->
-            when {
-                file.isDirectory -> file.name?.let { !it.startsWith(".") } ?: false
-                file.isFile -> file.name?.let { name ->
-                    name.substringAfterLast('.', "").lowercase() in allowedExtensions
-                } ?: false
-
-                else -> false
+            try {
+                val documentFile = DocumentFile.fromTreeUri(context, uri)
+                documentFile?.let { scanDirectory(it) } ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error scanning directory: $uri", e)
+                emptyList()
             }
-        }.flatMap { file ->
-            if (file.isDirectory) scanDirectory(file) else listOf(file)
         }
     }
+
+
+    //    private fun scanDirectory(directory: DocumentFile): List<DocumentFile> {
+//        val allowedExtensions = listOf("epub", "pdf", "mp3", "m4a", "m4b", "aac").let {
+//            if (_appPreferences.value.enablePdfSupport) it else it - "pdf"
+//        }
+//
+//        return directory.listFiles().filter { file ->
+//            when {
+//                file.isDirectory -> file.name?.let { !it.startsWith(".") } ?: false
+//                file.isFile -> file.name?.let { name ->
+//                    name.substringAfterLast('.', "").lowercase() in allowedExtensions
+//                } ?: false
+//
+//                else -> false
+//            }
+//        }.flatMap { file ->
+//            if (file.isDirectory) scanDirectory(file) else listOf(file)
+//        }
+//    }
+    private fun scanDirectory(directory: DocumentFile): List<DocumentFile> {
+        return try {
+            val allowedExtensions = listOf("epub", "pdf", "mp3", "m4a", "m4b", "aac").let {
+                if (_appPreferences.value.enablePdfSupport) it else it - "pdf"
+            }
+
+            directory.listFiles().filter { file ->
+                when {
+                    file.isDirectory -> file.name?.let { !it.startsWith(".") } ?: false
+                    file.isFile -> file.name?.let { name ->
+                        name.substringAfterLast('.', "").lowercase() in allowedExtensions
+                    } ?: false
+
+                    else -> false
+                }
+            }.flatMap { file ->
+                if (file.isDirectory) scanDirectory(file) else listOf(file)
+            }
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "Error scanning directory: ${directory.name}", e)
+            emptyList()
+        }
+    }
+
+//    private suspend fun addNewBook(documentFile: DocumentFile) {
+//        withContext(Dispatchers.IO) {
+//            try {
+//                val bookUriString = documentFile.uri.toString()
+//                if (!getBookUrisUseCase().contains(bookUriString)) {
+//                    val book = getBookInfo(documentFile)
+//                    insertBookUseCase(book)
+//                } else {
+//                    Log.d("HomeViewModel", "Book already exists: ${documentFile.name}")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("HomeViewModel", "Error adding book: ${documentFile.name}, ${e.message}")
+//            }
+//        }
+//    }
 
 
     private suspend fun addNewBook(documentFile: DocumentFile) {
-        val book = getBookInfo(documentFile)
-        insertBookUseCase(book)
+        withContext(Dispatchers.IO) {
+            try {
+                val bookUriString = documentFile.uri.toString()
+                if (!getBookUrisUseCase().contains(bookUriString)) {
+                    val book = getBookInfo(documentFile)
+                    // Add retry mechanism for database operations
+                    retry(attempts = 3) {
+                        insertBookUseCase(book)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error adding book: ${documentFile.name}", e)
+                throw e
+            }
+        }
     }
 
+    private suspend fun <T> retry(
+        attempts: Int,
+        delayBetweenAttempts: Long = 1000L,
+        block: suspend () -> T
+    ): T {
+        var lastException: Exception? = null
+        repeat(attempts) { attempt ->
+            try {
+                return block()
+            } catch (e: Exception) {
+                lastException = e
+                if (attempt < attempts - 1) {
+                    delay(delayBetweenAttempts)
+                }
+            }
+        }
+        throw lastException ?: IllegalStateException("Retry failed")
+    }
 
     private suspend fun getBookInfo(documentFile: DocumentFile): Book =
         withContext(Dispatchers.IO) {
@@ -727,17 +898,6 @@ class HomeViewModel
     }
 
 
-    private fun showSnackbar(message: String, indefinite: Boolean = false) {
-        viewModelScope.launch {
-            _snackbarMessage.value = message
-            if (!indefinite) {
-                delay(snackbarDisplayDuration)
-                _snackbarMessage.value = null
-            }
-        }
-    }
-
-
     fun sortBooks(sortOption: SortOption, sortOrder: SortOrder) {
         viewModelScope.launch {
             val isAscending = sortOrder == SortOrder.ASCENDING
@@ -816,5 +976,33 @@ class HomeViewModel
         }
     }
 
+    private fun showSnackbar(
+        message: String,
+        isIndefinite: Boolean = false,
+        showProgress: Boolean = false,
+        actionLabel: String? = null,
+        onActionClick: (() -> Unit)? = null
+    ) {
+        snackbarJob?.cancel()
+        snackbarJob = viewModelScope.launch {
+            _snackbarState.value = SnackbarState.Visible(
+                message = message,
+                isIndefinite = isIndefinite,
+                showProgress = showProgress,
+                actionLabel = actionLabel,
+                onActionClick = onActionClick
+            )
+
+            if (!isIndefinite) {
+                delay(3000)
+                hideSnackbar()
+            }
+        }
+    }
+
+    fun hideSnackbar() {
+        snackbarJob?.cancel()
+        _snackbarState.value = SnackbarState.Hidden
+    }
 
 }
