@@ -139,23 +139,31 @@ data class PurchaseHelper(val activity: Activity) {
 
     private fun completePurchase(item: Purchase) {
         purchase = item
-        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            // Unlock the premium features
-            _isPremium.value = true
-            _buyEnabled.value = false
-            _statusText.value = "Purchase Completed"
+        when (purchase.purchaseState) {
+            Purchase.PurchaseState.PURCHASED -> {
+                // Unlock premium features
+                _isPremium.value = true
+                _buyEnabled.value = false
+                _statusText.value = "Purchase Completed"
 
-            // Acknowledge the purchase
-            val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-                .setPurchaseToken(purchase.purchaseToken)
-                .build()
+                // Acknowledge the purchase
+                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
 
-            billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _statusText.value = "Purchase acknowledged"
-                } else {
-                    _statusText.value = "Failed to acknowledge purchase: ${billingResult.debugMessage}"
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
+                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                        _statusText.value = "Purchase acknowledged"
+                    } else {
+                        _statusText.value = "Failed to acknowledge purchase: ${billingResult.debugMessage}"
+                    }
                 }
+            }
+            Purchase.PurchaseState.PENDING -> {
+                _statusText.value = "Purchase is pending. Complete the transaction to unlock premium features."
+            }
+            else -> {
+                _statusText.value = "Purchase not completed."
             }
         }
     }
@@ -188,6 +196,11 @@ data class PurchaseHelper(val activity: Activity) {
 
         billingClient.queryPurchasesAsync(queryPurchasesParams) { billingResult, purchases ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                purchases.forEach { purchase ->
+                    if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+                        completePurchase(purchase)
+                    }
+                }
                 val isPremium = purchases.any { purchase ->
                     purchase.products.contains(productId) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                 }
@@ -197,9 +210,8 @@ data class PurchaseHelper(val activity: Activity) {
 
                 // Notify the ViewModel of the updated status
                 (activity as? MainActivity)?.viewModel?.updatePremiumStatus(isPremium)
-//                (activity as? MainActivity)?.viewModel?.updatePremiumStatus(true)
             } else {
-                _statusText.value = "Failed to query purchases"
+                _statusText.value = "Failed to query purchases: ${billingResult.debugMessage}"
             }
         }
     }
