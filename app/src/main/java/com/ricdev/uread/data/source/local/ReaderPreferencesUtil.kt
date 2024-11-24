@@ -59,7 +59,7 @@ class ReaderPreferencesUtil @Inject constructor(
             backgroundColor = Color.White,
             textColor = Color.Black,
             colorHistory = emptyList(),
-            tapNavigation = true,
+            tapNavigation = false,
             scroll = false,
             readingProgression = ReadingProgression.LTR,
             verticalText = false,

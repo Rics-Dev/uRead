@@ -39,6 +39,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -64,10 +66,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.markdown.m3.Markdown
 import com.ricdev.uread.R
+import com.ricdev.uread.presentation.settings.viewmodels.AboutViewModel
 import com.ricdev.uread.util.customMarkdownTypography
 import com.ricdev.uread.util.getAppVersion
 import java.io.IOException
@@ -77,7 +82,20 @@ import java.io.IOException
 @Composable
 fun AboutAppScreen(
     navController: NavController,
+    viewModel: AboutViewModel = hiltViewModel()
 ) {
+
+
+    val isDarkTheme = viewModel.isDarkTheme.collectAsStateWithLifecycle()
+
+    val elevationOverlay = if (isDarkTheme.value == true) {
+        Color.White.copy(alpha = 0.09f)
+            .compositeOver(MaterialTheme.colorScheme.surface)
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+
 
 
     val context = LocalContext.current
@@ -175,75 +193,120 @@ fun AboutAppScreen(
             HorizontalDivider()
 
             Spacer(modifier = Modifier.height(16.dp))
+
+
+
+
             ListItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(16.dp),
-                        clip = true
+                        spotColor = if (!isDarkTheme.value!!) {
+                            Color.Black.copy(alpha = 0.8f)
+                        } else {
+                            Color.Black.copy(alpha = 0.5f)
+                        }
                     )
                     .clip(RoundedCornerShape(16.dp))
+                    .background(elevationOverlay)
                     .clickable(onClick = {
                         showVersionDialog = true
                     })
                     .fillMaxWidth(),
-                headlineContent = { Text(text = stringResource(R.string.version)) },
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.version),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.Outlined.Info,
                         contentDescription = "Rating",
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                )
             )
-            ListItem(
 
+
+            ListItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(16.dp),
-                        clip = true
+                        spotColor = if (!isDarkTheme.value!!) {
+                            Color.Black.copy(alpha = 0.8f)
+                        } else {
+                            Color.Black.copy(alpha = 0.5f)
+                        }
                     )
                     .clip(RoundedCornerShape(16.dp))
+                    .background(elevationOverlay)
                     .clickable(onClick = {
                         showWhatsNewModal = true
                     })
                     .fillMaxWidth(),
-                headlineContent = { Text(text = stringResource(R.string.what_s_new)) },
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.what_s_new),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.Outlined.Update,
                         contentDescription = "What's new",
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                )
             )
 
             ListItem(
-
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(16.dp),
-                        clip = true
+                        spotColor = if (!isDarkTheme.value!!) {
+                            Color.Black.copy(alpha = 0.8f)
+                        } else {
+                            Color.Black.copy(alpha = 0.5f)
+                        }
                     )
                     .clip(RoundedCornerShape(16.dp))
+                    .background(elevationOverlay)
                     .clickable(onClick = {
                         showPrivacyPolicyModal = true
                     })
                     .fillMaxWidth(),
-                headlineContent = { Text(text = stringResource(R.string.privacy_policy)) },
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.privacy_policy),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.Outlined.PrivacyTip,
                         contentDescription = "Rating",
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                )
             )
+
+
 
             ListItem(
                 modifier = Modifier
@@ -251,33 +314,51 @@ fun AboutAppScreen(
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(16.dp),
-                        clip = true
+                        spotColor = if (!isDarkTheme.value!!) {
+                            Color.Black.copy(alpha = 0.8f)
+                        } else {
+                            Color.Black.copy(alpha = 0.5f)
+                        }
                     )
                     .clip(RoundedCornerShape(16.dp))
+                    .background(elevationOverlay)
                     .clickable(onClick = {
                         showLibrariesModal = true
                     })
                     .fillMaxWidth(),
-                headlineContent = { Text(text = stringResource(R.string.libraries)) },
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.libraries),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.Outlined.Book,
                         contentDescription = "Libraries",
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                )
             )
 
-            // Feature request
+
             ListItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(16.dp),
-                        clip = true
+                        spotColor = if (!isDarkTheme.value!!) {
+                            Color.Black.copy(alpha = 0.8f)
+                        } else {
+                            Color.Black.copy(alpha = 0.5f)
+                        }
                     )
                     .clip(RoundedCornerShape(16.dp))
+                    .background(elevationOverlay)
                     .clickable(onClick = {
                         try {
                             val intent = Intent(
@@ -292,14 +373,22 @@ fun AboutAppScreen(
                         }
                     })
                     .fillMaxWidth(),
-                headlineContent = { Text(text = stringResource(R.string.feature_request)) },
+                headlineContent = {
+                    Text(
+                        text = stringResource(R.string.feature_request),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.AutoMirrored.Outlined.Send,
                         contentDescription = "Feature Request",
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))

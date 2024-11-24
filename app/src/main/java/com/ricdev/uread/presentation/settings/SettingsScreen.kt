@@ -4,7 +4,9 @@ package com.ricdev.uread.presentation.settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +28,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,6 +55,7 @@ import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.play.core.review.model.ReviewErrorCode
 import com.ricdev.uread.R
+import com.ricdev.uread.data.model.AppTheme
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 //import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.PurchaseHelper
@@ -69,10 +76,23 @@ fun SettingsScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-//    var showPremiumModal by remember { mutableStateOf(false) }
-
 
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
+
+    val isDarkTheme = when (appPreferences.appTheme) {
+        AppTheme.SYSTEM -> isSystemInDarkTheme()
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+    }
+
+
+    val elevationOverlay = if (isDarkTheme) {
+        Color.White.copy(alpha = 0.09f)
+            .compositeOver(MaterialTheme.colorScheme.surface)
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
 
 
     CustomNavigationDrawer(
@@ -127,26 +147,41 @@ fun SettingsScreen(
                     }
                 }
 
+
                 ListItem(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(16.dp),
-                            clip = true
+                            spotColor = if (!isDarkTheme) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
                         )
                         .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
                         .clickable(onClick = {
                             navController.navigate(Screens.GeneralSettingsScreen.route)
                         })
                         .fillMaxWidth(),
-                    headlineContent = { Text(text = stringResource(R.string.general)) },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.general),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Outlined.Tune,
-                            contentDescription = "General"
+                            contentDescription = "General",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
                 )
 
 
@@ -156,44 +191,73 @@ fun SettingsScreen(
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(16.dp),
-                            clip = true
+                            spotColor = if (!isDarkTheme) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
                         )
                         .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
                         .clickable(onClick = {
                             navController.navigate(Screens.ThemeScreen.route)
                         })
                         .fillMaxWidth(),
-                    headlineContent = { Text(text = stringResource(R.string.theme)) },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.theme),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Outlined.Palette,
-                            contentDescription = "Theme"
+                            contentDescription = "Theme",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
                 )
+
+
+
                 ListItem(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(16.dp),
-                            clip = true
+                            spotColor = if (!isDarkTheme) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
                         )
                         .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
                         .clickable(onClick = {
                             navController.navigate(Screens.DeletedBooksScreen.route)
                         })
                         .fillMaxWidth(),
-                    headlineContent = { Text(text = stringResource(R.string.deleted_books)) },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.deleted_books),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Outlined.DeleteOutline,
-                            contentDescription = "Trash"
+                            contentDescription = "Trash",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
                 )
-
-
 
 
                 ListItem(
@@ -202,24 +266,37 @@ fun SettingsScreen(
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(16.dp),
-                            clip = true
+                            spotColor = if (!isDarkTheme) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
                         )
                         .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
                         .clickable(onClick = {
-                            navController.navigate(Screens.AboutAppScreen.route)
+                            navController.navigate(Screens.AboutAppScreen.route + "/${isDarkTheme}")
                         })
                         .fillMaxWidth(),
-                    headlineContent = { Text(text = stringResource(R.string.about)) },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.about),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Outlined.Info,
-                            contentDescription = "About"
+                            contentDescription = "About",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
                 )
 
 
-                // unlock premium
                 if (!appPreferences.isPremium) {
                     ListItem(
                         modifier = Modifier
@@ -227,40 +304,55 @@ fun SettingsScreen(
                             .shadow(
                                 elevation = 4.dp,
                                 shape = RoundedCornerShape(16.dp),
-                                clip = true
+                                spotColor = if (!isDarkTheme) {
+                                    Color.Black.copy(alpha = 0.8f)
+                                } else {
+                                    Color.Black.copy(alpha = 0.5f)
+                                }
                             )
                             .clip(RoundedCornerShape(16.dp))
+                            .background(elevationOverlay)
                             .clickable(onClick = {
                                 viewModel.purchasePremium(purchaseHelper)
                             })
                             .fillMaxWidth(),
-                        headlineContent = { Text(text = stringResource(R.string.remove_ads)) },
+                        headlineContent = {
+                            Text(
+                                text = stringResource(R.string.remove_ads),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
                         leadingContent = {
                             Icon(
                                 Icons.Default.Block,
-                                contentDescription = stringResource(R.string.remove_ads)
+                                contentDescription = stringResource(R.string.remove_ads),
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.crown),
-//                                tint = MaterialTheme.colorScheme.primary,
-//                                contentDescription = "Crown",
-//                                modifier = Modifier.size(22.dp)
-//                            )
-                        }
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        )
                     )
                 }
 
 
-                // app rating
+
+
+
                 ListItem(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(16.dp),
-                            clip = true
+                            spotColor = if (!isDarkTheme) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
                         )
                         .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
                         .clickable(onClick = {
                             val request = reviewManager.requestReviewFlow()
                             request.addOnCompleteListener { task ->
@@ -286,32 +378,24 @@ fun SettingsScreen(
                             }
                         })
                         .fillMaxWidth(),
-                    headlineContent = { Text(text = stringResource(R.string.rate_the_app)) },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.rate_the_app),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     leadingContent = {
                         Icon(
                             Icons.Outlined.StarRate,
                             contentDescription = "Rating",
-                            modifier = Modifier.size(24.dp)
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
                 )
-
-
-
-
-
-
             }
-
-
-
-//            if (showPremiumModal) {
-//                PremiumModal(
-//                    purchaseHelper = purchaseHelper,
-//                    hidePremiumModal = { showPremiumModal = false }
-//                )
-//            }
-
         }
     }
 }

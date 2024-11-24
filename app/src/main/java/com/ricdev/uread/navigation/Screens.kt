@@ -21,7 +21,7 @@ sealed class Screens(val route: String) {
     data object NotesScreen: Screens("notes_screen")
     data object AnnotationsScreen: Screens("annotations_screen")
     data object StatisticsScreen: Screens("statistics_screen")
-    data object OnlineBooksScreen: Screens("online_books_screen")
+//    data object OnlineBooksScreen: Screens("online_books_screen")
 
 
 

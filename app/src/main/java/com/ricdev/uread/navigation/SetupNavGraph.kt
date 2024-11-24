@@ -95,7 +95,7 @@ fun SetupNavGraph(
             DeletedBooksScreen(navController)
         }
         composable(
-            route = Screens.AboutAppScreen.route,
+            route = Screens.AboutAppScreen.route + "/{isDarkTheme}",
         ) {
             AboutAppScreen(navController)
         }

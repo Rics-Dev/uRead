@@ -137,8 +137,7 @@ fun ListLayout(
                             }
                             if (shouldShowAd) {
                                 navigateToBook()
-                                /* TODO */
-//                                showInterstitialAd(navigateToBook)
+                                showInterstitialAd(navigateToBook)
                             } else {
                                 navigateToBook()
                             }
