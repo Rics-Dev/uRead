@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Colorize
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material.icons.outlined.Delete
@@ -397,52 +396,22 @@ fun DefaultColors(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-//        (colors + colorHistory.take(1)).forEachIndexed { index, color ->
-//            ColorButton(color = color, onClick = { onColorSelected(color) })
-//            if (index == 3 && colorHistory.isNotEmpty()) {
-//                Box(
-//                    modifier = Modifier.height(24.dp)
-//                ) {
-//                    VerticalDivider()
-//                }
-//            }
-//        }
-
-
-        colors.forEach { color ->
-            ColorButton(
-                color = color,
-                onClick = { onColorSelected(color) }
-            )
-        }
-
-
-        if(colorHistory.isNotEmpty()){
-            Box(
-                modifier = Modifier.height(24.dp)
-                    .padding(end=0.dp)
-            ) {
-                VerticalDivider()
+        (colors + colorHistory.take(1)).forEachIndexed { index, color ->
+            ColorButton(color = color, onClick = { onColorSelected(color) })
+            if (index == 3 && colorHistory.isNotEmpty()) {
+                Box(
+                    modifier = Modifier.height(24.dp)
+                ) {
+                    VerticalDivider()
+                }
             }
-
-
-
-            IconButton(
-                onClick = {},
-                modifier = Modifier.size(36.dp)
-                    .padding(end = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowDown,
-                    contentDescription = "Custom Color history",
-                )
-            }
-
         }
-
-
     }
 }
+
+
+
+
 
 @Composable
 fun ColorButton(color: Color, onClick: () -> Unit) {

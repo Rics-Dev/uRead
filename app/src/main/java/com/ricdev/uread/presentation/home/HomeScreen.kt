@@ -211,9 +211,9 @@ fun HomeScreen(
 
 
 
-                            if (books.itemCount == 0) {
-                                EmptyShelfContent("Library")
-                            }
+//                            if (books.itemCount == 0) {
+//                                EmptyShelfContent("Library")
+//                            }
 
 
 
