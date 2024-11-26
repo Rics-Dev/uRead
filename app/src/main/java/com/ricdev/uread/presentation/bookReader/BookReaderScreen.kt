@@ -291,7 +291,6 @@ fun EpubReaderView(
 
     var mInterstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
 
-//    var showPremiumModal by remember { mutableStateOf(false) }
 
 
     var showTextToolbar by remember { mutableStateOf(false) }
@@ -519,7 +518,7 @@ fun EpubReaderView(
             val tapPosition = event.point?.let { point ->
                 Rect(
                     point.x.toInt(),
-                    point.y.toInt() - 75,
+                    point.y.toInt() + 100,
                     point.x.toInt(),
                     point.y.toInt()
                 )
@@ -726,7 +725,7 @@ fun EpubReaderView(
                             shouldApplyInsetsPadding = false,
                             selectionActionModeCallback = SelectionActionModeCallback(
                                 showCustomMenu = { rect, selectedText ->
-                                    textToolbarRect = rect
+                                    textToolbarRect = rect.apply { offset(0, 150) }
                                     actionSelectedText = selectedText
                                     showTextToolbar = true
                                 },
@@ -1079,14 +1078,6 @@ fun EpubReaderView(
             )
         }
     }
-
-
-//    if (showPremiumModal) {
-//        PremiumModal(
-//            purchaseHelper = purchaseHelper,
-//            hidePremiumModal = { showPremiumModal = false }
-//        )
-//    }
 
 
     if (showTextToolbar) {

@@ -2,10 +2,8 @@ package com.ricdev.uread.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.ricdev.uread.presentation.annotations.AnnotationsScreen
 import com.ricdev.uread.presentation.audioBookReader.AudiobookReaderScreen
 import com.ricdev.uread.presentation.bookDetails.BookDetailsScreen
@@ -13,8 +11,6 @@ import com.ricdev.uread.presentation.bookReader.BookReaderScreen
 import com.ricdev.uread.presentation.gettingStarted.GettingStartedScreen
 import com.ricdev.uread.presentation.home.HomeScreen
 import com.ricdev.uread.presentation.notes.NotesScreen
-//import com.ricdev.uread.presentation.onlineBooks.OnlineBooksScreen
-import com.ricdev.uread.presentation.onlineBooks.WebViewScreen
 import com.ricdev.uread.presentation.pdfReader.PdfReaderScreen
 import com.ricdev.uread.presentation.settings.SettingsScreen
 import com.ricdev.uread.presentation.settings.components.AboutAppScreen
@@ -24,8 +20,6 @@ import com.ricdev.uread.presentation.shelves.ShelvesScreen
 import com.ricdev.uread.presentation.settings.components.ThemeScreen
 import com.ricdev.uread.presentation.statistics.StatisticsScreen
 import com.ricdev.uread.util.PurchaseHelper
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
 @Composable
 fun SetupNavGraph(

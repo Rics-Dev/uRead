@@ -105,6 +105,13 @@ class HomeViewModel
     private val _books = MutableStateFlow<PagingData<Book>>(PagingData.empty())
     val books: StateFlow<PagingData<Book>> = _books.asStateFlow()
 
+    private val _selectedBooks = MutableStateFlow<List<Book>>(emptyList())
+    val selectedBooks: StateFlow<List<Book>> = _selectedBooks.asStateFlow()
+
+    private val _selectionMode = MutableStateFlow(false)
+    val selectionMode: StateFlow<Boolean> = _selectionMode.asStateFlow()
+
+
     private val _booksInShelfSet = MutableStateFlow<Set<Long>>(emptySet())
     val booksInShelfSet: StateFlow<Set<Long>> = _booksInShelfSet.asStateFlow()
 
@@ -568,21 +575,30 @@ class HomeViewModel
         }
     }
 
-//    private suspend fun addNewBook(documentFile: DocumentFile) {
-//        withContext(Dispatchers.IO) {
-//            try {
-//                val bookUriString = documentFile.uri.toString()
-//                if (!getBookUrisUseCase().contains(bookUriString)) {
-//                    val book = getBookInfo(documentFile)
-//                    insertBookUseCase(book)
-//                } else {
-//                    Log.d("HomeViewModel", "Book already exists: ${documentFile.name}")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("HomeViewModel", "Error adding book: ${documentFile.name}, ${e.message}")
-//            }
-//        }
-//    }
+    // Toggle book selection
+    fun toggleBookSelection(book: Book) {
+        _selectedBooks.value = if (_selectedBooks.value.contains(book)) {
+            _selectedBooks.value - book
+        } else {
+            _selectedBooks.value + book
+        }
+        _selectionMode.value = _selectedBooks.value.isNotEmpty()
+    }
+
+    fun selectAllBooks(books: List<Book>){
+        _selectedBooks.value = books
+    }
+
+
+    fun clearBookSelection() {
+        _selectedBooks.value = emptyList()
+        _selectionMode.value = false
+    }
+
+
+
+
+
 
 
     private suspend fun addNewBook(documentFile: DocumentFile) {

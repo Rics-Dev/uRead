@@ -24,9 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ricdev.uread.R
-import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
+import com.ricdev.uread.presentation.bookShelf.EmptyShelfContent
 import com.ricdev.uread.presentation.home.components.AddBookSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
 import com.ricdev.uread.presentation.home.components.CustomSearchBar
@@ -50,7 +50,6 @@ fun HomeScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
     val shelves by viewModel.shelves.collectAsStateWithLifecycle()
     val isAddingBooks by viewModel.isAddingBooks.collectAsStateWithLifecycle()
@@ -58,45 +57,27 @@ fun HomeScreen(
     val booksInShelf by viewModel.booksInShelfSet.collectAsStateWithLifecycle()
     val books = viewModel.books.collectAsLazyPagingItems()
 
-
     val importProgress by viewModel.importProgressState.collectAsStateWithLifecycle()
     val snackbarState by viewModel.snackbarState.collectAsStateWithLifecycle()
-
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val selectedTabRow by viewModel.selectedTabRow.collectAsStateWithLifecycle()
 
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-
     val allShelves = remember(shelves) { listOf("All Books") + shelves.map { it.name } }
-    val pagerState =
-        rememberPagerState { allShelves.size }
+    val pagerState = rememberPagerState { allShelves.size }
 
-
-    var selectedBooks by remember { mutableStateOf(listOf<Book>()) }
-    var selectionMode by remember { mutableStateOf(false) }
     var searchMode by remember { mutableStateOf(false) }
-
+    val selectedBooks by viewModel.selectedBooks.collectAsStateWithLifecycle()
+    val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
 
     var showLayoutModal by remember { mutableStateOf(false) }
     var showSortModal by remember { mutableStateOf(false) }
 
-
-    // Toggle book selection
-    fun toggleSelection(book: Book) {
-        selectedBooks = if (selectedBooks.contains(book)) {
-            selectedBooks - book
-        } else {
-            selectedBooks + book
-        }
-        selectionMode = selectedBooks.isNotEmpty()
-    }
-
-
     LaunchedEffect(selectedTab) {
         pagerState.animateScrollToPage(selectedTab)
+        viewModel.clearBookSelection()
         if (selectedTab == 0) {
             viewModel.updateCurrentShelf(null)
         } else {
@@ -104,17 +85,13 @@ fun HomeScreen(
             viewModel.updateCurrentShelf(shelf)
             shelf?.let { viewModel.getBooksForShelf(it.id) }
         }
-
     }
 
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
         if (!pagerState.isScrollInProgress) {
             selectedTab = pagerState.currentPage
-            selectionMode = false
-            selectedBooks = emptyList()
         }
     }
-
 
     CustomNavigationDrawer(
         purchaseHelper = purchaseHelper,
@@ -131,7 +108,6 @@ fun HomeScreen(
                     TopAppBar(
                         modifier = Modifier.fillMaxWidth(),
                         title = {
-
                             CustomSearchBar(
                                 query = searchQuery,
                                 onQueryChange = { viewModel.updateSearchQuery(it) },
@@ -155,15 +131,12 @@ fun HomeScreen(
                         selectedBooks = selectedBooks,
                         selectionMode = selectionMode,
                         clearSelection = {
-                            selectedBooks = emptyList()
-                            selectionMode = false
+                            viewModel.clearBookSelection()
                         },
                         selectAll = {
-                            selectedBooks = books.itemSnapshotList.items
-
+                            viewModel.selectAllBooks(books.itemSnapshotList.items)
                         },
                         appPreferences = appPreferences,
-
                         toggleLayoutModal = { showLayoutModal = true },
                         toggleSortFilterModal = { showSortModal = true },
                         totalBooks = books.itemCount,
@@ -186,8 +159,7 @@ fun HomeScreen(
                     selectedBooks = selectedBooks,
                     viewModel = viewModel,
                     clearSelection = {
-                        selectedBooks = emptyList()
-                        selectionMode = false
+                        viewModel.clearBookSelection()
                     },
                     navController = navController
                 )
@@ -230,17 +202,22 @@ fun HomeScreen(
                             var visible by remember { mutableStateOf(false) }
 
                             LaunchedEffect(Unit) {
-                                visible =
-                                    true  // Trigger animations when the composable is first displayed
+                                visible = true  // Trigger animations when the composable is first displayed
                             }
 
-                            val slideInAnimationSpec =
-                                tween<IntOffset>(durationMillis = 300)
+                            val slideInAnimationSpec = tween<IntOffset>(durationMillis = 300)
                             val tweenInAnimationSpec = tween<Float>(durationMillis = 300)
 
-//                            if (books.itemCount == 0) {
-//                                EmptyShelfContent("Library")
-//                            }
+
+
+
+                            if (books.itemCount == 0) {
+                                EmptyShelfContent("Library")
+                            }
+
+
+
+
                             if (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly) {
                                 AnimatedVisibility(
                                     visible = visible,
@@ -255,7 +232,7 @@ fun HomeScreen(
                                         selectedBooks = selectedBooks,
                                         selectionMode = selectionMode,
                                         toggleSelection = {
-                                            toggleSelection(it)
+                                            viewModel.toggleBookSelection(it)
                                         },
                                         viewModel = viewModel,
                                         isLoading = isAddingBooks,
@@ -276,7 +253,7 @@ fun HomeScreen(
                                         selectedBooks = selectedBooks,
                                         selectionMode = selectionMode,
                                         toggleSelection = {
-                                            toggleSelection(it)
+                                            viewModel.toggleBookSelection(it)
                                         },
                                         viewModel = viewModel,
                                         isLoading = isAddingBooks,
@@ -297,7 +274,7 @@ fun HomeScreen(
                                     navController = navController,
                                     selectedBooks = selectedBooks,
                                     selectionMode = selectionMode,
-                                    toggleSelection = ::toggleSelection,
+                                    toggleSelection = { book -> viewModel.toggleBookSelection(book) },
                                     isLoading = isAddingBooks,
                                     appPreferences = appPreferences,
                                 )
@@ -341,8 +318,6 @@ fun HomeScreen(
                 }
             }
 
-
-
             if (showLayoutModal) {
                 LayoutModal(
                     appPreferences = appPreferences,
@@ -357,7 +332,6 @@ fun HomeScreen(
                     onDismiss = { showSortModal = false },
                 )
             }
-
         }
     }
 }

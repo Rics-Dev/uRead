@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -118,7 +117,9 @@ fun TopToolbar(
 
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -127,6 +128,7 @@ fun TopToolbar(
                     isTtsToggled = !isTtsOn
                     textToSpeech()
                 },
+                modifier = Modifier.weight(1f)
             ) {
                 if (isTtsToggled && !isTtsOn) {
                     CircularProgressIndicator(
@@ -144,7 +146,8 @@ fun TopToolbar(
             }
             Column(
                 modifier = Modifier
-                    .width(300.dp),
+                    .weight(6f)
+                    .padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 publication.metadata.title?.let {
@@ -161,13 +164,12 @@ fun TopToolbar(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
             }
-
             IconButton(
                 onClick = {
                     bookmark()
                 },
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     if (isBookmarked) Icons.Default.BookmarkAdded else Icons.Outlined.BookmarkAdd,

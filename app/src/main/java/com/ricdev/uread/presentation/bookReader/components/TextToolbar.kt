@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BorderColor
 import androidx.compose.material.icons.outlined.Delete
@@ -90,7 +91,6 @@ fun TextToolbar(
     var showHighlightAction by remember { mutableStateOf(false) }
     var showUnderlineAction by remember { mutableStateOf(false) }
     var isPaletteVisible by remember { mutableStateOf(false) }
-//    var showPremiumModal by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf<Color?>(null) }
     var showTranslationDialog by remember { mutableStateOf(false) }
     var showDefinitionDialog by remember { mutableStateOf(false) }
@@ -285,14 +285,6 @@ fun TextToolbar(
         }
     }
 
-
-
-//    if (showPremiumModal) {
-//        PremiumModal(
-//            purchaseHelper = purchaseHelper,
-//            hidePremiumModal = { showPremiumModal = false }
-//        )
-//    }
 }
 
 @Composable
@@ -401,16 +393,54 @@ fun DefaultColors(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        (colors + colorHistory.take(1)).forEachIndexed { index, color ->
-            ColorButton(color = color, onClick = { onColorSelected(color) })
-            if (index == 3 && colorHistory.isNotEmpty()) {
+//        (colors + colorHistory.take(1)).forEachIndexed { index, color ->
+//            ColorButton(color = color, onClick = { onColorSelected(color) })
+//            if (index == 3 && colorHistory.isNotEmpty()) {
+//                Box(
+//                    modifier = Modifier.height(24.dp)
+//                ) {
+//                    VerticalDivider()
+//                }
+//            }
+//        }
+
+
+        colors.forEach { color ->
+            ColorButton(
+                color = color,
+                onClick = { onColorSelected(color) }
+            )
+        }
+
+
+        if(colorHistory.isNotEmpty()){
+            Box(
+                modifier = Modifier.height(24.dp)
+                    .padding(end=0.dp)
+            ) {
                 VerticalDivider()
             }
+
+
+
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(36.dp)
+                    .padding(end = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "Custom Color history",
+                )
+            }
+
         }
+
+
     }
 }
 
