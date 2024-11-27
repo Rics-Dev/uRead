@@ -7,8 +7,6 @@ import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import com.ricdev.uread.util.LanguageHelper
 import com.ricdev.uread.util.PurchaseHelper
-import com.ricdev.uread.util.event.AppEvent
-import com.ricdev.uread.util.event.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appPreferencesUtil: AppPreferencesUtil,
-    private val eventBus: EventBus,
     private val languageHelper: LanguageHelper,
     application: Application,
 ) : AndroidViewModel(application) {
@@ -47,16 +44,19 @@ class SettingsViewModel @Inject constructor(
     fun updatePdfSupport(isPdfSupported: Boolean) {
         viewModelScope.launch {
             appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(enablePdfSupport = isPdfSupported))
-            eventBus.emitEvent(AppEvent.RefreshBooks)
+//            eventBus.emitEvent(AppEvent.RefreshBooks)
         }
     }
 
 
     fun addScanDirectory(directory: String) {
         viewModelScope.launch {
-            val updatedDirectories = appPreferences.value.scanDirectories + directory
-            appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(scanDirectories = updatedDirectories))
-            eventBus.emitEvent(AppEvent.RefreshBooks)
+            val currentDirectories = appPreferences.value.scanDirectories
+            if (!currentDirectories.contains(directory)) {
+                val updatedDirectories = currentDirectories + directory
+                appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(scanDirectories = updatedDirectories))
+//                eventBus.emitEvent(AppEvent.RefreshBooks)
+            }
         }
     }
 
@@ -64,7 +64,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val updatedDirectories = appPreferences.value.scanDirectories - directory
             appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(scanDirectories = updatedDirectories))
-            eventBus.emitEvent(AppEvent.RefreshBooks)
+//            eventBus.emitEvent(AppEvent.RefreshBooks)
         }
     }
 

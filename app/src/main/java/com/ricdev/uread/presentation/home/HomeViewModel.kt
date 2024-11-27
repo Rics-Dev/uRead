@@ -39,8 +39,6 @@ import com.ricdev.uread.domain.use_case.shelves.RemoveShelfUseCase
 import com.ricdev.uread.presentation.home.states.ImportProgressState
 import com.ricdev.uread.presentation.home.states.SnackbarState
 import com.ricdev.uread.util.PurchaseHelper
-import com.ricdev.uread.util.event.AppEvent
-import com.ricdev.uread.util.event.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +82,6 @@ class HomeViewModel
     private val assetRetriever: AssetRetriever,
     private val publicationOpener: PublicationOpener,
     private val appPreferencesUtil: AppPreferencesUtil,
-    private val eventBus: EventBus,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -156,20 +153,22 @@ class HomeViewModel
                 launch { loadShelves() }
                 launch { observeBooks(preferences) }
                 launch { observeAppPreferences() }
-                launch { observeEvents() }
+//                launch { observeEvents() }
             }
         }
     }
 
-    private fun observeEvents() {
-        viewModelScope.launch {
-            eventBus.events.collect { event ->
-                when (event) {
-                    is AppEvent.RefreshBooks -> refreshBooks()
-                }
-            }
-        }
-    }
+//    private fun observeEvents() {
+//        viewModelScope.launch {
+//            eventBus.events.collect { event ->
+//                when (event) {
+//                    is AppEvent.RefreshBooks -> {
+////                        refreshBooks()
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun loadBooks(preferences: AppPreferences) {
         val sortBy = preferences.sortBy

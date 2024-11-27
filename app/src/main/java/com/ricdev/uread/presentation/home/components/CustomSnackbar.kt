@@ -1,5 +1,6 @@
 package com.ricdev.uread.presentation.home.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,15 +46,17 @@ fun CustomSnackbar(
                 // Show different content based on import progress
                 when (importProgressState) {
                     is ImportProgressState.InProgress -> {
+                        val animatedProgress = animateFloatAsState(
+                            targetValue = importProgressState.current.toFloat() / importProgressState.total,
+                            label = ""
+                        ).value
                         Column(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.Start,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             LinearProgressIndicator(
-                                progress = {
-                                    importProgressState.current.toFloat() / importProgressState.total
-                                },
+                                progress = { animatedProgress },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 8.dp),

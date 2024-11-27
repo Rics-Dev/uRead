@@ -18,7 +18,6 @@ import com.ricdev.uread.domain.repository.BooksRepository
 import com.ricdev.uread.domain.repository.ShelfRepository
 import com.ricdev.uread.util.LanguageHelper
 import com.ricdev.uread.util.PdfBitmapConverter
-import com.ricdev.uread.util.event.EventBus
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -173,9 +172,6 @@ object AppModule {
     }
 
 
-    @Provides
-    @Singleton
-    fun provideEventBus(): EventBus = EventBus()
 
 
     @Provides

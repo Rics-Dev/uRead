@@ -18,7 +18,6 @@ package com.ricdev.uread.presentation.onlineBooks
 //import java.io.IOException
 import javax.inject.Inject
 import android.app.Application
-import com.ricdev.uread.util.event.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import androidx.lifecycle.AndroidViewModel
@@ -27,7 +26,6 @@ import androidx.lifecycle.AndroidViewModel
 @HiltViewModel
 class WebViewScreenViewModel @Inject constructor(
     private val appPreferencesUtil: AppPreferencesUtil,
-    private val eventBus: EventBus,
     application: Application,
 ) : AndroidViewModel(application) {
 //
