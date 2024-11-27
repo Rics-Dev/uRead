@@ -3,9 +3,11 @@ package com.ricdev.uread.presentation.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -15,7 +17,6 @@ import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.filled.Headset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -26,7 +27,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
-import com.ricdev.uread.presentation.home.components.AddBookSnackbar
+import com.ricdev.uread.presentation.home.components.CustomSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
 import com.ricdev.uread.presentation.home.components.CustomSearchBar
 import com.ricdev.uread.presentation.home.components.CustomTopAppBar
@@ -152,22 +153,47 @@ fun HomeScreen(
                 }
             },
             bottomBar = {
-                CustomBottomAppBar(
-                    selectionMode = selectionMode,
-                    shelves = shelves,
-                    selectedBooks = selectedBooks,
-                    viewModel = viewModel,
-                    clearSelection = {
-                        viewModel.clearBookSelection()
-                    },
-                    navController = navController
-                )
+                AnimatedVisibility(
+                   visible = !selectionMode,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+                ) {
+                    NavigationBar {
+                        NavigationBarItem(
+                            icon = { Icon( Icons.AutoMirrored.Rounded.MenuBook, contentDescription = "Ebooks") },
+                            label = { Text("eBooks") },
+                            selected = selectedTabRow == 0,
+                            onClick = { viewModel.updateCurrentTabRow(0) }
+                        )
+                        NavigationBarItem(
+                            icon = { Icon(Icons.Default.Headset, contentDescription = "AudioBooks") },
+                            label = { Text("AudioBooks") },
+                            selected = selectedTabRow == 1,
+                            onClick = { viewModel.updateCurrentTabRow(1) }
+                        )
+                    }
+                }
+
+               AnimatedVisibility(
+                   visible = selectionMode,
+                   enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                   exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+               ) {
+                   CustomBottomAppBar(
+                       shelves = shelves,
+                       selectedBooks = selectedBooks,
+                       viewModel = viewModel,
+                       clearSelection = {
+                           viewModel.clearBookSelection()
+                       },
+                       navController = navController
+                   )
+               }
             },
             snackbarHost = {
-                AddBookSnackbar(
+                CustomSnackbar(
                     snackbarState = snackbarState,
                     importProgressState = importProgress,
-                    onDismiss = { viewModel.hideSnackbar() }
                 )
             },
         ) { innerPadding ->
@@ -201,21 +227,16 @@ fun HomeScreen(
                             var visible by remember { mutableStateOf(false) }
 
                             LaunchedEffect(Unit) {
-                                visible = true  // Trigger animations when the composable is first displayed
+                                visible = true
                             }
 
                             val slideInAnimationSpec = tween<IntOffset>(durationMillis = 300)
                             val tweenInAnimationSpec = tween<Float>(durationMillis = 300)
 
 
-
-
 //                            if (books.itemCount == 0) {
 //                                EmptyShelfContent("Library")
 //                            }
-
-
-
 
                             if (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly) {
                                 AnimatedVisibility(
@@ -282,38 +303,6 @@ fun HomeScreen(
                             }
                         }
                     }
-                }
-
-                TabRow(
-                    selectedTabIndex = selectedTabRow
-                ) {
-                    Tab(
-                        selected = selectedTabRow == 0,
-                        onClick = { viewModel.updateCurrentTabRow(0) },
-                        text = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Rounded.MenuBook,
-                                    contentDescription = "Ebooks"
-                                )
-                                Text("Ebooks")
-                            }
-                        }
-                    )
-                    Tab(
-                        selected = selectedTabRow == 1,
-                        onClick = { viewModel.updateCurrentTabRow(1) },
-                        text = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(Icons.Default.Headset, contentDescription = "Ebooks")
-                                Text("Audio Books")
-                            }
-                        }
-                    )
                 }
             }
 

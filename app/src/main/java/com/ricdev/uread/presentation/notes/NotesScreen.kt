@@ -67,7 +67,6 @@ import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.Note
 import com.ricdev.uread.presentation.bookReader.components.dialogs.NoteContent
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
-//import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.PurchaseHelper
 import kotlinx.coroutines.launch
 
@@ -84,7 +83,6 @@ fun NotesScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Sort books alphabetically by title
     val sortedBooksWithNotes = booksWithNotes.sortedBy { it.book.title }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }

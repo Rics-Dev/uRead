@@ -95,7 +95,6 @@ fun AnnotationsScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedBottomTabIndex by remember { mutableIntStateOf(0) }
 
-//    var showPremiumModal by remember { mutableStateOf(false) }
 
     var showAnnotationDialog by remember { mutableStateOf(false) }
 

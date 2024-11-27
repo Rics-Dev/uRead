@@ -242,14 +242,41 @@ class HomeViewModel
         refreshJob?.cancel()
         refreshJob = viewModelScope.launch {
             delay(500)
-            showSnackbar("Refreshing Library", true)
+            showSnackbar("Refreshing Library" )
             val scanDirectory = appPreferences.value.scanDirectories
             if (scanDirectory.isNotEmpty()) {
                 observeBooks(appPreferences.value)
             } else {
-                showSnackbar("No directory set for scanning books", false)
+                showSnackbar("No directory set for scanning books" )
             }
         }
+    }
+
+
+
+    private fun showSnackbar(
+        message: String,
+        unlimited: Boolean = false,
+    ) {
+        snackbarJob?.cancel()
+        snackbarJob = viewModelScope.launch {
+            _snackbarState.value = SnackbarState.Visible(
+                message = message,
+                unlimited = unlimited,
+            )
+
+            if(!unlimited) {
+                delay(3000)
+                hideSnackbar()
+            }
+        }
+
+
+    }
+
+    private fun hideSnackbar() {
+        snackbarJob?.cancel()
+        _snackbarState.value = SnackbarState.Hidden
     }
 
     private fun observeBooks(preferences: AppPreferences) {
@@ -259,8 +286,6 @@ class HomeViewModel
             _isAddingBooks.value = false
             showSnackbar(
                 message = "Error during import: ${throwable.message}",
-                actionLabel = "Retry",
-                onActionClick = { observeBooks(preferences) }
             )
         }) {
             try {
@@ -292,8 +317,6 @@ class HomeViewModel
                     _importProgressState.value = ImportProgressState.InProgress(0, newBooks.size)
                     showSnackbar(
                         message = "Adding new books to library",
-                        isIndefinite = true,
-                        showProgress = true
                     )
 
                     // Process books in smaller batches
@@ -310,9 +333,8 @@ class HomeViewModel
 
                                 // Update snackbar with progress
                                 showSnackbar(
-                                    message = "Adding books: $totalProcessed/${newBooks.size}",
-                                    isIndefinite = true,
-                                    showProgress = true
+                                    message = "Adding books ($totalProcessed/${newBooks.size})",
+                                    unlimited = true
                                 )
 
 
@@ -323,7 +345,6 @@ class HomeViewModel
                                 }
                             } catch (e: Exception) {
                                 Log.e("HomeViewModel", "Error adding book: ${documentFile.name}", e)
-                                // Continue with next book instead of stopping the whole process
                             }
                         }
                     }
@@ -331,7 +352,6 @@ class HomeViewModel
                     _importProgressState.value = ImportProgressState.Complete
                     showSnackbar(
                         message = "Added ${newBooks.size} book(s)",
-                        isIndefinite = false
                     )
                     _isAddingBooks.value = false
                 }
@@ -340,8 +360,6 @@ class HomeViewModel
                 if (deletedUris.isNotEmpty()) {
                     showSnackbar(
                         message = "Removing ${deletedUris.size} books",
-                        isIndefinite = true,
-                        showProgress = true
                     )
                     deletedUris.chunked(10).forEach { batch ->
                         batch.forEach { bookUri ->
@@ -351,14 +369,14 @@ class HomeViewModel
                                 Log.e("HomeViewModel", "Error deleting book: $bookUri", e)
                             }
                         }
-                        // Add small delay between batches
                         delay(50)
                     }
                     showSnackbar(
                         message = "Removed ${deletedUris.size} book(s)",
-                        isIndefinite = false
                     )
                 }
+
+
 
                 loadBooks(appPreferences.value)
             } catch (e: Exception) {
@@ -366,8 +384,6 @@ class HomeViewModel
                 Log.e("HomeViewModel", "Error observing books", e)
                 showSnackbar(
                     message = "Error updating library: ${e.message}",
-                    actionLabel = "Retry",
-                    onActionClick = { observeBooks(preferences) }
                 )
             } finally {
                 _isAddingBooks.value = false
@@ -395,7 +411,7 @@ class HomeViewModel
                 val newShelfId = addShelfUseCase(shelfName, newOrder)
                 _shelves.value += Shelf(id = newShelfId, name = shelfName, order = newOrder)
             } catch (e: Exception) {
-                showSnackbar("Failed to add shelf: ${e.message}", false)
+                showSnackbar("Failed to add shelf: ${e.message}" )
             }
         }
     }
@@ -406,7 +422,7 @@ class HomeViewModel
                 removeShelfUseCase(shelf)
                 _shelves.value = _shelves.value.filter { it.id != shelf.id }
             } catch (e: Exception) {
-                showSnackbar("Failed to remove shelf: ${e.message}", false)
+                showSnackbar("Failed to remove shelf: ${e.message}" )
             }
         }
     }
@@ -432,7 +448,7 @@ class HomeViewModel
                                 ) {
                                     deleteBookUseCase(book)
                                 } else {
-                                    showSnackbar("Failed to delete book: ${book.title}", true)
+                                    showSnackbar("Failed to delete book: ${book.title}" )
                                 }
                             } else {
                                 // Handle cases where the URI is not a content URI (e.g., file://)
@@ -441,14 +457,13 @@ class HomeViewModel
                                     if (bookFile.exists() && bookFile.delete()) {
                                         deleteBookUseCase(book)
                                     } else {
-                                        showSnackbar("Failed to delete book: ${book.title}", true)
+                                        showSnackbar("Failed to delete book: ${book.title}" )
                                     }
                                 }
                             }
                         } catch (e: Exception) {
                             showSnackbar(
-                                "Failed to delete book: ${book.title} - ${e.message}",
-                                true
+                                "Failed to delete book: ${book.title} - ${e.message}"
                             )
                         }
                     }
@@ -459,9 +474,9 @@ class HomeViewModel
                         updateBookUseCase(it)
                     }
                 }
-                showSnackbar("Books removed successfully", false)
+                showSnackbar("Books removed successfully" )
             } catch (e: Exception) {
-                showSnackbar("Failed to delete books: ${e.message}", true)
+                showSnackbar("Failed to delete books: ${e.message}" )
             }
         }
     }
@@ -474,9 +489,9 @@ class HomeViewModel
                         addBookToShelfUseCase(bookId, shelfId)
                     }
                 }
-                showSnackbar("Books added to shelf successfully", false)
+                showSnackbar("Books added to shelf successfully" )
             } catch (e: Exception) {
-                showSnackbar("Failed to add books to shelf: ${e.message}", false)
+                showSnackbar("Failed to add books to shelf: ${e.message}" )
             }
         }
     }
@@ -489,12 +504,18 @@ class HomeViewModel
                         removeBooksFromShelfUseCase(bookId, shelfId)
                     }
                 }
-                showSnackbar("Books removed from shelf successfully", false)
+
+                _booksInShelfSet.value -= bookIds.toSet()
+                showSnackbar("Books removed from shelf successfully" )
             } catch (e: Exception) {
-                showSnackbar("Failed to remove books from shelf: ${e.message}", false)
+                showSnackbar("Failed to remove books from shelf: ${e.message}" )
             }
         }
     }
+
+
+
+
 
     fun getBooksForShelfSelection(shelfId: Long): Flow<List<Book>> {
         return getBooksForShelfUseCase(shelfId)
@@ -512,14 +533,6 @@ class HomeViewModel
     }
 
 
-//    private suspend fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
-//        return withContext(Dispatchers.IO) {
-//            val documentFile = DocumentFile.fromTreeUri(context, uri)
-//            documentFile?.let { scanDirectory(it) } ?: emptyList()
-//        }
-//    }
-
-
     private suspend fun getBooksFromDirectory(context: Context, uri: Uri): List<DocumentFile> {
         return withContext(Dispatchers.IO) {
             try {
@@ -533,24 +546,6 @@ class HomeViewModel
     }
 
 
-    //    private fun scanDirectory(directory: DocumentFile): List<DocumentFile> {
-//        val allowedExtensions = listOf("epub", "pdf", "mp3", "m4a", "m4b", "aac").let {
-//            if (_appPreferences.value.enablePdfSupport) it else it - "pdf"
-//        }
-//
-//        return directory.listFiles().filter { file ->
-//            when {
-//                file.isDirectory -> file.name?.let { !it.startsWith(".") } ?: false
-//                file.isFile -> file.name?.let { name ->
-//                    name.substringAfterLast('.', "").lowercase() in allowedExtensions
-//                } ?: false
-//
-//                else -> false
-//            }
-//        }.flatMap { file ->
-//            if (file.isDirectory) scanDirectory(file) else listOf(file)
-//        }
-//    }
     private fun scanDirectory(directory: DocumentFile): List<DocumentFile> {
         return try {
             val allowedExtensions = listOf("epub", "pdf", "mp3", "m4a", "m4b", "aac").let {
@@ -575,7 +570,6 @@ class HomeViewModel
         }
     }
 
-    // Toggle book selection
     fun toggleBookSelection(book: Book) {
         _selectedBooks.value = if (_selectedBooks.value.contains(book)) {
             _selectedBooks.value - book
@@ -594,10 +588,6 @@ class HomeViewModel
         _selectedBooks.value = emptyList()
         _selectionMode.value = false
     }
-
-
-
-
 
 
 
@@ -992,33 +982,6 @@ class HomeViewModel
         }
     }
 
-    private fun showSnackbar(
-        message: String,
-        isIndefinite: Boolean = false,
-        showProgress: Boolean = false,
-        actionLabel: String? = null,
-        onActionClick: (() -> Unit)? = null
-    ) {
-        snackbarJob?.cancel()
-        snackbarJob = viewModelScope.launch {
-            _snackbarState.value = SnackbarState.Visible(
-                message = message,
-                isIndefinite = isIndefinite,
-                showProgress = showProgress,
-                actionLabel = actionLabel,
-                onActionClick = onActionClick
-            )
 
-            if (!isIndefinite) {
-                delay(3000)
-                hideSnackbar()
-            }
-        }
-    }
-
-    fun hideSnackbar() {
-        snackbarJob?.cancel()
-        _snackbarState.value = SnackbarState.Hidden
-    }
 
 }

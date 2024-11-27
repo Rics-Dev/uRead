@@ -84,7 +84,7 @@ fun CustomNavigationDrawer(
                                     contentDescription = "Crown",
                                     modifier = Modifier.size(if (isPortrait) 16.dp else 8.dp)
                                 )
-                                Text(stringResource(R.string.unlock_premium), fontSize = (if (isPortrait) 16.sp else 12.sp))
+                                Text(stringResource(R.string.remove_ads), fontSize = 12.sp)
                                 Image(
                                     painter = painterResource(id = R.drawable.crown),
                                     contentDescription = "Crown",
@@ -103,7 +103,8 @@ fun CustomNavigationDrawer(
                 Spacer(Modifier.height(if (isPortrait) 16.dp else 0.dp))
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(start = (if (isPortrait) 0 else 16).dp)
                 ) {
                     item {

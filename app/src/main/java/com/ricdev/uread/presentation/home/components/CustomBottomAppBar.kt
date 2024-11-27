@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun CustomBottomAppBar(
-    selectionMode: Boolean,
+//    selectionMode: Boolean,
     shelves: List<Shelf>,
     selectedBooks: List<Book>,
     viewModel: HomeViewModel,
@@ -71,11 +71,6 @@ fun CustomBottomAppBar(
 
 
 
-    AnimatedVisibility(
-        visible = selectionMode,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-    ) {
         BottomAppBar(
             content = {
                 Row(
@@ -101,7 +96,6 @@ fun CustomBottomAppBar(
                 }
             }
         )
-    }
 
 
     if (showAddBookToShelfDialog) {
