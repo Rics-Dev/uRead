@@ -147,21 +147,24 @@ fun ThemeScreen(
                 .padding(paddingValues)
                 .padding(16.dp),
         ) {
-            Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            SegmentedThemeControl(
-                selectedTheme = appPreferences.appTheme,
-                onThemeSelected = { theme ->
-                    viewModel.updateAppPreferences(appPreferences.copy(appTheme = theme))
-                }
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(stringResource(R.string.color_scheme), style = MaterialTheme.typography.titleMedium)
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
+            ){
+               item {
+                   Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
+                   Spacer(modifier = Modifier.height(4.dp))
+                   SegmentedThemeControl(
+                       selectedTheme = appPreferences.appTheme,
+                       onThemeSelected = { theme ->
+                           viewModel.updateAppPreferences(appPreferences.copy(appTheme = theme))
+                       }
+                   )
+                   Spacer(modifier = Modifier.height(4.dp))
+                   Text(stringResource(R.string.color_scheme), style = MaterialTheme.typography.titleMedium)
+               }
+
                 items(colorSchemes) { (name, scheme) ->
                     val displayName = displayNameMapping[name] ?: name
                     ColorSchemePreviewCard(
@@ -173,7 +176,6 @@ fun ThemeScreen(
                                 viewModel.updateAppPreferences(appPreferences.copy(colorScheme = name))
                             } else {
                                 viewModel.purchasePremium(purchaseHelper)
-//                                showPremiumModal = true
                             }
                         },
                         isPremium = !appPreferences.isPremium && name != "Dynamic"
@@ -182,13 +184,6 @@ fun ThemeScreen(
             }
         }
     }
-
-//    if(showPremiumModal){
-//        PremiumModal(
-//            purchaseHelper = purchaseHelper,
-//            hidePremiumModal = { showPremiumModal = false }
-//        )
-//    }
 }
 
 @Composable

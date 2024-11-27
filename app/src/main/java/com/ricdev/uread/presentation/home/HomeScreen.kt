@@ -26,7 +26,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
-import com.ricdev.uread.presentation.bookShelf.EmptyShelfContent
 import com.ricdev.uread.presentation.home.components.AddBookSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
 import com.ricdev.uread.presentation.home.components.CustomSearchBar

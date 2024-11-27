@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -148,275 +149,295 @@ fun AboutAppScreen(
             )
         },
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = (-12).dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+            item {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = (-12).dp),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-                        contentDescription = "App Logo",
-                        modifier = Modifier.size(150.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                            contentDescription = "App Logo",
+                            modifier = Modifier.size(150.dp)
+                        )
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color(0xE6564026),
+                            textAlign = TextAlign.Start,
+                            text = " uRead",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .offset(y = (-28).dp)
+                        )
+                        Text(
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color(0xE6564026),
+                            textAlign = TextAlign.Start,
+                            text = "v${appVersion?.versionName ?: "Unknown"}",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier
+                                .offset(y = (-28).dp)
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+
+            item {
+                ListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = if (!isDarkTheme.value!!) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
+                        .clickable(onClick = {
+                            showVersionDialog = true
+                        })
+                        .fillMaxWidth(),
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.version),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = "Rating",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
                     )
-                    Text(
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif,
-                        color = Color(0xE6564026),
-                        textAlign = TextAlign.Start,
-                        text = " uRead",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .offset(y = (-28).dp)
+                )
+            }
+
+
+            item {
+
+                ListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = if (!isDarkTheme.value!!) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
+                        .clickable(onClick = {
+                            showWhatsNewModal = true
+                        })
+                        .fillMaxWidth(),
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.what_s_new),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Outlined.Update,
+                            contentDescription = "What's new",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
                     )
-                    Text(
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = FontFamily.SansSerif,
-                        color = Color(0xE6564026),
-                        textAlign = TextAlign.Start,
-                        text = "v${appVersion?.versionName ?: "Unknown"}",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier
-                            .offset(y = (-28).dp)
+                )
+            }
+
+
+            item {
+
+                ListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = if (!isDarkTheme.value!!) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
+                        .clickable(onClick = {
+                            showPrivacyPolicyModal = true
+                        })
+                        .fillMaxWidth(),
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.privacy_policy),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Outlined.PrivacyTip,
+                            contentDescription = "Rating",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                )
+            }
+
+
+
+            item {
+
+                ListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = if (!isDarkTheme.value!!) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
+                        .clickable(onClick = {
+                            showLibrariesModal = true
+                        })
+                        .fillMaxWidth(),
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.libraries),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Outlined.Book,
+                            contentDescription = "Libraries",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                )
+            }
+
+
+
+            item {
+
+                ListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = if (!isDarkTheme.value!!) {
+                                Color.Black.copy(alpha = 0.8f)
+                            } else {
+                                Color.Black.copy(alpha = 0.5f)
+                            }
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(elevationOverlay)
+                        .clickable(onClick = {
+                            try {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/Rics-Dev/uRead/issues/new")
+                                )
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast
+                                    .makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        })
+                        .fillMaxWidth(),
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.feature_request),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.Send,
+                            contentDescription = "Feature Request",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+
+                    SocialMediaButton(
+                        icon = painterResource(id = R.drawable.github),
+                        contentDescription = "GitHub",
+                        onClick = {
+                            try {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/Rics-Dev/uRead")
+                                )
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
                     )
                 }
             }
 
-            HorizontalDivider()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-
-
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = if (!isDarkTheme.value!!) {
-                            Color.Black.copy(alpha = 0.8f)
-                        } else {
-                            Color.Black.copy(alpha = 0.5f)
-                        }
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(elevationOverlay)
-                    .clickable(onClick = {
-                        showVersionDialog = true
-                    })
-                    .fillMaxWidth(),
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.version),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Outlined.Info,
-                        contentDescription = "Rating",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                )
-            )
-
-
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = if (!isDarkTheme.value!!) {
-                            Color.Black.copy(alpha = 0.8f)
-                        } else {
-                            Color.Black.copy(alpha = 0.5f)
-                        }
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(elevationOverlay)
-                    .clickable(onClick = {
-                        showWhatsNewModal = true
-                    })
-                    .fillMaxWidth(),
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.what_s_new),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Outlined.Update,
-                        contentDescription = "What's new",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                )
-            )
-
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = if (!isDarkTheme.value!!) {
-                            Color.Black.copy(alpha = 0.8f)
-                        } else {
-                            Color.Black.copy(alpha = 0.5f)
-                        }
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(elevationOverlay)
-                    .clickable(onClick = {
-                        showPrivacyPolicyModal = true
-                    })
-                    .fillMaxWidth(),
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.privacy_policy),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Outlined.PrivacyTip,
-                        contentDescription = "Rating",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                )
-            )
-
-
-
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = if (!isDarkTheme.value!!) {
-                            Color.Black.copy(alpha = 0.8f)
-                        } else {
-                            Color.Black.copy(alpha = 0.5f)
-                        }
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(elevationOverlay)
-                    .clickable(onClick = {
-                        showLibrariesModal = true
-                    })
-                    .fillMaxWidth(),
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.libraries),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Outlined.Book,
-                        contentDescription = "Libraries",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                )
-            )
-
-
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = if (!isDarkTheme.value!!) {
-                            Color.Black.copy(alpha = 0.8f)
-                        } else {
-                            Color.Black.copy(alpha = 0.5f)
-                        }
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(elevationOverlay)
-                    .clickable(onClick = {
-                        try {
-                            val intent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/Rics-Dev/uRead/issues/new")
-                            )
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Toast
-                                .makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    })
-                    .fillMaxWidth(),
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.feature_request),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.Send,
-                        contentDescription = "Feature Request",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                )
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                SocialMediaButton(
-                    icon = painterResource(id = R.drawable.github),
-                    contentDescription = "GitHub",
-                    onClick = {
-                        try {
-                            val intent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/Rics-Dev/uRead")
-                            )
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                )
-            }
 
         }
     }
@@ -474,7 +495,7 @@ fun AboutAppScreen(
                 Box(
                     modifier = Modifier
                         .padding(vertical = 16.dp)
-                        .weight(1f) // Give the scrollable content as much space as possible
+                        .weight(1f)
                         .verticalScroll(rememberScrollState())
                 ) {
                     Markdown(

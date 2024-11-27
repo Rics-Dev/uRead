@@ -33,12 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.Shelf
 import com.ricdev.uread.presentation.home.HomeViewModel
 import com.ricdev.uread.navigation.Screens
+import com.ricdev.uread.navigation.navigateToScreen
 import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
@@ -48,7 +49,7 @@ fun CustomBottomAppBar(
     selectedBooks: List<Book>,
     viewModel: HomeViewModel,
     clearSelection: () -> Unit,
-    navController: NavController // Add this parameter
+    navController: NavHostController // Add this parameter
 ) {
     var showAddBookToShelfDialog by remember { mutableStateOf(false) }
     var removeBooksDialog by remember { mutableStateOf(false) }
@@ -107,7 +108,6 @@ fun CustomBottomAppBar(
         AlertDialog(
             onDismissRequest = {
                 showAddBookToShelfDialog = false
-                clearSelection()
             },
             title = { Text(stringResource(R.string.manage_bookshelf)) },
             text = {
@@ -152,7 +152,7 @@ fun CustomBottomAppBar(
 
                         onClick = {
                             showAddBookToShelfDialog = false
-                            navController.navigate(Screens.ShelvesScreen.route)
+                            navController.navigateToScreen(Screens.ShelvesScreen.route)
                         }
                     ) {
                         Text(stringResource(R.string.shelves))

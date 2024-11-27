@@ -1,7 +1,11 @@
 package com.ricdev.uread.presentation.sharedComponents
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.outlined.*
@@ -12,9 +16,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -37,8 +43,8 @@ fun CustomNavigationDrawer(
 ) {
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-//    var showPremiumModal by remember { mutableStateOf(false) }
-
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
 
@@ -46,7 +52,7 @@ fun CustomNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(if (isPortrait) 24.dp else 0.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
@@ -57,19 +63,17 @@ fun CustomNavigationDrawer(
                             painter = painterResource(id = R.drawable.crown),
                             contentDescription = "Crown",
                             modifier = Modifier
-                                .size(24.dp)
-                                .offset(y = (36).dp)  // Adjust this value to control overlap
+                                .size(if (isPortrait) 24.dp else 16.dp)
+                                .offset(y = (if (isPortrait) 36 else 18).dp)
                         )
                     } else {
                         FilledTonalButton(
                             contentPadding = PaddingValues(8.dp),
                             onClick = {
                                 viewModel.purchasePremium(purchaseHelper)
-//                                showPremiumModal = true
                             },
                             modifier = Modifier
-                                .offset(y = (36).dp)  // Adjust this value to control overlap
-
+                                .offset(y = (if (isPortrait) 36 else 18).dp)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -78,15 +82,13 @@ fun CustomNavigationDrawer(
                                 Image(
                                     painter = painterResource(id = R.drawable.crown),
                                     contentDescription = "Crown",
-                                    modifier = Modifier
-                                        .size(16.dp)
+                                    modifier = Modifier.size(if (isPortrait) 16.dp else 8.dp)
                                 )
-                                Text(stringResource(R.string.unlock_premium))
+                                Text(stringResource(R.string.unlock_premium), fontSize = (if (isPortrait) 16.sp else 12.sp))
                                 Image(
                                     painter = painterResource(id = R.drawable.crown),
                                     contentDescription = "Crown",
-                                    modifier = Modifier
-                                        .size(16.dp)
+                                    modifier = Modifier.size(if (isPortrait) 16.dp else 8.dp)
                                 )
                             }
                         }
@@ -94,148 +96,123 @@ fun CustomNavigationDrawer(
                     Image(
                         painter = painterResource(id = R.mipmap.ic_launcher_foreground),
                         contentDescription = "App Logo",
-                        modifier = Modifier.size(150.dp)
+                        modifier = Modifier.size(if (isPortrait) 150.dp else 100.dp)
                     )
                 }
                 HorizontalDivider()
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(if (isPortrait) 16.dp else 0.dp))
 
-                NavigationItem(
-                    icon = Icons.Outlined.Home,
-                    label = stringResource(R.string.home),
-                    isSelected = currentRoute == Screens.HomeScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.HomeScreen.route,
-                            scope
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = (if (isPortrait) 0 else 16).dp)
+                ) {
+                    item {
+                        NavigationItem(
+                            icon = Icons.Outlined.Home,
+                            label = stringResource(R.string.home),
+                            isSelected = currentRoute == Screens.HomeScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.HomeScreen.route,
+                                    scope
+                                )
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        NavigationItem(
+                            icon = Icons.Outlined.QueryStats,
+                            label = stringResource(R.string.statistics),
+                            isSelected = currentRoute == Screens.StatisticsScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.StatisticsScreen.route,
+                                    scope
+                                )
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        NavigationItem(
+                            icon = Icons.Outlined.FolderCopy,
+                            label = stringResource(R.string.shelves),
+                            isSelected = currentRoute == Screens.ShelvesScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.ShelvesScreen.route,
+                                    scope
+                                )
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        NavigationItem(
+                            icon = Icons.AutoMirrored.Outlined.StickyNote2,
+                            label = stringResource(R.string.notes),
+                            isSelected = currentRoute == Screens.NotesScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.NotesScreen.route,
+                                    scope
+                                )
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        NavigationItem(
+                            icon = Icons.Outlined.BorderColor,
+                            label = stringResource(R.string.highlights_underlines),
+                            isSelected = currentRoute == Screens.AnnotationsScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.AnnotationsScreen.route,
+                                    scope
+                                )
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        NavigationItem(
+                            icon = Icons.Outlined.Settings,
+                            label = stringResource(R.string.settings),
+                            isSelected = currentRoute == Screens.SettingsScreen.route,
+                            onClick = {
+                                navigateIfNeeded(
+                                    navController,
+                                    currentRoute,
+                                    drawerState,
+                                    Screens.SettingsScreen.route,
+                                    scope
+                                )
+                            }
                         )
                     }
-                )
-                Spacer(Modifier.height(16.dp))
-
-                //NavigationItem(
-                //    icon = Icons.Outlined.Language,
-                //    label = stringResource(R.string.online_books),
-                //    isSelected = currentRoute == Screens.OnlineBooksScreen.route,
-                //    onClick = {
-                //        navigateIfNeeded(
-                //            navController,
-                //            currentRoute,
-                //            drawerState,
-                //            Screens.OnlineBooksScreen.route,
-                //            scope
-                //        )
-                //    }
-                //)
-                //Spacer(Modifier.height(16.dp))
-
-
-                NavigationItem(
-                    icon = Icons.Outlined.QueryStats,
-                    label = stringResource(R.string.statistics),
-                    isSelected = currentRoute == Screens.StatisticsScreen.route,
-                    onClick = {
-                        //if (appPreferences.isPremium) {
-                            navigateIfNeeded(
-                                navController,
-                                currentRoute,
-                                drawerState,
-                                Screens.StatisticsScreen.route,
-                                scope
-                            )
-                        //} else {
-                          //  viewModel.purchasePremium(purchaseHelper)
-//                            showPremiumModal = true
-//                            scope.launch {
-//                                drawerState.close()
-//                            }
-                        //}
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-
-
-                NavigationItem(
-                    icon = Icons.Outlined.FolderCopy,
-                    label = stringResource(R.string.shelves),
-                    isSelected = currentRoute == Screens.ShelvesScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.ShelvesScreen.route,
-                            scope
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-
-
-                NavigationItem(
-                    icon = Icons.AutoMirrored.Outlined.StickyNote2,
-                    label = stringResource(R.string.notes),
-                    isSelected = currentRoute == Screens.NotesScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.NotesScreen.route,
-                            scope
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-
-
-                NavigationItem(
-                    icon = Icons.Outlined.BorderColor,
-                    label = stringResource(R.string.highlights_underlines),
-                    isSelected = currentRoute == Screens.AnnotationsScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.AnnotationsScreen.route,
-                            scope
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-
-
-                NavigationItem(
-                    icon = Icons.Outlined.Settings,
-                    label = stringResource(R.string.settings),
-                    isSelected = currentRoute == Screens.SettingsScreen.route,
-                    onClick = {
-                        navigateIfNeeded(
-                            navController,
-                            currentRoute,
-                            drawerState,
-                            Screens.SettingsScreen.route,
-                            scope
-                        )
-                    }
-                )
+                }
             }
         }
     ) {
         content()
     }
-
-
-//    if (showPremiumModal) {
-//        PremiumModal(
-//            purchaseHelper = purchaseHelper,
-//            hidePremiumModal = { showPremiumModal = false }
-//        )
-//    }
 }
 
 @Composable
@@ -246,16 +223,6 @@ private fun NavigationItem(
     onClick: () -> Unit
 ) {
     NavigationDrawerItem(
-//        shape = RoundedCornerShape(16.dp),
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(horizontal = 12.dp)
-//            .shadow(
-//              elevation = 6.dp,
-//                shape = RoundedCornerShape(16.dp),
-//                clip = true
-//            )
-//        ,
         icon = { Icon(icon, contentDescription = label) },
         label = { Text(label) },
         selected = false,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.outlined.ViewAgenda
@@ -138,92 +139,116 @@ fun LayoutModal(
             }
 
 
-
             Spacer(modifier = Modifier.height(16.dp))
 
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ){
+               item {
 
-            AnimatedVisibility(
-                visible = (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        stringResource(R.string.grid_count, appPreferences.gridCount),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Slider(
-                        value = appPreferences.gridCount.toFloat(),
-                        onValueChange = { newValue ->
-                            val updatedValue = newValue.roundToInt().coerceIn(2, 5)
-                            viewModel.updateAppPreferences(appPreferences.copy(gridCount = updatedValue))
-                        },
-                        valueRange = 2f..5f,
-                        steps = 2,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SettingsSwitch(
-                        title = stringResource(R.string.cover_only),
-                        checked = appPreferences.homeLayout == Layout.CoverOnly,
-                        onCheckedChange = { newValue ->
-                            viewModel.updateAppPreferences(appPreferences.copy(homeLayout = if (newValue) Layout.CoverOnly else Layout.Grid))
+                   AnimatedVisibility(
+                       visible = (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly)
+                   ) {
+                       Column(
+                           horizontalAlignment = Alignment.CenterHorizontally
+                       ) {
+                           Text(
+                               stringResource(R.string.grid_count, appPreferences.gridCount),
+                               style = MaterialTheme.typography.titleMedium
+                           )
+                           Slider(
+                               value = appPreferences.gridCount.toFloat(),
+                               onValueChange = { newValue ->
+                                   val updatedValue = newValue.roundToInt().coerceIn(2, 5)
+                                   viewModel.updateAppPreferences(appPreferences.copy(gridCount = updatedValue))
+                               },
+                               valueRange = 2f..5f,
+                               steps = 2,
+                           )
+                           Spacer(modifier = Modifier.height(8.dp))
+                           SettingsSwitch(
+                               title = stringResource(R.string.cover_only),
+                               checked = appPreferences.homeLayout == Layout.CoverOnly,
+                               onCheckedChange = { newValue ->
+                                   viewModel.updateAppPreferences(appPreferences.copy(homeLayout = if (newValue) Layout.CoverOnly else Layout.Grid))
+                               }
+                           )
+                       }
+
+                   }
+               }
+
+
+
+
+
+                item {
+
+                    AnimatedVisibility(
+                        visible = appPreferences.homeLayout == Layout.List
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            SettingsSwitch(
+                                title = stringResource(R.string.show_reading_status),
+                                checked = appPreferences.showReadingStatus,
+                                onCheckedChange = {
+                                    viewModel.updateAppPreferences(
+                                        appPreferences.copy(
+                                            showReadingStatus = it
+                                        )
+                                    )
+                                }
+                            )
+                            SettingsSwitch(
+                                title = stringResource(R.string.show_reading_dates),
+                                checked = appPreferences.showReadingDates,
+                                onCheckedChange = {
+                                    viewModel.updateAppPreferences(
+                                        appPreferences.copy(
+                                            showReadingDates = it
+                                        )
+                                    )
+                                }
+                            )
                         }
+
+
+                    }
+                }
+
+
+
+                item {
+
+                    SettingsSwitch(
+                        title = stringResource(R.string.show_ratings),
+                        checked = appPreferences.showRating,
+                        onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showRating = it)) }
                     )
                 }
 
-            }
 
-            AnimatedVisibility(
-                visible = appPreferences.homeLayout == Layout.List
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                item {
                     SettingsSwitch(
-                        title = stringResource(R.string.show_reading_status),
-                        checked = appPreferences.showReadingStatus,
-                        onCheckedChange = {
-                            viewModel.updateAppPreferences(
-                                appPreferences.copy(
-                                    showReadingStatus = it
-                                )
-                            )
-                        }
-                    )
-                    SettingsSwitch(
-                        title = stringResource(R.string.show_reading_dates),
-                        checked = appPreferences.showReadingDates,
-                        onCheckedChange = {
-                            viewModel.updateAppPreferences(
-                                appPreferences.copy(
-                                    showReadingDates = it
-                                )
-                            )
-                        }
+                        title = stringResource(R.string.show_pdf_label),
+                        checked = appPreferences.showPdfLabel,
+                        onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showPdfLabel = it)) }
                     )
                 }
 
 
+                item {
+                    SettingsSwitch(
+                        title = stringResource(R.string.show_entries),
+                        checked = appPreferences.showEntries,
+                        onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showEntries = it)) }
+                    )
+                }
             }
 
-            SettingsSwitch(
-                title = stringResource(R.string.show_ratings),
-                checked = appPreferences.showRating,
-                onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showRating = it)) }
-            )
-
-            SettingsSwitch(
-                title = stringResource(R.string.show_pdf_label),
-                checked = appPreferences.showPdfLabel,
-                onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showPdfLabel = it)) }
-            )
-
-
-            SettingsSwitch(
-                title = stringResource(R.string.show_entries),
-                checked = appPreferences.showEntries,
-                onCheckedChange = { viewModel.updateAppPreferences(appPreferences.copy(showEntries = it)) }
-            )
         }
     }
 }

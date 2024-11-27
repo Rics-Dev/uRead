@@ -2,6 +2,7 @@ package com.ricdev.uread.presentation.home.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,7 +44,7 @@ fun SortFilterModal(
                 .fillMaxWidth()
         ) {
             TabRow(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow ,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                 selectedTabIndex = selectedTab
             ) {
                 Tab(
@@ -88,7 +89,10 @@ fun FilterContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(stringResource(R.string.reading_status), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.reading_status),
+                style = MaterialTheme.typography.titleMedium
+            )
             Row(
                 modifier = Modifier,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -97,7 +101,7 @@ fun FilterContent(
                     ReadingStatus.NOT_STARTED to stringResource(R.string.not_started),
                     ReadingStatus.IN_PROGRESS to stringResource(R.string.in_progress),
                     ReadingStatus.FINISHED to stringResource(R.string.finished),
-                ).forEach{ (readingStatus, label) ->
+                ).forEach { (readingStatus, label) ->
                     val isSelected = readingStatus in appPreferences.readingStatus
 
                     ElevatedButton(
@@ -135,7 +139,7 @@ fun FilterContent(
                 listOf(
                     FileType.EPUB to "EPUB",
                     FileType.PDF to "PDF",
-                ).forEach{ (fileType, label) ->
+                ).forEach { (fileType, label) ->
                     val isSelected = fileType in appPreferences.fileTypes
 
                     ElevatedButton(
@@ -162,8 +166,6 @@ fun FilterContent(
             }
 
 
-
-
         }
     }
 }
@@ -174,7 +176,7 @@ fun SortContent(
     appPreferences: AppPreferences,
     viewModel: HomeViewModel
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
@@ -182,109 +184,129 @@ fun SortContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            listOf(
-                SortOrder.ASCENDING to Icons.Default.ArrowUpward,
-                SortOrder.DESCENDING to Icons.Default.ArrowDownward,
-            ).forEach { (sortOrder, icon) ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = sortOrder.name.lowercase(Locale.getDefault()).replaceFirstChar { it.uppercase(Locale.getDefault()) },
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                    ElevatedButton(
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (appPreferences.sortOrder == sortOrder) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            },
-                            contentColor = if (appPreferences.sortOrder == sortOrder) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
-                        ),
-                        onClick = {
-                            viewModel.updateAppPreferences(appPreferences.copy(sortOrder = sortOrder))
-                            viewModel.sortBooks(appPreferences.sortBy, sortOrder)
-                        }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                listOf(
+                    SortOrder.ASCENDING to Icons.Default.ArrowUpward,
+                    SortOrder.DESCENDING to Icons.Default.ArrowDownward,
+                ).forEach { (sortOrder, icon) ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(imageVector = icon, contentDescription = "Sort order")
+                        Text(
+                            text = sortOrder.name.lowercase(Locale.getDefault())
+                                .replaceFirstChar { it.uppercase(Locale.getDefault()) },
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        ElevatedButton(
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (appPreferences.sortOrder == sortOrder) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                                contentColor = if (appPreferences.sortOrder == sortOrder) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            ),
+                            onClick = {
+                                viewModel.updateAppPreferences(appPreferences.copy(sortOrder = sortOrder))
+                                viewModel.sortBooks(appPreferences.sortBy, sortOrder)
+                            }
+                        ) {
+                            Icon(imageVector = icon, contentDescription = "Sort order")
+                        }
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        SortListItem(
-            text = stringResource(R.string.last_added),
-            selected = appPreferences.sortBy == SortOption.LAST_ADDED,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.LAST_ADDED))
-                viewModel.sortBooks(SortOption.LAST_ADDED, appPreferences.sortOrder)
-            }
-        )
+        item {
 
-        SortListItem(
-            text = stringResource(R.string.last_opened),
-            selected = appPreferences.sortBy == SortOption.LAST_OPENED,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.LAST_OPENED))
-                viewModel.sortBooks(SortOption.LAST_OPENED, appPreferences.sortOrder)
-            }
-        )
+            SortListItem(
+                text = stringResource(R.string.last_added),
+                selected = appPreferences.sortBy == SortOption.LAST_ADDED,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.LAST_ADDED))
+                    viewModel.sortBooks(SortOption.LAST_ADDED, appPreferences.sortOrder)
+                }
+            )
+        }
 
+        item {
 
-        SortListItem(
-            text = stringResource(R.string.title),
-            selected = appPreferences.sortBy == SortOption.TITLE,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.TITLE))
-                viewModel.sortBooks(SortOption.TITLE, appPreferences.sortOrder)
-            }
-        )
+            SortListItem(
+                text = stringResource(R.string.last_opened),
+                selected = appPreferences.sortBy == SortOption.LAST_OPENED,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.LAST_OPENED))
+                    viewModel.sortBooks(SortOption.LAST_OPENED, appPreferences.sortOrder)
+                }
+            )
+        }
 
-        SortListItem(
-            text = stringResource(R.string.author),
-            selected = appPreferences.sortBy == SortOption.AUTHOR,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.AUTHOR))
-                viewModel.sortBooks(SortOption.AUTHOR, appPreferences.sortOrder)
-            }
-        )
-
-        SortListItem(
-            text = stringResource(R.string.rating),
-            selected = appPreferences.sortBy == SortOption.RATING,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.RATING))
-                viewModel.sortBooks(SortOption.RATING, appPreferences.sortOrder)
-            }
-        )
+        item {
+            SortListItem(
+                text = stringResource(R.string.title),
+                selected = appPreferences.sortBy == SortOption.TITLE,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.TITLE))
+                    viewModel.sortBooks(SortOption.TITLE, appPreferences.sortOrder)
+                }
+            )
+        }
 
 
-        SortListItem(
-            text = stringResource(R.string.progression),
-            selected = appPreferences.sortBy == SortOption.PROGRESSION,
-            onClick = {
-                viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.PROGRESSION))
-                viewModel.sortBooks(SortOption.PROGRESSION, appPreferences.sortOrder)
-            }
-        )
+
+        item {
+
+            SortListItem(
+                text = stringResource(R.string.author),
+                selected = appPreferences.sortBy == SortOption.AUTHOR,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.AUTHOR))
+                    viewModel.sortBooks(SortOption.AUTHOR, appPreferences.sortOrder)
+                }
+            )
+        }
+
+
+
+
+        item {
+
+            SortListItem(
+                text = stringResource(R.string.rating),
+                selected = appPreferences.sortBy == SortOption.RATING,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.RATING))
+                    viewModel.sortBooks(SortOption.RATING, appPreferences.sortOrder)
+                }
+            )
+        }
+
+
+        item {
+            SortListItem(
+                text = stringResource(R.string.progression),
+                selected = appPreferences.sortBy == SortOption.PROGRESSION,
+                onClick = {
+                    viewModel.updateAppPreferences(appPreferences.copy(sortBy = SortOption.PROGRESSION))
+                    viewModel.sortBooks(SortOption.PROGRESSION, appPreferences.sortOrder)
+                }
+            )
+        }
+
     }
 }
-
-
-
-
 
 
 @Composable
