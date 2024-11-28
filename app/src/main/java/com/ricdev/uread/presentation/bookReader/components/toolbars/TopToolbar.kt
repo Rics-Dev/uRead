@@ -132,6 +132,7 @@ fun TopToolbar(
             ) {
                 if (isTtsToggled && !isTtsOn) {
                     CircularProgressIndicator(
+                        color = Color.Black,
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp
                     )

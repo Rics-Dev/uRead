@@ -776,6 +776,7 @@ fun EpubReaderView(
         val isTtsPlaying by viewModel.isTtsPlaying.collectAsStateWithLifecycle()
         val ttsSpeed by viewModel.ttsSpeed.collectAsStateWithLifecycle()
         val ttsPitch by viewModel.ttsPitch.collectAsStateWithLifecycle()
+        val ttsLanguage by viewModel.ttsLanguage.collectAsStateWithLifecycle()
 
 
         //Bookmark
@@ -808,7 +809,6 @@ fun EpubReaderView(
 
 
 
-        // TopToolbar with extra top padding
         AnimatedVisibility(
             visible = areToolbarsVisible,
             enter = slideInVertically(initialOffsetY = { -it }),
@@ -858,6 +858,7 @@ fun EpubReaderView(
             isTtsPlaying = isTtsPlaying,
             speed = ttsSpeed,
             pitch = ttsPitch,
+            language = ttsLanguage,
             onPlay = {
                 ttsNavigator?.play()
                 viewModel.setTtsPlaying(true)
@@ -871,6 +872,7 @@ fun EpubReaderView(
             },
             onSpeedChange = { viewModel.setTtsSpeed(it.toDouble()) },
             onPitchChange = { viewModel.setTtsPitch(it.toDouble()) },
+            onLanguageChange = { viewModel.setTtsLanguage(it) },
             onSkipToNextUtterance = { viewModel.skipToNextUtterance() },
             onSkipToPreviousUtterance = { viewModel.skipToPreviousUtterance() }
         )

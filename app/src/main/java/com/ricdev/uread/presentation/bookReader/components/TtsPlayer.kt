@@ -24,15 +24,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,8 +55,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ricdev.uread.R
+import com.ricdev.uread.data.model.AppLanguage
+import org.readium.r2.shared.util.Language
 
 
 @Composable
@@ -60,11 +69,13 @@ fun TtsPlayer(
     isTtsPlaying: Boolean,
     speed: Double,
     pitch: Double,
+    language: Language,
     onPlay: () -> Unit,
     onPause: () -> Unit,
     onEnd: () -> Unit,
     onSpeedChange: (Float) -> Unit,
     onPitchChange: (Float) -> Unit,
+    onLanguageChange: (Language) -> Unit,
     onSkipToNextUtterance: () -> Unit,
     onSkipToPreviousUtterance: () -> Unit
 ) {
@@ -76,6 +87,7 @@ fun TtsPlayer(
 
 
     var showTtsSettings by remember { mutableStateOf(false) }
+    var showLanguageSettings by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedVisibility(
@@ -122,7 +134,7 @@ fun TtsPlayer(
 
                         // Main content
                         AnimatedVisibility(
-                            visible = !showTtsSettings
+                            visible = !showTtsSettings && !showLanguageSettings
                         ) {
                             MainTtsPlayer(
                                 heightAnimation = heightAnimation,
@@ -146,8 +158,27 @@ fun TtsPlayer(
                                 pitch = pitch,
                                 onSpeedChange = onSpeedChange,
                                 onPitchChange = onPitchChange,
-                                onEnd = onEnd,
-                                hideTtsSettings = { showTtsSettings = false }
+                                hideTtsSettings = { showTtsSettings = false },
+                                showLanguageSettings = {
+                                    showTtsSettings = false
+                                    showLanguageSettings = true
+                                }
+                            )
+                        }
+
+
+
+                        AnimatedVisibility(
+                            visible = showLanguageSettings
+                        ) {
+                            LanguageSettings(
+                                heightAnimation = heightAnimation,
+                                currentLanguage = language,
+                                onLanguageChange = onLanguageChange,
+                                onClose = {
+                                    showLanguageSettings = false
+                                    showTtsSettings = true
+                                },
                             )
                         }
                     }
@@ -282,13 +313,15 @@ fun TtsSettings(
     pitch: Double,
     onSpeedChange: (Float) -> Unit,
     onPitchChange: (Float) -> Unit,
-    onEnd: () -> Unit,
     hideTtsSettings: () -> Unit,
+    showLanguageSettings: () -> Unit,
 ) {
+
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp * heightAnimation)
+            .height(300.dp * heightAnimation)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -300,30 +333,38 @@ fun TtsSettings(
             // Speed control
             Text(
                 text = stringResource(R.string.speed_x, speed.format(2)),
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
             Slider(
                 value = speed.toFloat(),
                 onValueChange = onSpeedChange,
                 valueRange = 0.25f..1.75f,
-                steps = 5
+                steps = 5,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Pitch control
             Text(
                 text = stringResource(R.string.pitch_x, pitch.format(2)),
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
             Slider(
                 value = pitch.toFloat(),
                 onValueChange = onPitchChange,
                 valueRange = 0.25f..1.75f,
-                steps = 5
+                steps = 5,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Action buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -332,7 +373,7 @@ fun TtsSettings(
                 ElevatedButton(
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(48.dp),
                     onClick = hideTtsSettings,
                 ) {
                     Icon(
@@ -341,28 +382,115 @@ fun TtsSettings(
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                // Stop button
+                // language button
                 ElevatedButton(
                     contentPadding = PaddingValues(
                         vertical = 8.dp,
                         horizontal = 16.dp
                     ),
-                    onClick = onEnd,
+                    onClick = showLanguageSettings,
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Stop,
-                        contentDescription = "Stop TTS"
+                        imageVector = Icons.Rounded.Language,
+                        contentDescription = "Change tts language"
                     )
                     Text(
-                        text = stringResource(R.string.stop),
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = stringResource(R.string.language),
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
         }
     }
 }
+
+
+@Composable
+fun LanguageSettings(
+    heightAnimation: Float,
+    currentLanguage: Language,
+    onLanguageChange: (Language) -> Unit,
+    onClose: () -> Unit
+) {
+    val languages = AppLanguage.entries.filter { it != AppLanguage.SYSTEM }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp * heightAnimation)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                ElevatedButton(
+                    contentPadding = PaddingValues(0.dp),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.size(48.dp),
+                    onClick = onClose,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowBackIosNew,
+                        contentDescription = "Hide TTS settings",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .wrapContentSize(Alignment.Center),
+                    text = "",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            LazyColumn {
+                items(languages) { lang ->
+                    val isSelected = lang.code == currentLanguage.code
+                    ElevatedButton(
+                        onClick = {
+                            onLanguageChange(Language(lang.code))
+                            onClose()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        colors = if (isSelected) {
+                            ButtonDefaults.elevatedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            ButtonDefaults.elevatedButtonColors()
+                        }
+                    ) {
+                        Text(text = lang.displayName)
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "selected language",
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 // Helper function to format Double to 2 decimal places
 fun Double.format(digits: Int) = "%.${digits}f".format(this)

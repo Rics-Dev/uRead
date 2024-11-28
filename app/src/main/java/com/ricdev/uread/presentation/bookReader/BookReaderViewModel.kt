@@ -149,11 +149,14 @@ class BookReaderViewModel @Inject constructor(
     val ttsNavigator: StateFlow<TtsNavigator<AndroidTtsSettings, AndroidTtsPreferences, AndroidTtsEngine.Error, AndroidTtsEngine.Voice>?> =
         _ttsNavigator.asStateFlow()
 
-    private val _ttsSpeed = MutableStateFlow<Double>(1.0)
+    private val _ttsSpeed = MutableStateFlow(1.0)
     val ttsSpeed: StateFlow<Double> = _ttsSpeed.asStateFlow()
+
     private val _ttsPitch = MutableStateFlow(1.0)
     val ttsPitch: StateFlow<Double> = _ttsPitch.asStateFlow()
 
+    private val _ttsLanguage = MutableStateFlow(Language("en"))
+    val ttsLanguage: StateFlow<Language> = _ttsLanguage.asStateFlow()
 
     private var isReadingSessionActive = false
     private var lastLocatorChangeTime = 0L
@@ -305,14 +308,24 @@ class BookReaderViewModel @Inject constructor(
         updateTtsPreferences()
     }
 
+
+    fun setTtsLanguage(language: Language) {
+        _ttsLanguage.value = language
+        updateTtsPreferences()
+    }
+
+
+
     private fun updateTtsPreferences() {
+        ttsNavigator.value?.pause()
         ttsNavigator.value?.submitPreferences(
             AndroidTtsPreferences(
                 speed = _ttsSpeed.value,
                 pitch = _ttsPitch.value,
-                language = Language("en") // Assuming English is the default language
+                language = _ttsLanguage.value
             )
         )
+        ttsNavigator.value?.play()
     }
 
     fun skipToNextUtterance() {

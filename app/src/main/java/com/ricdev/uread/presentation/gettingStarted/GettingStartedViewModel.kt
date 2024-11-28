@@ -52,7 +52,8 @@ class GettingStartedViewModel @Inject constructor(
 
     fun skipGettingStarted() {
         viewModelScope.launch {
-            updateAppPreferences(appPreferences.value.copy(isFirstLaunch = false))
+            val updatedPreferences = appPreferences.value.copy(isFirstLaunch = false)
+            updateAppPreferences(updatedPreferences)
         }
     }
 }
