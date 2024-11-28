@@ -3,6 +3,7 @@ package com.ricdev.uread.presentation.settings
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ricdev.uread.data.model.AppLanguage
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import com.ricdev.uread.util.LanguageHelper
@@ -70,14 +71,21 @@ class SettingsViewModel @Inject constructor(
 
 
 
-    fun updateLanguage(language: String) {
+//    fun updateLanguage(language: String) {
+//        viewModelScope.launch {
+//            appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(language = language))
+//            languageHelper.changeLanguage(getApplication(), language)
+//        }
+//    }
+
+    fun updateLanguage(languageCode: String) {
         viewModelScope.launch {
-            appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(language = language))
+            val language = AppLanguage.fromCode(languageCode)
+//            appPreferencesUtil.updateLanguage(language.code)
+            appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(language = language.code))
             languageHelper.changeLanguage(getApplication(), language)
         }
     }
-
-
 
 
 

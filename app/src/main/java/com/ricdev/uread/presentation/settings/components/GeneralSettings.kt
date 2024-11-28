@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.ricdev.uread.R
+import com.ricdev.uread.data.model.AppLanguage
 import com.ricdev.uread.presentation.settings.SettingsViewModel
 
 
@@ -193,64 +194,118 @@ fun GeneralSettings(
                     )
                 },
                 trailingContent = {
-                    Text(
-                        text = when (appPreferences.language) {
-                            "system" -> stringResource(R.string.system_default)
-                            "en" -> "English"
-                            "fr" -> "Français"
-                            "de" -> "Deutsch"
-                            "it" -> "Italiano"
-                            "es" -> "Español"
-                            else -> appPreferences.language
-                        },
-                        modifier = Modifier.clickable { isLanguageDropdownExpanded = true }
-                    )
-                    DropdownMenu(
-                        expanded = isLanguageDropdownExpanded,
-                        onDismissRequest = { isLanguageDropdownExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.system_default)) },
-                            onClick = {
-                                viewModel.updateLanguage("system")
-                                isLanguageDropdownExpanded = false
-                            }
+//                    Text(
+//                        text = when (appPreferences.language) {
+//                            "system" -> stringResource(R.string.system_default)
+//                            "en" -> "English"
+//                            "fr" -> "Français"
+//                            "de" -> "Deutsch"
+//                            "it" -> "Italiano"
+//                            "es" -> "Español"
+//                            "tr" -> "Türkçe"
+//                            "zh" -> "中文"
+//                            "ja" -> "日本語"
+//                            "ru" -> "Русский"
+//                            else -> appPreferences.language
+//                        },
+//                        modifier = Modifier.clickable { isLanguageDropdownExpanded = true }
+//                    )
+//                    DropdownMenu(
+//                        expanded = isLanguageDropdownExpanded,
+//                        onDismissRequest = { isLanguageDropdownExpanded = false }
+//                    ) {
+//                        DropdownMenuItem(
+//                            text = { Text(stringResource(R.string.system_default)) },
+//                            onClick = {
+//                                viewModel.updateLanguage("system")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("English") },
+//                            onClick = {
+//                                viewModel.updateLanguage("en")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("Français") },
+//                            onClick = {
+//                                viewModel.updateLanguage("fr")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("Deutsch") },
+//                            onClick = {
+//                                viewModel.updateLanguage("de")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text( "Italiano") },
+//                            onClick = {
+//                                viewModel.updateLanguage("it")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("Español") },
+//                            onClick = {
+//                                viewModel.updateLanguage("es")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("Türkçe") },
+//                            onClick = {
+//                                viewModel.updateLanguage("tr")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("中文") },
+//                            onClick = {
+//                                viewModel.updateLanguage("zh")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("日本語") },
+//                            onClick = {
+//                                viewModel.updateLanguage("ja")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                        DropdownMenuItem(
+//                            text = { Text("Русский") },
+//                            onClick = {
+//                                viewModel.updateLanguage("ru")
+//                                isLanguageDropdownExpanded = false
+//                            }
+//                        )
+//                    }
+//                },
+
+                    Column {
+                        Text(
+                            text = AppLanguage.fromCode(appPreferences.language).displayName,
+                            modifier = Modifier.clickable { isLanguageDropdownExpanded = true }
                         )
-                        DropdownMenuItem(
-                            text = { Text("English") },
-                            onClick = {
-                                viewModel.updateLanguage("en")
-                                isLanguageDropdownExpanded = false
+                        DropdownMenu(
+                            expanded = isLanguageDropdownExpanded,
+                            onDismissRequest = { isLanguageDropdownExpanded = false }
+                        ) {
+                            AppLanguage.entries.forEach { language ->
+                                DropdownMenuItem(
+                                    text = { Text(language.displayName) },
+                                    onClick = {
+                                        viewModel.updateLanguage(language.code)
+                                        isLanguageDropdownExpanded = false
+                                    }
+                                )
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Français") },
-                            onClick = {
-                                viewModel.updateLanguage("fr")
-                                isLanguageDropdownExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Deutsch") },
-                            onClick = {
-                                viewModel.updateLanguage("de")
-                                isLanguageDropdownExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text( "Italiano") },
-                            onClick = {
-                                viewModel.updateLanguage("it")
-                                isLanguageDropdownExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Español") },
-                            onClick = {
-                                viewModel.updateLanguage("es")
-                                isLanguageDropdownExpanded = false
-                            }
-                        )
+                        }
                     }
                 },
                 modifier = Modifier.clickable { isLanguageDropdownExpanded = true }

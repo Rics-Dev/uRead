@@ -164,7 +164,7 @@
     <string name="what_s_new">What\'s new</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="libraries">Libraries</string>
-    <string name="feature_request">Feature Request</string>
+    <string name="feature_request">Feature Request / Bug Report</string>
     <string name="selected" tools:override="true">%1$s selected</string>
     <string name="books_deleted_successfully">Books deleted successfully</string>
     <string name="books_restored_successfully">Books restored successfully</string>

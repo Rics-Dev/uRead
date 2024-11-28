@@ -1,8 +1,10 @@
 package com.ricdev.uread
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ricdev.uread.data.model.AppLanguage
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import com.ricdev.uread.navigation.Screens
@@ -39,11 +41,18 @@ class SplashViewModel @Inject constructor(
             try {
                 val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
                 determineStartDestination(initialPreferences)
-
                 _appPreferences.value = initialPreferences
-                languageHelper.changeLanguage(getApplication(), initialPreferences.language)
+
+
+
+//                languageHelper.changeLanguage(getApplication(), initialPreferences.language)
+
+
+                // Experimental
+                languageHelper.changeLanguage(getApplication(), AppLanguage.fromCode(initialPreferences.language))
+
             } catch (e: Exception) {
-                // Handle potential exceptions (e.g., log error, show error message)
+                Log.e("LanguageViewModel", "Initialization error", e)
             }
         }
 

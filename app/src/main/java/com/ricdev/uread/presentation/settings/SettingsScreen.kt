@@ -1,7 +1,10 @@
 package com.ricdev.uread.presentation.settings
 
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,13 +13,16 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DeleteOutline
@@ -312,48 +318,100 @@ fun SettingsScreen(
                 }
 
 
-                if (!appPreferences.isPremium) {
-                    item {
-                        ListItem(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .shadow(
-                                    elevation = 4.dp,
-                                    shape = RoundedCornerShape(16.dp),
-                                    spotColor = if (!isDarkTheme) {
-                                        Color.Black.copy(alpha = 0.8f)
-                                    } else {
-                                        Color.Black.copy(alpha = 0.5f)
-                                    }
-                                )
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(elevationOverlay)
-                                .clickable(onClick = {
-                                    viewModel.purchasePremium(purchaseHelper)
-                                })
-                                .fillMaxWidth(),
-                            headlineContent = {
-                                Text(
-                                    text = stringResource(R.string.remove_ads),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            leadingContent = {
-                                Icon(
-                                    Icons.Default.Block,
-                                    contentDescription = stringResource(R.string.remove_ads),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent,
+//                if (!appPreferences.isPremium) {
+//                    item {
+//                        ListItem(
+//                            modifier = Modifier
+//                                .padding(horizontal = 16.dp, vertical = 8.dp)
+//                                .shadow(
+//                                    elevation = 4.dp,
+//                                    shape = RoundedCornerShape(16.dp),
+//                                    spotColor = if (!isDarkTheme) {
+//                                        Color.Black.copy(alpha = 0.8f)
+//                                    } else {
+//                                        Color.Black.copy(alpha = 0.5f)
+//                                    }
+//                                )
+//                                .clip(RoundedCornerShape(16.dp))
+//                                .background(elevationOverlay)
+//                                .clickable(onClick = {
+//                                    viewModel.purchasePremium(purchaseHelper)
+//                                })
+//                                .fillMaxWidth(),
+//                            headlineContent = {
+//                                Text(
+//                                    text = stringResource(R.string.remove_ads),
+//                                    color = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            },
+//                            leadingContent = {
+//                                Icon(
+//                                    Icons.Default.Block,
+//                                    contentDescription = stringResource(R.string.remove_ads),
+//                                    tint = MaterialTheme.colorScheme.onSurface
+//                                )
+//                            },
+//                            colors = ListItemDefaults.colors(
+//                                containerColor = Color.Transparent,
+//                            )
+//                        )
+//                    }
+//                }
+
+
+
+
+
+                item {
+
+                    ListItem(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = if (!isDarkTheme) {
+                                    Color.Black.copy(alpha = 0.8f)
+                                } else {
+                                    Color.Black.copy(alpha = 0.5f)
+                                }
                             )
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(elevationOverlay)
+                            .clickable(onClick = {
+                                try {
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://github.com/Rics-Dev/uRead/issues/new")
+                                    )
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast
+                                        .makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            })
+                            .fillMaxWidth(),
+                        headlineContent = {
+                            Text(
+                                text = stringResource(R.string.feature_request),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        leadingContent = {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.Send,
+                                contentDescription = "Feature Request",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
                         )
-                    }
+                    )
+
+
                 }
-
-
-
 
 
                 item {

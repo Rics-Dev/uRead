@@ -5,21 +5,61 @@ import android.content.Context
 import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.ricdev.uread.data.model.AppLanguage
 import java.util.Locale
 
+//class LanguageHelper {
+//    fun changeLanguage(context: Context, languageCode: String) {
+//        val locale = try{
+//            when (languageCode) {
+//                "system" -> Resources.getSystem().configuration.locales[0]
+//                else -> Locale.forLanguageTag(languageCode)
+//            }
+//        } catch (e: Exception){
+//            // Fallback to locale if invalid
+//            Resources.getSystem().configuration.locales[0]
+//        }
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
+//        } else {
+//            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
+//        }
+//    }
+//}
+
+
+
+//Experimental
 class LanguageHelper {
-    fun changeLanguage(context: Context, languageCode: String) {
-        val locale = when (languageCode) {
-            "system" -> Resources.getSystem().configuration.locales[0]
-            else -> Locale(languageCode)
+    fun changeLanguage(context: Context, language: AppLanguage) {
+        val locale = when (language) {
+            AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
+            else -> Locale.forLanguageTag(language.code)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
-        } else {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
+            } else {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
+            }
+        } catch (e: Exception) {
+            Log.e("LanguageHelper", "Failed to change language", e)
         }
+    }
+
+    // Context wrapper for more robust locale handling
+    fun updateBaseContextLocale(context: Context,language: AppLanguage): Context {
+        val locale = when (language) {
+            AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
+            else -> Locale.forLanguageTag(language.code)
+        }
+        val configuration = context.resources.configuration
+        configuration.setLocale(locale)
+        return context.createConfigurationContext(configuration)
     }
 }

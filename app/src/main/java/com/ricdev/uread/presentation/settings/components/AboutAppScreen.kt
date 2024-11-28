@@ -355,60 +355,13 @@ fun AboutAppScreen(
                         containerColor = Color.Transparent,
                     )
                 )
+                Spacer(modifier = Modifier.height(48.dp))
+
             }
 
 
 
-            item {
 
-                ListItem(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .shadow(
-                            elevation = 4.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            spotColor = if (!isDarkTheme.value!!) {
-                                Color.Black.copy(alpha = 0.8f)
-                            } else {
-                                Color.Black.copy(alpha = 0.5f)
-                            }
-                        )
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(elevationOverlay)
-                        .clickable(onClick = {
-                            try {
-                                val intent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://github.com/Rics-Dev/uRead/issues/new")
-                                )
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Toast
-                                    .makeText(context, "Unable to open GitHub", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        })
-                        .fillMaxWidth(),
-                    headlineContent = {
-                        Text(
-                            text = stringResource(R.string.feature_request),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    leadingContent = {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.Send,
-                            contentDescription = "Feature Request",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = Color.Transparent,
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
 
 
             item {

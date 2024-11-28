@@ -164,7 +164,7 @@
     <string name="what_s_new">Novità</string>
     <string name="privacy_policy">Informativa sulla privacy</string>
     <string name="libraries">Librerie</string>
-    <string name="feature_request">Richiesta di funzionalità</string>
+    <string name="feature_request">Richiesta di funzionalità / Segnalazione di bug</string>
     <string name="selected" tools:override="true">%1$s selezionati</string>
     <string name="books_deleted_successfully">Libri eliminati con successo</string>
     <string name="books_restored_successfully">Libri ripristinati con successo</string>
