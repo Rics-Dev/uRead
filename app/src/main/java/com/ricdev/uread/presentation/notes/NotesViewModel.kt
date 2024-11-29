@@ -1,6 +1,7 @@
 package com.ricdev.uread.presentation.notes
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ricdev.uread.data.model.AppPreferences

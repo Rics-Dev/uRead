@@ -392,6 +392,7 @@ class HomeViewModel
 
     fun updateAppPreferences(newPreferences: AppPreferences) {
         viewModelScope.launch {
+            Log.d("it's me", "the home viewModel")
             appPreferencesUtil.updateAppPreferences(newPreferences)
         }
     }
@@ -975,6 +976,7 @@ class HomeViewModel
             val currentPreferences = appPreferences.value
             if (currentPreferences.isPremium != isPremium) {
                 val updatedPreferences = currentPreferences.copy(isPremium = isPremium)
+                Log.d("it's me", "the home viewModel")
                 appPreferencesUtil.updateAppPreferences(updatedPreferences)
                 _appPreferences.value = updatedPreferences
             }

@@ -9,7 +9,6 @@ import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.source.local.AppPreferencesUtil
 import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.util.LanguageHelper
-import com.ricdev.uread.util.PurchaseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,35 +29,30 @@ class SplashViewModel @Inject constructor(
     private val _appPreferences = MutableStateFlow(AppPreferencesUtil.defaultPreferences)
     val appPreferences: StateFlow<AppPreferences> = _appPreferences.asStateFlow()
 
-
     private val _startDestination = MutableStateFlow<String?>(null)
     val startDestination: StateFlow<String?> = _startDestination.asStateFlow()
 
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
 
     init {
-        viewModelScope.launch {
-            try {
-                val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
-                determineStartDestination(initialPreferences)
-                _appPreferences.value = initialPreferences
-
-
-
-//                languageHelper.changeLanguage(getApplication(), initialPreferences.language)
-
-
-                // Experimental
-                languageHelper.changeLanguage(getApplication(), AppLanguage.fromCode(initialPreferences.language))
-
-            } catch (e: Exception) {
-                Log.e("LanguageViewModel", "Initialization error", e)
-            }
-        }
-
-        viewModelScope.launch {
-            appPreferencesUtil.appPreferencesFlow.collect { preferences ->
-                _appPreferences.value = preferences
+        if (!_isInitialized.value) {
+            viewModelScope.launch {
+                try {
+                    val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
+                    Log.d("SplashViewModel", "Initial preferences: $initialPreferences")
+                    determineStartDestination(initialPreferences)
+                    _appPreferences.value = initialPreferences
+                    languageHelper.changeLanguage(
+                        getApplication(),
+                        AppLanguage.fromCode(initialPreferences.language)
+                    )
+                } catch (e: Exception) {
+                    Log.e("SplashViewModel", "Initialization error", e)
+                } finally {
+                    _isInitialized.value = true
+                }
             }
         }
     }
@@ -72,18 +66,9 @@ class SplashViewModel @Inject constructor(
     }
 
 
-    fun purchasePremium(purchaseHelper: PurchaseHelper) {
-        purchaseHelper.makePurchase()
-        viewModelScope.launch {
-            purchaseHelper.isPremium.collect { isPremium ->
-                updatePremiumStatus(isPremium)
-            }
-        }
-    }
-
     fun updatePremiumStatus(isPremium: Boolean) {
         viewModelScope.launch {
-            val currentPreferences = appPreferences.value
+            val currentPreferences = appPreferencesUtil.appPreferencesFlow.first()
             if (currentPreferences.isPremium != isPremium) {
                 val updatedPreferences = currentPreferences.copy(isPremium = isPremium)
                 appPreferencesUtil.updateAppPreferences(updatedPreferences)
@@ -91,7 +76,6 @@ class SplashViewModel @Inject constructor(
             }
         }
     }
-
 }
 
 

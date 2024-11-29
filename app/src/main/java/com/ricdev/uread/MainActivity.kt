@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     val viewModel: SplashViewModel by viewModels()
+
     // experimental
     private val languageHelper = LanguageHelper()
 
@@ -39,15 +40,13 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         splashScreen.setKeepOnScreenCondition {
-            viewModel.startDestination.value == null
+            viewModel.startDestination.value == null || !viewModel.isInitialized.value
         }
 
         // Background initialization of MobileAds
@@ -61,16 +60,19 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
             val screen by viewModel.startDestination.collectAsStateWithLifecycle()
+            val isInitialized by viewModel.isInitialized.collectAsStateWithLifecycle()
 
-            UReadTheme(appPreferences = appPreferences) {
-                val navController = rememberNavController()
+            if (isInitialized) {
+                UReadTheme(appPreferences = appPreferences) {
+                    val navController = rememberNavController()
 
-                screen?.let {
-                    SetupNavGraph(
-                        navController = navController,
-                        startDestination = it,
-                        purchaseHelper = purchaseHelper,
-                    )
+                    screen?.let {
+                        SetupNavGraph(
+                            navController = navController,
+                            startDestination = it,
+                            purchaseHelper = purchaseHelper,
+                        )
+                    }
                 }
             }
         }

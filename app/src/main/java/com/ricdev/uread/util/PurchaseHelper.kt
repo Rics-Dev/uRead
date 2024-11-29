@@ -82,12 +82,19 @@ data class PurchaseHelper(val activity: Activity) {
 
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _statusText.value = "Billing Client Connected"
-                    queryProduct(productId)
-                    checkPurchaseStatus()
-                } else {
-                    _statusText.value = "Billing Client Connection Failure"
+                when (billingResult.responseCode) {
+                    BillingClient.BillingResponseCode.OK -> {
+                        _statusText.value = "Billing Client Connected"
+                        queryProduct(productId)
+                        checkPurchaseStatus()
+                    }
+                    BillingClient.BillingResponseCode.BILLING_UNAVAILABLE -> {
+                        _statusText.value = "Billing Unavailable"
+                        // Handle billing unavailability
+                    }
+                    else -> {
+                        _statusText.value = "Billing Client Connection Failed: ${billingResult.debugMessage}"
+                    }
                 }
             }
 
@@ -171,20 +178,34 @@ data class PurchaseHelper(val activity: Activity) {
 
 
     fun makePurchase() {
-        productDetails?.let { details ->
+        if (productDetails == null) {
+            _statusText.value = "Product details not available. Please try again."
+            return
+        }
+        try {
             val billingFlowParams = BillingFlowParams.newBuilder()
                 .setProductDetailsParamsList(
                     ImmutableList.of(
                         BillingFlowParams.ProductDetailsParams.newBuilder()
-                            .setProductDetails(details)
+                            .setProductDetails(productDetails!!)
                             .build()
                     )
                 )
                 .build()
 
-            billingClient.launchBillingFlow(activity, billingFlowParams)
-        } ?: run {
-            _statusText.value = "Product details not available. Please try again."
+            val billingResult = billingClient.launchBillingFlow(activity, billingFlowParams)
+
+            when (billingResult.responseCode) {
+                BillingClient.BillingResponseCode.OK -> {
+                    // Purchase flow started successfully
+                }
+                else -> {
+                    _statusText.value = "Failed to launch billing flow: ${billingResult.debugMessage}"
+                }
+            }
+        } catch (e: Exception) {
+            _statusText.value = "Error launching purchase: ${e.message}"
+            e.printStackTrace()
         }
     }
 

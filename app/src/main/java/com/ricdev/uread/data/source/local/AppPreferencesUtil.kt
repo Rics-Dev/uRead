@@ -1,6 +1,7 @@
 package com.ricdev.uread.data.source.local
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -73,6 +74,11 @@ class AppPreferencesUtil @Inject constructor(
 
 
     val appPreferencesFlow: Flow<AppPreferences> = dataStore.data.map { preferences ->
+        val isFirstLaunch = preferences[IS_FIRST_LAUNCH] ?: defaultPreferences.isFirstLaunch
+        Log.d("AppPreferencesUtil", "Reading preferences. isFirstLaunch: $isFirstLaunch")
+
+        val scanDirectories = preferences[SCAN_DIRECTORY] ?: defaultPreferences.scanDirectories
+        Log.d("AppPreferencesUtil", "Reading preferences. Scan directories: $scanDirectories")
         AppPreferences(
             isFirstLaunch = preferences[IS_FIRST_LAUNCH] ?: defaultPreferences.isFirstLaunch,
             scanDirectories = preferences[SCAN_DIRECTORY] ?: defaultPreferences.scanDirectories,
@@ -98,6 +104,8 @@ class AppPreferencesUtil @Inject constructor(
 
     suspend fun updateAppPreferences(newPreferences: AppPreferences) {
         dataStore.edit { preferences ->
+            Log.d("AppPreferencesUtil", "Updating preferences. isFirstLaunch: ${newPreferences.isFirstLaunch}")
+            Log.d("AppPreferencesUtil", "Updating preferences. Scan directories: ${newPreferences.scanDirectories}")
             preferences[IS_FIRST_LAUNCH] = newPreferences.isFirstLaunch
             preferences[SCAN_DIRECTORY] = newPreferences.scanDirectories
             preferences[ENABLE_PDF_SUPPORT] = newPreferences.enablePdfSupport
@@ -131,23 +139,6 @@ class AppPreferencesUtil @Inject constructor(
             preferences[SHOW_PDF_LABEL] = defaultPreferences.showPdfLabel
         }
     }
-
-    suspend fun resetSortPreferences() {
-        dataStore.edit { preferences ->
-            preferences[SORT_ORDER] = defaultPreferences.sortOrder.name
-            preferences[SORT_BY] = defaultPreferences.sortBy.name
-        }
-    }
-
-
-     suspend fun updateIsPremium(isPremium: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[IS_PREMIUM] = isPremium
-        }
-
-    }
-
-
 }
 
 

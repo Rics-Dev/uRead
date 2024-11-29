@@ -4,8 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.outlined.*
@@ -25,7 +23,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ricdev.uread.SplashViewModel
 import com.ricdev.uread.R
 import com.ricdev.uread.util.PurchaseHelper
 import com.ricdev.uread.navigation.Screens
@@ -38,7 +35,7 @@ fun CustomNavigationDrawer(
     purchaseHelper: PurchaseHelper,
     drawerState: DrawerState,
     navController: NavHostController,
-    viewModel: SplashViewModel = hiltViewModel(),
+    viewModel: CustomNavigationViewModel = hiltViewModel(),
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()

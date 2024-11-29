@@ -1,6 +1,7 @@
 package com.ricdev.uread.presentation.settings
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ricdev.uread.data.model.AppLanguage
@@ -45,7 +46,6 @@ class SettingsViewModel @Inject constructor(
     fun updatePdfSupport(isPdfSupported: Boolean) {
         viewModelScope.launch {
             appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(enablePdfSupport = isPdfSupported))
-//            eventBus.emitEvent(AppEvent.RefreshBooks)
         }
     }
 
@@ -55,8 +55,8 @@ class SettingsViewModel @Inject constructor(
             val currentDirectories = appPreferences.value.scanDirectories
             if (!currentDirectories.contains(directory)) {
                 val updatedDirectories = currentDirectories + directory
+                Log.d("it's me", "the Settings viewModel")
                 appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(scanDirectories = updatedDirectories))
-//                eventBus.emitEvent(AppEvent.RefreshBooks)
             }
         }
     }
@@ -64,24 +64,18 @@ class SettingsViewModel @Inject constructor(
     fun removeScanDirectory(directory: String) {
         viewModelScope.launch {
             val updatedDirectories = appPreferences.value.scanDirectories - directory
+            Log.d("it's me", "the Settings viewModel")
             appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(scanDirectories = updatedDirectories))
-//            eventBus.emitEvent(AppEvent.RefreshBooks)
         }
     }
 
 
 
-//    fun updateLanguage(language: String) {
-//        viewModelScope.launch {
-//            appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(language = language))
-//            languageHelper.changeLanguage(getApplication(), language)
-//        }
-//    }
+
 
     fun updateLanguage(languageCode: String) {
         viewModelScope.launch {
             val language = AppLanguage.fromCode(languageCode)
-//            appPreferencesUtil.updateLanguage(language.code)
             appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(language = language.code))
             languageHelper.changeLanguage(getApplication(), language)
         }
