@@ -46,11 +46,10 @@ class ThemeViewModel @Inject constructor(
 
 
 
-
     fun updateAppPreferences(newPreferences: AppPreferences) {
         viewModelScope.launch {
             appPreferencesUtil.updateAppPreferences(newPreferences)
-
+            _appPreferences.value = newPreferences
         }
     }
 

@@ -39,14 +39,13 @@ class MainActivity : AppCompatActivity() {
         super.attachBaseContext(context)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         splashScreen.setKeepOnScreenCondition {
-            viewModel.startDestination.value == null || !viewModel.isInitialized.value
+            viewModel.startDestination.value == null
         }
 
         // Background initialization of MobileAds
@@ -58,21 +57,18 @@ class MainActivity : AppCompatActivity() {
         purchaseHelper.billingSetup()
 
         setContent {
-            val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
             val screen by viewModel.startDestination.collectAsStateWithLifecycle()
-            val isInitialized by viewModel.isInitialized.collectAsStateWithLifecycle()
 
-            if (isInitialized) {
-                UReadTheme(appPreferences = appPreferences) {
-                    val navController = rememberNavController()
 
-                    screen?.let {
-                        SetupNavGraph(
-                            navController = navController,
-                            startDestination = it,
-                            purchaseHelper = purchaseHelper,
-                        )
-                    }
+            UReadTheme {
+                val navController = rememberNavController()
+
+                screen?.let {
+                    SetupNavGraph(
+                        navController = navController,
+                        startDestination = it,
+                        purchaseHelper = purchaseHelper,
+                    )
                 }
             }
         }

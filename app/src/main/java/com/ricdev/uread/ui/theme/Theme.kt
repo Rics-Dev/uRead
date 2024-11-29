@@ -8,10 +8,13 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.AppTheme
@@ -19,13 +22,12 @@ import com.ricdev.uread.data.model.AppTheme
 
 @Composable
 fun UReadTheme(
-    appPreferences: AppPreferences,
-    content: @Composable () -> Unit
+    viewModel: AppThemeViewModel = hiltViewModel(),
+    content: @Composable () -> Unit,
 ) {
 
-
     val context = LocalContext.current
-
+    val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
 
 
     val darkTheme = when (appPreferences.appTheme) {

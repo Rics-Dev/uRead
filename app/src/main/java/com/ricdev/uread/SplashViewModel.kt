@@ -32,27 +32,20 @@ class SplashViewModel @Inject constructor(
     private val _startDestination = MutableStateFlow<String?>(null)
     val startDestination: StateFlow<String?> = _startDestination.asStateFlow()
 
-    private val _isInitialized = MutableStateFlow(false)
-    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
-
 
     init {
-        if (!_isInitialized.value) {
-            viewModelScope.launch {
-                try {
-                    val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
-                    Log.d("SplashViewModel", "Initial preferences: $initialPreferences")
-                    determineStartDestination(initialPreferences)
-                    _appPreferences.value = initialPreferences
-                    languageHelper.changeLanguage(
-                        getApplication(),
-                        AppLanguage.fromCode(initialPreferences.language)
-                    )
-                } catch (e: Exception) {
-                    Log.e("SplashViewModel", "Initialization error", e)
-                } finally {
-                    _isInitialized.value = true
-                }
+        viewModelScope.launch {
+            try {
+                val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
+                Log.d("SplashViewModel", "Initial preferences: $initialPreferences")
+                determineStartDestination(initialPreferences)
+                _appPreferences.value = initialPreferences
+                languageHelper.changeLanguage(
+                    getApplication(),
+                    AppLanguage.fromCode(initialPreferences.language)
+                )
+            } catch (e: Exception) {
+                Log.e("SplashViewModel", "Initialization error", e)
             }
         }
     }
