@@ -131,7 +131,7 @@ fun BookCard(
                             }
                         }
                     ),
-                elevation = CardDefaults.cardElevation(if (selected) 20.dp else 10.dp)
+                elevation = CardDefaults.cardElevation(if (selected) 20.dp else 8.dp)
             ) {
 
                 Box(
