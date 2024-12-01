@@ -16,7 +16,9 @@ import com.ricdev.uread.data.model.ReadingStatus
 import com.ricdev.uread.data.model.SortOption
 import com.ricdev.uread.data.model.SortOrder
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore(name = "app_prefs")
@@ -73,12 +75,40 @@ class AppPreferencesUtil @Inject constructor(
     }
 
 
-    val appPreferencesFlow: Flow<AppPreferences> = dataStore.data.map { preferences ->
-        val isFirstLaunch = preferences[IS_FIRST_LAUNCH] ?: defaultPreferences.isFirstLaunch
-        Log.d("AppPreferencesUtil", "Reading preferences. isFirstLaunch: $isFirstLaunch")
 
-        val scanDirectories = preferences[SCAN_DIRECTORY] ?: defaultPreferences.scanDirectories
-        Log.d("AppPreferencesUtil", "Reading preferences. Scan directories: $scanDirectories")
+    init {
+        runBlocking {
+            initializeDefaultPreferences()
+        }
+    }
+    private suspend fun initializeDefaultPreferences() {
+        val preferences = dataStore.data.first()
+        if (preferences[IS_FIRST_LAUNCH] == null) {
+            dataStore.edit { prefs ->
+                prefs[IS_FIRST_LAUNCH] = defaultPreferences.isFirstLaunch
+                prefs[SCAN_DIRECTORY] = defaultPreferences.scanDirectories
+                prefs[ENABLE_PDF_SUPPORT] = defaultPreferences.enablePdfSupport
+                prefs[LANGUAGE] = defaultPreferences.language
+                prefs[APP_THEME] = defaultPreferences.appTheme.name
+                prefs[COLOR_SCHEME] = defaultPreferences.colorScheme
+                prefs[HOME_LAYOUT] = defaultPreferences.homeLayout.name
+                prefs[GRID_COUNT] = defaultPreferences.gridCount
+                prefs[SHOW_ENTRIES] = defaultPreferences.showEntries
+                prefs[SHOW_RATING] = defaultPreferences.showRating
+                prefs[SHOW_READING_STATUS] = defaultPreferences.showReadingStatus
+                prefs[SHOW_READING_DATES] = defaultPreferences.showReadingDates
+                prefs[SHOW_PDF_LABEL] = defaultPreferences.showPdfLabel
+                prefs[SORT_BY] = defaultPreferences.sortBy.name
+                prefs[SORT_ORDER] = defaultPreferences.sortOrder.name
+                prefs[READING_STATUS] = defaultPreferences.readingStatus.map { it.name }.toSet()
+                prefs[FILE_TYPE] = defaultPreferences.fileTypes.map { it.name }.toSet()
+                prefs[IS_PREMIUM] = defaultPreferences.isPremium
+            }
+        }
+    }
+
+
+    val appPreferencesFlow: Flow<AppPreferences> = dataStore.data.map { preferences ->
         AppPreferences(
             isFirstLaunch = preferences[IS_FIRST_LAUNCH] ?: defaultPreferences.isFirstLaunch,
             scanDirectories = preferences[SCAN_DIRECTORY] ?: defaultPreferences.scanDirectories,

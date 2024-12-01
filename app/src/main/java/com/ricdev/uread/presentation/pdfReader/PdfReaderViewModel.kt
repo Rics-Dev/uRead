@@ -134,7 +134,11 @@ class PdfReaderViewModel @Inject constructor(
                 val sessionDuration = currentTime - lastSaveTime
                 lastSaveTime = currentTime
 
-                val newProgression = ((currentPage ).toFloat() / _pageCount.value.toFloat()) * 100f
+                val newProgression = if (_pageCount.value != 0) {
+                    ((currentPage).toFloat() / _pageCount.value.toFloat()) * 100f
+                } else {
+                    0f
+                }
                 val newReadingTime = book.readingTime + sessionDuration
                 var newReadingStatus = book.readingStatus
 
@@ -199,7 +203,7 @@ class PdfReaderViewModel @Inject constructor(
     private fun updateBook(updatedBook: Book) {
         viewModelScope.launch {
             var updatedBook2 = updatedBook
-            if(updatedBook.progression >= 98f){
+            if (updatedBook.progression.isFinite() && updatedBook.progression >= 98f) {
                 updatedBook2 = updatedBook.copy(readingStatus = ReadingStatus.FINISHED)
             }
             updateBookUseCase(updatedBook2)

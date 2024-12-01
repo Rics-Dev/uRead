@@ -296,13 +296,13 @@ fun BookListCard(
                         text = if (book.readingTime > 0) {
                             stringResource(
                                 R.string.completed_reading_time,
-                                book.progression.toInt(),
+                                book.progression!!.toInt(),
                                 formatReadingTime(
                                     book.readingTime
                                 )
                             )
                         } else {
-                            stringResource(R.string.completed, book.progression.toInt())
+                            stringResource(R.string.completed, book.progression!!.toInt())
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

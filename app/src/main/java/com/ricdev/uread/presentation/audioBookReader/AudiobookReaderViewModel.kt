@@ -236,10 +236,15 @@ class AudiobookReaderViewModel @Inject constructor(
     }
 
 
-     private fun saveCurrentPosition() {
+    private fun saveCurrentPosition() {
         viewModelScope.launch(Dispatchers.IO) {
             _audiobook.value?.let { book ->
-                val updatedBook = book.copy(readingTime = _currentTime.value, progression = (_currentTime.value.toFloat() * 100f) / _totalTime.value)
+                val progression = if (_totalTime.value != 0L) {
+                    (_currentTime.value.toFloat() * 100f) / _totalTime.value
+                } else {
+                    0f
+                }
+                val updatedBook = book.copy(readingTime = _currentTime.value, progression = progression)
                 updateBookUseCase(updatedBook)
             }
         }

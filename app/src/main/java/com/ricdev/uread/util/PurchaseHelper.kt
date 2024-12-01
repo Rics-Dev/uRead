@@ -1,7 +1,6 @@
 package com.ricdev.uread.util
 
 import android.app.Activity
-import android.util.Base64
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -18,10 +17,6 @@ import com.ricdev.uread.BuildConfig
 import com.ricdev.uread.MainActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
 
 data class PurchaseHelper(val activity: Activity) {
 
@@ -183,6 +178,13 @@ data class PurchaseHelper(val activity: Activity) {
             return
         }
         try {
+            // Ensure billing client is ready
+            if (billingClient.connectionState != BillingClient.ConnectionState.CONNECTED) {
+                _statusText.value = "Billing client not connected. Please try again."
+                return
+            }
+
+
             val billingFlowParams = BillingFlowParams.newBuilder()
                 .setProductDetailsParamsList(
                     ImmutableList.of(
@@ -197,7 +199,13 @@ data class PurchaseHelper(val activity: Activity) {
 
             when (billingResult.responseCode) {
                 BillingClient.BillingResponseCode.OK -> {
-                    // Purchase flow started successfully
+                    _statusText.value = "Purchase flow started"
+                }
+                BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED -> {
+                    _statusText.value = "Billing feature not supported"
+                }
+                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> {
+                    _statusText.value = "Billing service disconnected"
                 }
                 else -> {
                     _statusText.value = "Failed to launch billing flow: ${billingResult.debugMessage}"
