@@ -8,10 +8,12 @@ An Ebook and AudioBook reader for Android supporting Epub and PDF books, impleme
 </p>
 
 
-<p align=center>
-<image src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="100">
-</image>
+<p align="center">
+    <a href="https://play.google.com/store/apps/details?id=com.ricdev.uread" target="_blank">
+        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="100" alt="Get it on Google Play">
+    </a>
 </p>
+
 
 ---
 
