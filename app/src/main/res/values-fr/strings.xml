@@ -195,5 +195,6 @@
     <string name="speed_x">Vitesse: %1$sx</string>
     <string name="skip">Passer</string>
     <string name="last_added">Dernier ajouté</string>
+    <string name="keep_screen_on">Garder l\'écran allumé</string>
 
 </resources>

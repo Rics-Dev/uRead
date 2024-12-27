@@ -196,4 +196,5 @@
     <string name="speed_x">السرعة: %1$sx</string>
     <string name="skip">تخطي</string>
     <string name="last_added">آخر إضافة</string>
+    <string name="keep_screen_on">إبقاء الشاشة قيد التشغيل</string>
 </resources>

@@ -39,12 +39,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.elixer.palette.Presets
 import com.elixer.palette.constraints.HorizontalAlignment
 import com.elixer.palette.constraints.VerticalAlignment
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.ReaderPreferences
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.BookReaderViewModel
 //import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.ColorPicker
@@ -61,6 +63,7 @@ enum class ColorType(val displayName: String) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalReadiumApi::class)
 @Composable
 fun UiSettings(
+    navController: NavHostController,
     purchaseHelper: PurchaseHelper,
     appPreferences: AppPreferences,
     viewModel: BookReaderViewModel,
@@ -144,7 +147,8 @@ fun UiSettings(
                         editingColorType = ColorType.BACKGROUND
                         isPaletteVisible = true
                     } else {
-                        viewModel.purchasePremium(purchaseHelper)
+                        navController.navigate(Screens.PremiumScreen.route);
+//                        viewModel.purchasePremium(purchaseHelper)
 //                        showPremiumModal = true
                     }
 
@@ -167,7 +171,8 @@ fun UiSettings(
                         editingColorType = ColorType.TEXT
                         isPaletteVisible = true
                     } else {
-                        viewModel.purchasePremium(purchaseHelper)
+                        navController.navigate(Screens.PremiumScreen.route);
+//                        viewModel.purchasePremium(purchaseHelper)
 //                        showPremiumModal = true
                     }
 

@@ -195,4 +195,5 @@
     <string name="speed_x">Hız: %1$sx</string>
     <string name="skip">Atla</string>
     <string name="last_added">Son Eklenen</string>
+    <string name="keep_screen_on">Ekranı açık tut</string>
 </resources>

@@ -46,6 +46,7 @@ import coil.request.ImageRequest
 import coil.size.Scale
 import com.ricdev.uread.presentation.pdfReader.components.PdfReaderBottomBar
 import com.ricdev.uread.presentation.pdfReader.components.PdfReaderTopBar
+import com.ricdev.uread.util.KeepScreenOn
 import com.ricdev.uread.util.SetFullScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,6 +56,8 @@ fun PdfReaderScreen(
     navController: NavHostController,
     viewModel: PdfReaderViewModel = hiltViewModel()
 ) {
+
+    KeepScreenOn(true)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var areToolbarsVisible by remember { mutableStateOf(false) }

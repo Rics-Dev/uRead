@@ -40,9 +40,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.Bookmark
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.BookReaderViewModel
 //import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.PurchaseHelper
@@ -54,6 +56,7 @@ import java.util.Locale
 
 @Composable
 fun BookmarksDrawer(
+    navController: NavHostController,
     viewModel: BookReaderViewModel,
     purchaseHelper: PurchaseHelper,
     appPreferences: AppPreferences,
@@ -122,8 +125,9 @@ fun BookmarksDrawer(
                                 onBookmarkClick = onBookmarkClick,
                                 onRemoveBookmark = onRemoveBookmark,
                                 showPremiumModal = {
+                                    navController.navigate(Screens.PremiumScreen.route);
 //                                    showPremiumModal = true
-                                    viewModel.purchasePremium(purchaseHelper)
+//                                    viewModel.purchasePremium(purchaseHelper)
                                 }
                             )
                         }

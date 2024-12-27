@@ -13,9 +13,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Info
@@ -64,7 +61,6 @@ import com.google.android.play.core.review.model.ReviewErrorCode
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppTheme
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
-//import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.PurchaseHelper
 import com.ricdev.uread.navigation.Screens
 import kotlinx.coroutines.launch

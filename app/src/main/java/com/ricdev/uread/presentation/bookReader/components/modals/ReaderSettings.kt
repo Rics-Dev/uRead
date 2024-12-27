@@ -85,6 +85,18 @@ fun ReaderSettings(
 
 
 
+            // Keep Screen On
+            SettingsSwitch(
+                title = stringResource(R.string.keep_screen_on),
+                checked = readerPreferences.keepScreenOn,
+                onCheckedChange = { isKeepScreenOn ->
+                    viewModel.updateReaderPreferences(
+                        readerPreferences.copy(
+                            keepScreenOn = isKeepScreenOn,
+                        )
+                    )
+                }
+            )
 
             // Scroll Mode
             SettingsSwitch(

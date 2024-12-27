@@ -196,4 +196,5 @@
     <string name="speed_x">Hastighet: %1$sx</string>
     <string name="skip">Hoppa över</string>
     <string name="last_added">Senast tillagd</string>
+    <string name="keep_screen_on">Håll skärmen på</string>
 </resources>

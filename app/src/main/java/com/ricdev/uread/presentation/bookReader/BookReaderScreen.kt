@@ -54,6 +54,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
@@ -71,6 +72,7 @@ import com.ricdev.uread.data.model.BookAnnotation
 import com.ricdev.uread.data.model.Note
 import com.ricdev.uread.data.model.ReaderPreferences
 import com.ricdev.uread.domain.model.DecorationStyleAnnotationMark
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.components.TextToolbar
 import com.ricdev.uread.presentation.bookReader.components.TtsPlayer
 import com.ricdev.uread.presentation.bookReader.components.dialogs.NoteContent
@@ -86,6 +88,7 @@ import com.ricdev.uread.presentation.bookReader.components.modals.UiSettings
 import com.ricdev.uread.presentation.bookReader.components.dialogs.NoteDialog
 import com.ricdev.uread.presentation.bookReader.components.drawers.BookmarksDrawer
 import com.ricdev.uread.presentation.bookReader.util.SelectionActionModeCallback
+import com.ricdev.uread.util.KeepScreenOn
 import com.ricdev.uread.util.PurchaseHelper
 import com.ricdev.uread.util.SetFullScreen
 import kotlinx.coroutines.delay
@@ -115,10 +118,11 @@ import org.readium.r2.shared.DelicateReadiumApi
 @OptIn(ExperimentalReadiumApi::class)
 @Composable
 fun BookReaderScreen(
-    navController: NavController,
+    navController: NavHostController,
     purchaseHelper: PurchaseHelper,
     viewModel: BookReaderViewModel = hiltViewModel()
 ) {
+
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -137,6 +141,9 @@ fun BookReaderScreen(
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
 
     var areToolbarsVisible by remember { mutableStateOf(false) }
+
+
+    KeepScreenOn(readerPreferences.keepScreenOn)
 
     LaunchedEffect(uiState) {
         viewModel.fetchInitialLocator()
@@ -241,7 +248,7 @@ fun BookReaderScreen(
 fun EpubReaderView(
     book: Book?,
     purchaseHelper: PurchaseHelper,
-    navController: NavController,
+    navController: NavHostController,
     publication: Publication,
     initialLocator: Locator?,
     onLocatorChange: (Locator) -> Unit,
@@ -939,6 +946,7 @@ fun EpubReaderView(
         )
 
         NotesDrawer(
+            navController = navController,
             viewModel = viewModel,
             purchaseHelper = purchaseHelper,
             appPreferences = appPreferences,
@@ -961,6 +969,7 @@ fun EpubReaderView(
         )
 
         BookmarksDrawer(
+            navController = navController,
             viewModel = viewModel,
             purchaseHelper = purchaseHelper,
             appPreferences = appPreferences,
@@ -980,6 +989,7 @@ fun EpubReaderView(
         )
 
         AnnotationsDrawer(
+            navController = navController,
             viewModel = viewModel,
             purchaseHelper = purchaseHelper,
             appPreferences = appPreferences,
@@ -1018,7 +1028,8 @@ fun EpubReaderView(
                 onDismiss = { showNoteDialog = false },
                 showPremiumModal = {
                     showNoteDialog = false
-                    viewModel.purchasePremium(purchaseHelper)
+                    navController.navigate(Screens.PremiumScreen.route);
+//                    viewModel.purchasePremium(purchaseHelper)
 //                    showPremiumModal = true
                 }
             )
@@ -1040,7 +1051,8 @@ fun EpubReaderView(
                 },
                 showPremiumModal = {
                     viewModel.clearSelectedNote()
-                    viewModel.purchasePremium(purchaseHelper)
+//                    viewModel.purchasePremium(purchaseHelper)
+                    navController.navigate(Screens.PremiumScreen.route);
                 }
             )
         }
@@ -1064,6 +1076,7 @@ fun EpubReaderView(
 
         if (showUISettings) {
             UiSettings(
+                navController = navController,
                 purchaseHelper = purchaseHelper,
                 appPreferences = appPreferences,
                 viewModel = viewModel,
@@ -1084,6 +1097,7 @@ fun EpubReaderView(
 
     if (showTextToolbar) {
         TextToolbar(
+            navController = navController,
             viewModel = viewModel,
             selectedText = actionSelectedText,
             rect = textToolbarRect!!,

@@ -18,6 +18,7 @@ import com.ricdev.uread.presentation.settings.components.DeletedBooksScreen
 import com.ricdev.uread.presentation.settings.components.GeneralSettings
 import com.ricdev.uread.presentation.shelves.ShelvesScreen
 import com.ricdev.uread.presentation.settings.components.ThemeScreen
+import com.ricdev.uread.presentation.sharedComponents.PremiumScreen
 import com.ricdev.uread.presentation.statistics.StatisticsScreen
 import com.ricdev.uread.util.PurchaseHelper
 
@@ -108,6 +109,11 @@ fun SetupNavGraph(
             route = Screens.StatisticsScreen.route,
         ) {
             StatisticsScreen(navController, purchaseHelper)
+        }
+        composable(
+            route = Screens.PremiumScreen.route,
+        ) {
+            PremiumScreen(navController, purchaseHelper);
         }
         //composable(
         //    route = Screens.OnlineBooksScreen.route,

@@ -24,5 +24,6 @@ sealed class Screens(val route: String) {
 //    data object OnlineBooksScreen: Screens("online_books_screen")
 
 
+    data object PremiumScreen: Screens("premium_screen")
 
 }

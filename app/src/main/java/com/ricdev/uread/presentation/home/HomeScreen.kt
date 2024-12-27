@@ -203,6 +203,7 @@ fun HomeScreen(
                     .padding(innerPadding)
             ) {
                 Shelves(
+                    navController = navController,
                     viewModel = viewModel,
                     appPreferences = appPreferences,
                     shelves = shelves,

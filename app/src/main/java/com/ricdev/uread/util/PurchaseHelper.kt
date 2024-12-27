@@ -1,6 +1,7 @@
 package com.ricdev.uread.util
 
 import android.app.Activity
+import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -28,6 +29,10 @@ data class PurchaseHelper(val activity: Activity) {
 //    private val base64Key = BuildConfig.BASE_64_ENCODED_PUBLIC_KEY
 
     private val _productName = MutableStateFlow("Searching...")
+    private val _formattedPrice = MutableStateFlow("N/A")
+    private val _priceCurrencyCode = MutableStateFlow("N/A")
+    val formattedPrice = _formattedPrice.asStateFlow()
+    val priceCurrencyCode = _priceCurrencyCode.asStateFlow()
     private val _buyEnabled = MutableStateFlow(false)
     private val _isPremium = MutableStateFlow(false)
     val isPremium = _isPremium.asStateFlow()
@@ -117,6 +122,9 @@ data class PurchaseHelper(val activity: Activity) {
             if (productDetailsList.isNotEmpty()) {
                 productDetails = productDetailsList[0]
                 _productName.value = "Product: " + productDetails?.name
+                productDetails?.toString()?.let { Log.e("Product Name", it) };
+                _formattedPrice.value = productDetails?.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A"
+                _priceCurrencyCode.value = productDetails?.oneTimePurchaseOfferDetails?.priceCurrencyCode ?: "N/A"
                 _buyEnabled.value = true
             } else {
                 _statusText.value = "No Matching Products Found"

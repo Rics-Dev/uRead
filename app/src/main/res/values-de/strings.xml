@@ -195,5 +195,6 @@
     <string name="speed_x">Geschwindigkeit: %1$sx</string>
     <string name="skip">Auslassen</string>
     <string name="last_added">Zuletzt hinzugefügt</string>
+    <string name="keep_screen_on">Bildschirm anlassen</string>
 
 </resources>

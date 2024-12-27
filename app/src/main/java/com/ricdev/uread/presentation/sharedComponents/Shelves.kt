@@ -8,15 +8,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.Shelf
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.home.HomeViewModel
 import com.ricdev.uread.presentation.sharedComponents.dialogs.AddShelfDialog
 import com.ricdev.uread.util.PurchaseHelper
 
 @Composable
 fun Shelves(
+    navController: NavHostController,
     viewModel: HomeViewModel,
     appPreferences: AppPreferences,
     shelves: List<Shelf>,
@@ -55,7 +58,8 @@ fun Shelves(
             selected = false,
             onClick = {
                 if (shelves.isNotEmpty() && !appPreferences.isPremium) {
-                    viewModel.purchasePremium(purchaseHelper)
+                    navController.navigate(Screens.PremiumScreen.route);
+//                    viewModel.purchasePremium(purchaseHelper)
 //                    showPremiumModal = true
                 } else {
                     showAddShelfDialog = true

@@ -196,4 +196,5 @@
     <string name="speed_x">गति: %1$sx</string>
     <string name="skip">छोड़ें</string>
     <string name="last_added">अंतिम जोड़ा गया</string>
+    <string name="keep_screen_on">" स्क्रीन चालू रखें"</string>
 </resources>

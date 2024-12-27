@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.ricdev.uread.R
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 import com.ricdev.uread.presentation.statistics.components.ReadingGraph
 import com.ricdev.uread.presentation.statistics.components.ReadingHeatmap
@@ -550,7 +551,8 @@ fun StatisticsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route);
+//                                viewModel.purchasePremium(purchaseHelper)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,

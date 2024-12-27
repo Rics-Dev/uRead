@@ -10,7 +10,10 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,6 +47,7 @@ fun CustomNavigationDrawer(
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
+    var showPremiumScreen by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -67,7 +71,9 @@ fun CustomNavigationDrawer(
                         FilledTonalButton(
                             contentPadding = PaddingValues(8.dp),
                             onClick = {
-                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route);
+//                                showPremiumScreen = true;
+//                                viewModel.purchasePremium(purchaseHelper)
                             },
                             modifier = Modifier
                                 .offset(y = (if (isPortrait) 36 else 18).dp)
@@ -81,7 +87,7 @@ fun CustomNavigationDrawer(
                                     contentDescription = "Crown",
                                     modifier = Modifier.size(if (isPortrait) 16.dp else 8.dp)
                                 )
-                                Text(stringResource(R.string.remove_ads), fontSize = 12.sp)
+                                Text(stringResource(R.string.unlock_premium), fontSize = 12.sp)
                                 Image(
                                     painter = painterResource(id = R.drawable.crown),
                                     contentDescription = "Crown",
@@ -211,6 +217,14 @@ fun CustomNavigationDrawer(
     ) {
         content()
     }
+
+   if (showPremiumScreen){
+      PremiumScreen(
+          navController = navController,
+          purchaseHelper = purchaseHelper,
+      )
+   }
+
 }
 
 @Composable

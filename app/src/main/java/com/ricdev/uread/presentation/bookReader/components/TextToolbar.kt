@@ -59,18 +59,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.github.skydoves.colorpicker.compose.ColorPickerController
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.ricdev.uread.data.model.AnnotationType
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.BookAnnotation
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.BookReaderViewModel
-//import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.util.PurchaseHelper
 
 @Composable
 fun TextToolbar(
+    navController: NavHostController,
     viewModel: BookReaderViewModel,
     selectedText: String?,
     rect: Rect,
@@ -178,7 +180,8 @@ fun TextToolbar(
                         onCustomColorClick = {
                             if (appPreferences.isPremium) isPaletteVisible = true
                             else {
-                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route);
+//                                viewModel.purchasePremium(purchaseHelper)
                             }
                         },
                         onColorSelected = { color ->

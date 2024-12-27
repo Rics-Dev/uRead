@@ -195,4 +195,5 @@
     <string name="speed_x">Скорость: %1$sx</string>
     <string name="skip">Пропустить</string>
     <string name="last_added">Последние добавленные</string>
+    <string name="keep_screen_on">Оставить экран включенным</string>
 </resources>

@@ -37,6 +37,7 @@ class ReaderPreferencesUtil @Inject constructor(
         val BACKGROUND_COLOR = intPreferencesKey("background_color")
         val TEXT_COLOR = intPreferencesKey("text_color")
         val COLOR_HISTORY = stringPreferencesKey("color_history")
+        val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val TAP_NAVIGATION = booleanPreferencesKey("tap_navigation")
         val SCROLL = booleanPreferencesKey("scroll")
         val READING_PROGRESSION = stringPreferencesKey("reading_progression")
@@ -59,6 +60,7 @@ class ReaderPreferencesUtil @Inject constructor(
             backgroundColor = Color.White,
             textColor = Color.Black,
             colorHistory = emptyList(),
+            keepScreenOn = true,
             tapNavigation = false,
             scroll = false,
             readingProgression = ReadingProgression.LTR,
@@ -88,6 +90,7 @@ class ReaderPreferencesUtil @Inject constructor(
             ),
             textColor = Color(preferences[TEXT_COLOR] ?: defaultPreferences.textColor.toArgb()),
             colorHistory = preferences[COLOR_HISTORY]?.let { parseColorHistory(it) } ?: emptyList(),
+            keepScreenOn = preferences[KEEP_SCREEN_ON] ?: defaultPreferences.keepScreenOn,
             tapNavigation = preferences[TAP_NAVIGATION] ?: defaultPreferences.tapNavigation,
             scroll = preferences[SCROLL] ?: defaultPreferences.scroll,
             readingProgression = ReadingProgression.valueOf(
@@ -126,6 +129,7 @@ class ReaderPreferencesUtil @Inject constructor(
 
 
 
+            preferences[KEEP_SCREEN_ON] = newPreferences.keepScreenOn
             preferences[SCROLL] = newPreferences.scroll
             preferences[TAP_NAVIGATION] = newPreferences.tapNavigation
             preferences[READING_PROGRESSION] = newPreferences.readingProgression.name
@@ -167,6 +171,7 @@ class ReaderPreferencesUtil @Inject constructor(
     @OptIn(ExperimentalReadiumApi::class)
     suspend fun resetReaderPreferences() {
         dataStore.edit { preferences ->
+            preferences[KEEP_SCREEN_ON] = defaultPreferences.keepScreenOn
             preferences[SCROLL] = defaultPreferences.scroll
             preferences[TAP_NAVIGATION] = defaultPreferences.tapNavigation
             preferences[READING_PROGRESSION] = defaultPreferences.readingProgression.name

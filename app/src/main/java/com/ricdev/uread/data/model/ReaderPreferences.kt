@@ -24,6 +24,7 @@ data class ReaderPreferences @OptIn(ExperimentalReadiumApi::class) constructor(
     val textColor: Color,
     val colorHistory: List<Color> = emptyList(),
     //Reader Settings
+    val keepScreenOn: Boolean,
     val tapNavigation: Boolean,
     val scroll: Boolean,
     val readingProgression: ReadingProgression,

@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Shelf
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 //import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
 import com.ricdev.uread.presentation.sharedComponents.dialogs.AddShelfDialog
@@ -81,8 +82,9 @@ fun ShelvesScreen(
                 FloatingActionButton(
                     onClick = {
                         if (shelvesState.let { it is ShelvesState.Success && it.shelves.isNotEmpty() } && !appPreferences.isPremium) {
+                            navController.navigate(Screens.PremiumScreen.route);
 //                            showPremiumModal = true
-                            viewModel.purchasePremium(purchaseHelper)
+//                            viewModel.purchasePremium(purchaseHelper)
                         } else {
                             showAddShelfDialog = true
                         }
