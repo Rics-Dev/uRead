@@ -315,5 +315,8 @@ fun CustomSearchBar(
         ),
         shape = RoundedCornerShape(50.dp),
         textStyle = MaterialTheme.typography.bodyLarge
+
+
+
     )
 }
