@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -71,7 +70,7 @@ fun CustomNavigationDrawer(
                         FilledTonalButton(
                             contentPadding = PaddingValues(8.dp),
                             onClick = {
-                                navController.navigate(Screens.PremiumScreen.route);
+                                navController.navigate(Screens.PremiumScreen.route)
                             },
                             modifier = Modifier
                                 .offset(y = (if (isPortrait) 36 else 18).dp)

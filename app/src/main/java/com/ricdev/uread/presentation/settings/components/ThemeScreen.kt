@@ -28,18 +28,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppTheme
-//import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
-import com.ricdev.uread.util.PurchaseHelper
+import com.ricdev.uread.navigation.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeScreen(
     navController: NavController,
-    purchaseHelper: PurchaseHelper,
     viewModel: ThemeViewModel = hiltViewModel()
 ) {
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
-//    var showPremiumModal by remember { mutableStateOf(false) }
 
     val isDarkTheme = when (appPreferences.appTheme) {
         AppTheme.SYSTEM -> isSystemInDarkTheme()
@@ -175,7 +172,7 @@ fun ThemeScreen(
                             if (name == "Dynamic" || appPreferences.isPremium) {
                                 viewModel.updateAppPreferences(appPreferences.copy(colorScheme = name))
                             } else {
-                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route)
                             }
                         },
                         isPremium = !appPreferences.isPremium && name != "Dynamic"

@@ -65,6 +65,7 @@ import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.Note
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.components.dialogs.NoteContent
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 import com.ricdev.uread.util.PurchaseHelper
@@ -201,8 +202,7 @@ fun NotesScreen(
                         onUpdateNote = { updatedNote -> viewModel.updateNote(updatedNote) },
                         onRemoveNote = { note -> viewModel.deleteNote(note) },
                         showPremiumModal = {
-//                            showPremiumModal = true
-                            viewModel.purchasePremium(purchaseHelper)
+                            navController.navigate(Screens.PremiumScreen.route)
                         }
                     )
                 }
@@ -222,8 +222,7 @@ fun NotesScreen(
                         showNoteDialog = false
                     },
                     showPremiumModal = {
-                        viewModel.purchasePremium(purchaseHelper)
-//                        showPremiumModal = true
+                        navController.navigate(Screens.PremiumScreen.route)
                     }
                 )
             }

@@ -77,7 +77,7 @@ fun SetupNavGraph(
         composable(
             route = Screens.ThemeScreen.route,
         ) {
-            ThemeScreen(navController, purchaseHelper)
+            ThemeScreen(navController)
         }
         composable(
             route = Screens.ShelvesScreen.route,

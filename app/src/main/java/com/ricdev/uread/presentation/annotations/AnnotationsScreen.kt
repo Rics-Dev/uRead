@@ -73,7 +73,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
-//import com.ricsdev.uread.presentation.sharedComponents.PremiumModal
+import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.util.PurchaseHelper
 
 
@@ -256,7 +256,7 @@ fun AnnotationsScreen(
                             },
 
                             showPremiumModal = {
-                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route)
                             }
                         )
 
@@ -284,13 +284,6 @@ fun AnnotationsScreen(
             }
         }
     }
-
-//    if (showPremiumModal) {
-//        PremiumModal(
-//            purchaseHelper = purchaseHelper,
-//            hidePremiumModal = { showPremiumModal = false }
-//        )
-//    }
 }
 
 @Composable
