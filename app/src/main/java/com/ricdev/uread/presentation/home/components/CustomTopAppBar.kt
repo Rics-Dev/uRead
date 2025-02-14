@@ -1,19 +1,36 @@
 package com.ricdev.uread.presentation.home.components
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -22,8 +39,10 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,12 +61,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import coil.compose.AsyncImage
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.Book
@@ -55,6 +79,9 @@ import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.data.model.Shelf
 import com.ricdev.uread.presentation.home.HomeViewModel
 import com.ricdev.uread.presentation.sharedComponents.dialogs.DeleteShelfDialog
+import java.io.File
+import java.io.FileOutputStream
+import java.security.MessageDigest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -230,6 +257,10 @@ fun CustomTopAppBar(
                         )
                     }
 
+                    ImagePicker { path ->
+                        viewModel.updateAppPreferences(appPreferences.copy(homeBackgroundImage = path))
+                    }
+
                     DropdownMenuItem(onClick = {
                         viewModel.refreshBooks()
                         dropdownMenuExpanded = false
@@ -279,7 +310,245 @@ fun CustomTopAppBar(
     }
 }
 
+@Composable
+fun ImageSourceDialog(
+    context: Context,
+    onDismiss: () -> Unit,
+    onSelectBookCover: (String) -> Unit,
+    onSelectImagePicker: () -> Unit
+) {
+    val savedCovers = listSavedBookCovers(context)
+    var showGrid by remember { mutableStateOf(false) }
 
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Image Source") },
+        text = {
+            Column {
+                Text("Choose an image source")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (showGrid && savedCovers.isNotEmpty()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        content = {
+                            items(savedCovers.sortedByDescending { it.lastModified() }) { file ->
+                                ImageCard(
+                                    file = file,
+                                    onClick = {
+                                        onSelectBookCover(file.absolutePath)
+                                        onDismiss()
+                                    }
+                                )
+                            }
+                        }
+                    )
+                } else {
+                    if (savedCovers.isNotEmpty()) {
+                        Button(
+                            onClick = { showGrid = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Saved Book Covers")
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    Button(
+                        onClick = {
+                            onSelectImagePicker()
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Select from Gallery")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            if (showGrid) {
+                Button(onClick = { showGrid = false }) {
+                    Text("Back")
+                }
+            } else {
+                Button(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun ImageCard(file: File, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            model = file,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+@Composable
+fun ImagePicker(onImageSelected: (String) -> Unit) {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Content picker launcher
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val imagePath = saveHomeBackgroundImage(context, it)
+            imagePath?.let { path -> onImageSelected(path) }
+        }
+    }
+
+    // Permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false) ||
+                    permissions.getOrDefault(Manifest.permission.READ_EXTERNAL_STORAGE, false) -> {
+                imagePicker.launch("image/*")
+            }
+        }
+    }
+
+    fun checkAndRequestPermissions() {
+        when {
+            // Android 14+ (API 34)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                ))
+            }
+            // Android 13 (API 33)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ))
+            }
+            // Android 12L and below
+            else -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ))
+            }
+        }
+    }
+
+    fun hasPermissions(): Boolean {
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ) == PERMISSION_GRANTED
+            }
+            else -> {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PERMISSION_GRANTED
+            }
+        }
+    }
+
+    DropdownMenuItem(
+        onClick = {
+            showDialog = true
+        },
+        text = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Change background Image")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.Default.ImageSearch,
+                    contentDescription = "Select Image",
+                )
+            }
+        }
+    )
+
+    if (showDialog) {
+        ImageSourceDialog(
+            context = context,
+            onDismiss = { showDialog = false },
+            onSelectBookCover = { path ->
+                onImageSelected(path)
+            },
+            onSelectImagePicker = {
+                if (hasPermissions()) {
+                    imagePicker.launch("image/*")
+                } else {
+                    checkAndRequestPermissions()
+                }
+            }
+        )
+    }
+}
+
+
+private fun saveHomeBackgroundImage(context: Context, uri: Uri): String? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val imageBytes = inputStream?.readBytes()
+        inputStream?.close()
+
+        if (imageBytes == null) return null
+
+        val md = MessageDigest.getInstance("MD5")
+        val imageHash = md.digest(imageBytes).joinToString("") { "%02x".format(it) }
+
+        val existingFile = context.filesDir.listFiles { file ->
+            file.nameWithoutExtension.startsWith("home_bg_$imageHash")
+        }?.firstOrNull()
+
+        if (existingFile != null) {
+            return existingFile.absolutePath
+        }
+
+        val fileName = "home_bg_${imageHash}.jpg"
+        val file = File(context.filesDir, fileName)
+
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+        outputStream.flush()
+        outputStream.close()
+
+        file.absolutePath
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun listSavedBookCovers(context: Context): List<File> {
+    val filesDir = context.filesDir
+    return filesDir.listFiles { file ->
+        file.name.startsWith("book_cover_") && file.extension.lowercase() == "jpg"
+    }?.toList() ?: emptyList()
+}
 
 @Composable
 fun CustomSearchBar(

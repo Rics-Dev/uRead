@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -18,12 +19,17 @@ import androidx.compose.material.icons.filled.Headset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.rememberAsyncImagePainter
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
@@ -223,84 +229,118 @@ fun HomeScreen(
                         .weight(1f)
                         .background(color = MaterialTheme.colorScheme.background)
                 ) { index ->
-                    when (index) {
-                        0 -> {
-                            var visible by remember { mutableStateOf(false) }
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if(appPreferences.homeBackgroundImage.isNotEmpty()){
+                            Image(
+                                painter = rememberAsyncImagePainter(appPreferences.homeBackgroundImage),
+                                contentDescription = "Book cover",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .alpha(0.7f),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
 
-                            LaunchedEffect(Unit) {
-                                visible = true
-                            }
+                    // Gradient overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                                        MaterialTheme.colorScheme.background
+                                    ),
+                                    startY = 0f,
+                                    endY = 2000f
+                                )
+                            )
+                    )
 
-                            val slideInAnimationSpec = tween<IntOffset>(durationMillis = 300)
-                            val tweenInAnimationSpec = tween<Float>(durationMillis = 300)
+
+
+                        Column{
+                            when (index) {
+                                0 -> {
+                                    var visible by remember { mutableStateOf(false) }
+
+                                    LaunchedEffect(Unit) {
+                                        visible = true
+                                    }
+
+                                    val slideInAnimationSpec = tween<IntOffset>(durationMillis = 300)
+                                    val tweenInAnimationSpec = tween<Float>(durationMillis = 300)
 
 
 //                            if (books.itemCount == 0) {
 //                                EmptyShelfContent("Library")
 //                            }
 
-                            if (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly) {
-                                AnimatedVisibility(
-                                    visible = visible,
-                                    enter = fadeIn(tweenInAnimationSpec) + slideInVertically(
-                                        animationSpec = slideInAnimationSpec,
-                                        initialOffsetY = { it })
-                                ) {
-                                    GridLayout(
-                                        clearSearch = { viewModel.updateSearchQuery("") },
-                                        books = books,
-                                        navController = navController,
-                                        selectedBooks = selectedBooks,
-                                        selectionMode = selectionMode,
-                                        toggleSelection = {
-                                            viewModel.toggleBookSelection(it)
-                                        },
-                                        viewModel = viewModel,
-                                        isLoading = isAddingBooks,
-                                        appPreferences = appPreferences,
-                                    )
+                                    if (appPreferences.homeLayout == Layout.Grid || appPreferences.homeLayout == Layout.CoverOnly) {
+                                        AnimatedVisibility(
+                                            visible = visible,
+                                            enter = fadeIn(tweenInAnimationSpec) + slideInVertically(
+                                                animationSpec = slideInAnimationSpec,
+                                                initialOffsetY = { it })
+                                        ) {
+                                            GridLayout(
+                                                clearSearch = { viewModel.updateSearchQuery("") },
+                                                books = books,
+                                                navController = navController,
+                                                selectedBooks = selectedBooks,
+                                                selectionMode = selectionMode,
+                                                toggleSelection = {
+                                                    viewModel.toggleBookSelection(it)
+                                                },
+                                                viewModel = viewModel,
+                                                isLoading = isAddingBooks,
+                                                appPreferences = appPreferences,
+                                            )
+                                        }
+                                    } else {
+                                        AnimatedVisibility(
+                                            visible = visible,
+                                            enter = fadeIn(tweenInAnimationSpec) + slideInVertically(
+                                                animationSpec = slideInAnimationSpec,
+                                                initialOffsetY = { it })
+                                        ) {
+                                            ListLayout(
+                                                clearSearch = { viewModel.updateSearchQuery("") },
+                                                books = books,
+                                                navController = navController,
+                                                selectedBooks = selectedBooks,
+                                                selectionMode = selectionMode,
+                                                toggleSelection = {
+                                                    viewModel.toggleBookSelection(it)
+                                                },
+                                                viewModel = viewModel,
+                                                isLoading = isAddingBooks,
+                                                appPreferences = appPreferences,
+                                            )
+                                        }
+                                    }
                                 }
-                            } else {
-                                AnimatedVisibility(
-                                    visible = visible,
-                                    enter = fadeIn(tweenInAnimationSpec) + slideInVertically(
-                                        animationSpec = slideInAnimationSpec,
-                                        initialOffsetY = { it })
-                                ) {
-                                    ListLayout(
-                                        clearSearch = { viewModel.updateSearchQuery("") },
-                                        books = books,
-                                        navController = navController,
-                                        selectedBooks = selectedBooks,
-                                        selectionMode = selectionMode,
-                                        toggleSelection = {
-                                            viewModel.toggleBookSelection(it)
-                                        },
-                                        viewModel = viewModel,
-                                        isLoading = isAddingBooks,
-                                        appPreferences = appPreferences,
-                                    )
-                                }
-                            }
-                        }
 
-                        else -> {
-                            val shelf = shelves.getOrNull(index - 1)
-                            if (shelf != null) {
-                                BookShelfScreen(
-                                    clearSearch = { viewModel.updateSearchQuery("") },
-                                    shelf = shelf,
-                                    books = books,
-                                    homeViewModel = viewModel,
-                                    navController = navController,
-                                    selectedBooks = selectedBooks,
-                                    selectionMode = selectionMode,
-                                    toggleSelection = { book -> viewModel.toggleBookSelection(book) },
-                                    isLoading = isAddingBooks,
-                                    appPreferences = appPreferences,
-                                )
-                            } else {
-                                Text(stringResource(R.string.shelf_not_found))
+                                else -> {
+                                    val shelf = shelves.getOrNull(index - 1)
+                                    if (shelf != null) {
+                                        BookShelfScreen(
+                                            clearSearch = { viewModel.updateSearchQuery("") },
+                                            shelf = shelf,
+                                            books = books,
+                                            homeViewModel = viewModel,
+                                            navController = navController,
+                                            selectedBooks = selectedBooks,
+                                            selectionMode = selectionMode,
+                                            toggleSelection = { book -> viewModel.toggleBookSelection(book) },
+                                            isLoading = isAddingBooks,
+                                            appPreferences = appPreferences,
+                                        )
+                                    } else {
+                                        Text(stringResource(R.string.shelf_not_found))
+                                    }
+                                }
                             }
                         }
                     }
