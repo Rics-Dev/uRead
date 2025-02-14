@@ -1,9 +1,7 @@
 package com.ricdev.uread.presentation.bookDetails.components
 
 import android.Manifest
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.Uri
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -28,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,6 +64,8 @@ fun EditMetadataModal(
 ) {
     if (book == null) return
 
+
+    val initialBook = remember { book.copy() }
     val context = LocalContext.current
     val updateError by viewModel.updateError.collectAsStateWithLifecycle()
 
@@ -274,8 +275,36 @@ fun EditMetadataModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Reset Button
+                Button(
+                    onClick = {
+                        // Reset all fields to initial values
+                        title = initialBook.title
+                        authors = initialBook.authors
+                        description = initialBook.description ?: ""
+                        publishDate = initialBook.publishDate ?: ""
+                        publisher = initialBook.publisher ?: ""
+                        language = initialBook.language ?: ""
+                        numberOfPages = initialBook.numberOfPages?.toString() ?: ""
+                        subjects = initialBook.subjects ?: ""
+                        narrator = initialBook.narrator ?: ""
+                        coverImage = initialBook.coverPath
+                        // Clear errors
+                        titleError = false
+                        authorsError = false
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) {
+                    Text("Reset")
+                }
+
+                // Save Button
                 Button(
                     onClick = {
                         titleError = title.isBlank()
