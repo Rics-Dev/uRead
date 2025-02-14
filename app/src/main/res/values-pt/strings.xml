@@ -196,4 +196,7 @@
     <string name="skip">Pular</string>
     <string name="last_added">Último Adicionado</string>
     <string name="keep_screen_on">Manter a tela ligada</string>
+    <string name="change_home_background">Mudar o fundo da página inicial</string>
+    <string name="saved_book_covers">Capas de livros salvas</string>
+    <string name="select_from_gallery">Selecionar da galeria</string>
 </resources>

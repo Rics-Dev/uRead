@@ -196,4 +196,7 @@
     <string name="skip">건너뛰기</string>
     <string name="last_added">최근 추가</string>
     <string name="keep_screen_on">화면 켜짐 유지</string>
+    <string name="change_home_background">홈 배경 변경</string>
+    <string name="saved_book_covers">저장된 책 표지</string>
+    <string name="select_from_gallery">갤러리에서 선택</string>
 </resources>

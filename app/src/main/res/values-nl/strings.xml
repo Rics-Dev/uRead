@@ -196,4 +196,7 @@
     <string name="skip">Overslaan</string>
     <string name="last_added">Laatst toegevoegd</string>
     <string name="keep_screen_on">Scherm aanhouden</string>
+    <string name="change_home_background">Verander de achtergrond van de startpagina</string>
+    <string name="saved_book_covers">Opgeslagen boekomslagen</string>
+    <string name="select_from_gallery">Selecteer uit galerij</string>
 </resources>

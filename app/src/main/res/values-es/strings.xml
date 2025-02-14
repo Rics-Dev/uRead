@@ -196,5 +196,8 @@
     <string name="skip">Omitir</string>
     <string name="last_added">Último añadido</string>
     <string name="keep_screen_on">Mantener la pantalla encendida</string>
+    <string name="change_home_background">Cambiar el fondo de la página de inicio</string>
+    <string name="saved_book_covers">Portadas de libros guardadas</string>
+    <string name="select_from_gallery">Seleccionar de la galería</string>
 
 </resources>

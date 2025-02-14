@@ -196,4 +196,7 @@
     <string name="skip">Atla</string>
     <string name="last_added">Son Eklenen</string>
     <string name="keep_screen_on">Ekranı açık tut</string>
+    <string name="change_home_background">Ana Sayfa Arka Planını Değiştir</string>
+    <string name="saved_book_covers">Kaydedilen Kitap Kapakları</string>
+    <string name="select_from_gallery">Galeriden Seç</string>
 </resources>

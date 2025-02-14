@@ -349,7 +349,7 @@ fun ImageSourceDialog(
                             onClick = { showGrid = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Saved Book Covers")
+                            Text(stringResource(R.string.saved_book_covers))
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -361,7 +361,7 @@ fun ImageSourceDialog(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Select from Gallery")
+                        Text(stringResource(R.string.select_from_gallery))
                     }
                 }
             }
@@ -479,7 +479,7 @@ fun ImagePicker(onImageSelected: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Change background Image")
+                Text(stringResource(R.string.change_home_background))
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.Default.ImageSearch,
@@ -518,16 +518,17 @@ private fun saveHomeBackgroundImage(context: Context, uri: Uri): String? {
 
         val md = MessageDigest.getInstance("MD5")
         val imageHash = md.digest(imageBytes).joinToString("") { "%02x".format(it) }
+        val fileName = "home_bg_${imageHash}.jpg"
 
+        // Changed to match exact filename instead of startsWith
         val existingFile = context.filesDir.listFiles { file ->
-            file.nameWithoutExtension.startsWith("home_bg_$imageHash")
+            file.name == fileName
         }?.firstOrNull()
 
         if (existingFile != null) {
             return existingFile.absolutePath
         }
 
-        val fileName = "home_bg_${imageHash}.jpg"
         val file = File(context.filesDir, fileName)
 
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
@@ -546,7 +547,9 @@ private fun saveHomeBackgroundImage(context: Context, uri: Uri): String? {
 fun listSavedBookCovers(context: Context): List<File> {
     val filesDir = context.filesDir
     return filesDir.listFiles { file ->
-        file.name.startsWith("book_cover_") && file.extension.lowercase() == "jpg"
+        val isJpg = file.extension.lowercase() == "jpg"
+        val name = file.nameWithoutExtension
+        isJpg && !name.matches(Regex("home_bg_[a-f0-9]+"))
     }?.toList() ?: emptyList()
 }
 

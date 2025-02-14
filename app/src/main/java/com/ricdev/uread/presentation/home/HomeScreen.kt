@@ -32,6 +32,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.rememberAsyncImagePainter
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Layout
+import com.ricdev.uread.navigation.Screens
+import com.ricdev.uread.navigation.navigateToScreen
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
 import com.ricdev.uread.presentation.home.components.CustomSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
@@ -45,6 +47,7 @@ import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 import com.ricdev.uread.presentation.sharedComponents.Shelves
 import com.ricdev.uread.util.PurchaseHelper
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,6 +83,13 @@ fun HomeScreen(
 
     var showLayoutModal by remember { mutableStateOf(false) }
     var showSortModal by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(Unit) {
+        if(!appPreferences.isPremium && Random.nextFloat() < 0.10f){
+            navController.navigate(Screens.PremiumScreen.route)
+        }
+    }
 
     LaunchedEffect(selectedTab) {
         pagerState.animateScrollToPage(selectedTab)

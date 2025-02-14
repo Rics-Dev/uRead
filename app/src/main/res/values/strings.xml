@@ -196,4 +196,7 @@
     <string name="skip">Skip</string>
     <string name="last_added">Last Added</string>
     <string name="keep_screen_on">Keep screen on</string>
+    <string name="change_home_background">Change Home Background</string>
+    <string name="saved_book_covers">Saved Book Covers</string>
+    <string name="select_from_gallery">Select From Gallery</string>
 </resources>

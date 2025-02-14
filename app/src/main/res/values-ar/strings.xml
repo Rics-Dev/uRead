@@ -197,4 +197,7 @@
     <string name="skip">تخطي</string>
     <string name="last_added">آخر إضافة</string>
     <string name="keep_screen_on">إبقاء الشاشة قيد التشغيل</string>
+    <string name="change_home_background">تغيير خلفية الصفحة الرئيسية</string>
+    <string name="saved_book_covers">أغلفة الكتب المحفوظة</string>
+    <string name="select_from_gallery">اختر من المعرض</string>
 </resources>

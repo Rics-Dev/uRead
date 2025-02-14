@@ -848,12 +848,12 @@ class HomeViewModel
     }
 
     private fun saveCoverImage(bitmap: Bitmap, documentFile: DocumentFile): String? {
-        var fileName = "book_cover_${documentFile.name ?: System.currentTimeMillis()}.jpg"
+        var fileName = "${documentFile.name ?: System.currentTimeMillis()}.jpg"
         var file = File(context.filesDir, fileName)
         var counter = 1
 
         while (file.exists()) {
-            fileName = "book_cover_${documentFile.name ?: System.currentTimeMillis()}_$counter.jpg"
+            fileName = "${documentFile.name ?: System.currentTimeMillis()}_$counter.jpg"
             file = File(context.filesDir, fileName)
             counter++
         }
@@ -869,29 +869,6 @@ class HomeViewModel
             null
         }
     }
-
-//    private fun saveCoverImage(bitmap: Bitmap, documentFile: DocumentFile): String? {
-//        var fileName = "${documentFile.name ?: System.currentTimeMillis()}.jpg"
-//        var file = File(context.filesDir, fileName)
-//        var counter = 1
-//
-//        while (file.exists()) {
-//            fileName = "${documentFile.name ?: System.currentTimeMillis()}_$counter.jpg"
-//            file = File(context.filesDir, fileName)
-//            counter++
-//        }
-//
-//        return try {
-//            file.outputStream().use { out ->
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-//                out.flush()
-//            }
-//            file.absolutePath
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//            null
-//        }
-//    }
 
 
     fun updateBook(updatedBook: Book, updatedReadingStatus: Boolean = false) {

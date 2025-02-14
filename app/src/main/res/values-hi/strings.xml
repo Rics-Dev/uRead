@@ -197,4 +197,7 @@
     <string name="skip">छोड़ें</string>
     <string name="last_added">अंतिम जोड़ा गया</string>
     <string name="keep_screen_on">" स्क्रीन चालू रखें"</string>
+    <string name="change_home_background">होम बैकग्राउंड बदलें</string>
+    <string name="saved_book_covers">सहेजे गए पुस्तक कवर</string>
+    <string name="select_from_gallery">गैलरी से चुनें</string>
 </resources>

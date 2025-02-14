@@ -196,4 +196,7 @@
     <string name="skip">スキップ</string>
     <string name="last_added">最近追加</string>
     <string name="keep_screen_on">画面をオンにする</string>
+    <string name="change_home_background">ホーム背景を変更</string>
+    <string name="saved_book_covers">保存されたブックカバー</string>
+    <string name="select_from_gallery">ギャラリーから選択</string>
 </resources>

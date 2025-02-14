@@ -197,4 +197,7 @@
     <string name="skip">Hoppa över</string>
     <string name="last_added">Senast tillagd</string>
     <string name="keep_screen_on">Håll skärmen på</string>
+    <string name="change_home_background">Ändra startsidans bakgrund</string>
+    <string name="saved_book_covers">Sparade bokomslag</string>
+    <string name="select_from_gallery">Välj från galleriet</string>
 </resources>

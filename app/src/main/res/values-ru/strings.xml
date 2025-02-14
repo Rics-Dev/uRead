@@ -196,4 +196,7 @@
     <string name="skip">Пропустить</string>
     <string name="last_added">Последние добавленные</string>
     <string name="keep_screen_on">Оставить экран включенным</string>
+    <string name="change_home_background">Изменить фон главной страницы</string>
+    <string name="saved_book_covers">Сохраненные обложки книг</string>
+    <string name="select_from_gallery">Выбрать из галереи</string>
 </resources>
