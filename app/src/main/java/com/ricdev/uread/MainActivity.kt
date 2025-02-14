@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         val purchaseHelper = PurchaseHelper(this)
         purchaseHelper.billingSetup()
+        purchaseHelper.checkPurchaseStatus()
 
         setContent {
             val screen by viewModel.startDestination.collectAsStateWithLifecycle()

@@ -53,7 +53,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -1112,7 +1111,6 @@ fun EpubReaderView(
                 showTextToolbar = false
             },
             onDismiss = { showTextToolbar = false },
-            purchaseHelper = purchaseHelper,
             appPreferences = appPreferences,
             selectedAnnotation = selectedAnnotation,
             onRemoveAnnotation = {

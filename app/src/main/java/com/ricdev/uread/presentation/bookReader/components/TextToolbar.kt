@@ -7,9 +7,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -40,8 +43,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -68,7 +73,6 @@ import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.BookAnnotation
 import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.presentation.bookReader.BookReaderViewModel
-import com.ricdev.uread.util.PurchaseHelper
 
 @Composable
 fun TextToolbar(
@@ -80,7 +84,6 @@ fun TextToolbar(
     onUnderline: (Color) -> Unit,
     onNote: () -> Unit,
     onDismiss: () -> Unit,
-    purchaseHelper: PurchaseHelper,
     appPreferences: AppPreferences,
     selectedAnnotation: BookAnnotation?,
     onRemoveAnnotation: (BookAnnotation) -> Unit,
@@ -180,8 +183,7 @@ fun TextToolbar(
                         onCustomColorClick = {
                             if (appPreferences.isPremium) isPaletteVisible = true
                             else {
-                                navController.navigate(Screens.PremiumScreen.route);
-//                                viewModel.purchasePremium(purchaseHelper)
+                                navController.navigate(Screens.PremiumScreen.route)
                             }
                         },
                         onColorSelected = { color ->
@@ -333,6 +335,7 @@ fun ActionButtons(
     }
 }
 
+
 @Composable
 fun ColorSelectionPanel(
     selectedAnnotation: BookAnnotation?,
@@ -344,11 +347,21 @@ fun ColorSelectionPanel(
 ) {
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back")
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Back",
+                    modifier = Modifier.size(20.dp)
+                )
             }
             IconButton(
                 onClick = {
@@ -356,23 +369,32 @@ fun ColorSelectionPanel(
                         onRemoveAnnotation(it)
                     }
                 },
-                enabled = selectedAnnotation != null
+                enabled = selectedAnnotation != null,
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Delete Annotation",
+                    modifier = Modifier.size(24.dp),
+                    tint = if (selectedAnnotation != null) LocalContentColor.current else LocalContentColor.current.copy(alpha = 0.38f)
                 )
             }
             IconButton(
                 onClick = onCustomColorClick,
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Colorize,
                     contentDescription = "Custom Color",
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
-        HorizontalDivider()
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        )
         DefaultColors(
             onColorSelected = onColorSelected,
             colorHistory = colorHistory
@@ -385,49 +407,75 @@ fun DefaultColors(
     onColorSelected: (Color) -> Unit,
     colorHistory: List<Color>
 ) {
-    val colors = listOf(
-        Color(0xFF6DBA70),
-        Color(0xFFFFF176),
-        Color(0xFF618CFF),
-        Color(0xFFFF6B6B),
+    val defaultColors = listOf(
+        Color(0xFF4CAF50), // Material Green
+        Color(0xFFFFEB3B), // Material Yellow
+        Color(0xFF2196F3), // Material Blue
+        Color(0xFFE91E63), // Material Pink
+        Color(0xFFFF9800), // Material Orange
+        Color(0xFF9C27B0), // Material Purple
+        Color(0xFF795548), // Material Brown
+        Color(0xFF607D8B), // Material Blue Grey
+        Color(0xFFFF5722), // Material Deep Orange
+        Color(0xFF009688)  // Material Teal
     )
 
-    Row(
+    val colorsToShow = if (colorHistory.isNotEmpty()) {
+        (colorHistory + defaultColors).distinct().take(10)
+    } else {
+        defaultColors
+    }
+
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        (colors + colorHistory.take(1)).forEachIndexed { index, color ->
+        items(
+            count = Int.MAX_VALUE,
+            key = { index -> index }
+        ) { index ->
+            val color = colorsToShow[index % colorsToShow.size]
             ColorButton(color = color, onClick = { onColorSelected(color) })
-            if (index == 3 && colorHistory.isNotEmpty()) {
-                Box(
-                    modifier = Modifier.height(24.dp)
-                ) {
-                    VerticalDivider()
-                }
-            }
         }
     }
 }
 
-
-
-
-
 @Composable
 fun ColorButton(color: Color, onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(25.dp)
-            .clip(RoundedCornerShape(50.dp))
-            .clickable(onClick = onClick)
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = Color.Transparent,
+        border = BorderStroke(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        ),
+        modifier = Modifier.size(32.dp),
+        interactionSource = interactionSource
     ) {
-        Canvas(modifier = Modifier.size(25.dp)) { drawCircle(color = color) }
-        Canvas(modifier = Modifier.size(22.dp)) { drawCircle(color = Color.DarkGray) }
-        Canvas(modifier = Modifier.size(17.dp)) { drawCircle(color = color) }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(4.dp)
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                // Outer circle
+                drawCircle(
+                    color = color,
+                    radius = size.minDimension / 2
+                )
+
+                // Inner circle (slightly darker shade for depth)
+                drawCircle(
+                    color = color.copy(alpha = 0.85f),
+                    radius = size.minDimension / 2.5f
+                )
+            }
+        }
     }
 }
 
