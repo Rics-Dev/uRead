@@ -31,6 +31,7 @@ class AppPreferencesUtil @Inject constructor(
 
     companion object {
         val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
+        val IS_ASSETS_BOOKS_FETCHED = booleanPreferencesKey("is_assets_books_fetched")
         val SCAN_DIRECTORY = stringSetPreferencesKey("scan_directory")
         val ENABLE_PDF_SUPPORT = booleanPreferencesKey("enable_pdf_support")
         val LANGUAGE = stringPreferencesKey("language")
@@ -55,6 +56,7 @@ class AppPreferencesUtil @Inject constructor(
         // Default values
         val defaultPreferences = AppPreferences(
             isFirstLaunch = true,
+            isAssetsBooksFetched = false,
             scanDirectories = emptySet(),
             enablePdfSupport = true,
             language = "system",
@@ -88,6 +90,7 @@ class AppPreferencesUtil @Inject constructor(
         if (preferences[IS_FIRST_LAUNCH] == null) {
             dataStore.edit { prefs ->
                 prefs[IS_FIRST_LAUNCH] = defaultPreferences.isFirstLaunch
+                prefs[IS_ASSETS_BOOKS_FETCHED] = defaultPreferences.isAssetsBooksFetched
                 prefs[SCAN_DIRECTORY] = defaultPreferences.scanDirectories
                 prefs[ENABLE_PDF_SUPPORT] = defaultPreferences.enablePdfSupport
                 prefs[LANGUAGE] = defaultPreferences.language
@@ -114,6 +117,7 @@ class AppPreferencesUtil @Inject constructor(
     val appPreferencesFlow: Flow<AppPreferences> = dataStore.data.map { preferences ->
         AppPreferences(
             isFirstLaunch = preferences[IS_FIRST_LAUNCH] ?: defaultPreferences.isFirstLaunch,
+            isAssetsBooksFetched = preferences[IS_ASSETS_BOOKS_FETCHED] ?: defaultPreferences.isAssetsBooksFetched,
             scanDirectories = preferences[SCAN_DIRECTORY] ?: defaultPreferences.scanDirectories,
             enablePdfSupport = preferences[ENABLE_PDF_SUPPORT] ?: defaultPreferences.enablePdfSupport,
             language = preferences[LANGUAGE] ?: defaultPreferences.language,
@@ -141,6 +145,7 @@ class AppPreferencesUtil @Inject constructor(
             Log.d("AppPreferencesUtil", "Updating preferences. isFirstLaunch: ${newPreferences.isFirstLaunch}")
             Log.d("AppPreferencesUtil", "Updating preferences. Scan directories: ${newPreferences.scanDirectories}")
             preferences[IS_FIRST_LAUNCH] = newPreferences.isFirstLaunch
+            preferences[IS_ASSETS_BOOKS_FETCHED] = newPreferences.isAssetsBooksFetched
             preferences[SCAN_DIRECTORY] = newPreferences.scanDirectories
             preferences[ENABLE_PDF_SUPPORT] = newPreferences.enablePdfSupport
             preferences[LANGUAGE] = newPreferences.language

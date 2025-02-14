@@ -3,6 +3,7 @@ package com.ricdev.uread.data.model
 data class AppPreferences(
     //App Settings
     val isFirstLaunch: Boolean,
+    val isAssetsBooksFetched: Boolean,
     val scanDirectories: Set<String>,
     val enablePdfSupport: Boolean,
     val language: String,

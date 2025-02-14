@@ -62,6 +62,7 @@ import org.readium.r2.shared.util.getOrElse
 import org.readium.r2.shared.util.toAbsoluteUrl
 import org.readium.r2.streamer.PublicationOpener
 import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -153,22 +154,47 @@ class HomeViewModel
                 launch { loadShelves() }
                 launch { observeBooks(preferences) }
                 launch { observeAppPreferences() }
-//                launch { observeEvents() }
+                if (!preferences.isAssetsBooksFetched) {
+                    launch { addPublicDomainBooksIfNeeded() }
+                }
             }
         }
     }
 
-//    private fun observeEvents() {
-//        viewModelScope.launch {
-//            eventBus.events.collect { event ->
-//                when (event) {
-//                    is AppEvent.RefreshBooks -> {
-////                        refreshBooks()
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private suspend fun addPublicDomainBooksIfNeeded() {
+        val publicDomainBooks = listOf("alice_in_wonderlands.epub", "romeo_and_juliet.epub")
+        val existingUris = getBookUrisUseCase()
+        publicDomainBooks.forEach { fileName ->
+            val internalFile = copyAssetToInternalStorage(fileName)
+            val internalUri = Uri.fromFile(internalFile)
+            if (!existingUris.contains(internalUri.toString())) {
+                val book = getBookInfoFromInternalFile(internalFile)
+                insertBookUseCase(book)
+            }
+        }
+        appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(isAssetsBooksFetched = true))
+    }
+
+    private fun copyAssetToInternalStorage(fileName: String): File {
+        val assetManager = context.assets
+        val internalDir = File(context.filesDir, "books")
+        if (!internalDir.exists()) internalDir.mkdirs()
+        val internalFile = File(internalDir, fileName)
+        if (!internalFile.exists()) {
+            assetManager.open("books/$fileName").use { input ->
+                FileOutputStream(internalFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        return internalFile
+    }
+
+    private suspend fun getBookInfoFromInternalFile(file: File): Book {
+        val documentFile = DocumentFile.fromFile(file)
+        return getBookInfo(documentFile)
+    }
+
 
     private fun loadBooks(preferences: AppPreferences) {
         val sortBy = preferences.sortBy
@@ -308,7 +334,10 @@ class HomeViewModel
                 }
 
                 val currentUris = uniqueFiles.map { it.uri.toString() }.toSet()
-                val deletedUris = existingUris.filter { it !in currentUris }
+                val assetBookUris = listOf("alice_in_wonderlands.epub", "romeo_and_juliet.epub").map {
+                    Uri.fromFile(copyAssetToInternalStorage(it)).toString()
+                }
+                val deletedUris = existingUris.filter { it !in currentUris && it !in assetBookUris }
 
 
                 if (newBooks.isNotEmpty()) {
