@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -113,9 +114,11 @@ fun GridLayout(
     val verticalSpacing = (screenHeight * 0.02f).coerceAtLeast(6.dp).coerceAtMost(24.dp)
 
 
+    val isAddingBook by viewModel.isAddingBooks.collectAsState()
 
 
     LazyVerticalGrid(
+        userScrollEnabled = !isAddingBook,
         columns = GridCells.Fixed(appPreferences.gridCount),
         contentPadding = PaddingValues(10.dp),
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),

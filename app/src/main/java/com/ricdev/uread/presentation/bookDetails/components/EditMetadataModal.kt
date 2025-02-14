@@ -2,10 +2,8 @@ package com.ricdev.uread.presentation.bookDetails.components
 
 import android.Manifest
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -27,7 +25,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,14 +48,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.ricdev.uread.data.model.Book
 import com.ricdev.uread.data.model.FileType
 import com.ricdev.uread.presentation.bookDetails.BookDetailsViewModel
+import com.ricdev.uread.util.PermissionHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +89,7 @@ fun EditMetadataModal(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val coverPath = viewModel.updateCoverImage(context, book.id.toString() ,uri)
+            val coverPath = viewModel.updateCoverImage(context, uri)
             if (coverPath != null) {
                 coverImage = coverPath
             }
@@ -111,51 +108,11 @@ fun EditMetadataModal(
         }
     }
 
-    fun checkAndRequestPermissions() {
-        when {
-            // Android 14+ (API 34)
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
-                permissionLauncher.launch(arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                ))
-            }
-            // Android 13 (API 33)
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                permissionLauncher.launch(arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES
-                ))
-            }
-            // Android 12L and below
-            else -> {
-                permissionLauncher.launch(arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ))
-            }
-        }
-    }
-
-    fun hasPermissions(): Boolean {
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_MEDIA_IMAGES
-                ) == PERMISSION_GRANTED
-            }
-            else -> {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PERMISSION_GRANTED
-            }
-        }
-    }
 
     ModalBottomSheet(
         shape = BottomSheetDefaults.HiddenShape,
         dragHandle = null,
-        onDismissRequest = {},
+        onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
             confirmValueChange = { it != SheetValue.PartiallyExpanded }
@@ -206,10 +163,10 @@ fun EditMetadataModal(
                             .clip(RoundedCornerShape(8.dp))
                             .clickable(
                                 onClick = {
-                                    if (hasPermissions()) {
+                                    if (PermissionHandler.hasPermissions(context)) {
                                         imagePicker.launch("image/*")
                                     } else {
-                                        checkAndRequestPermissions()
+                                        PermissionHandler.requestPermissions(permissionLauncher)
                                     }
                                 }
                             )
@@ -220,7 +177,7 @@ fun EditMetadataModal(
                             modifier = Modifier.fillMaxSize()
                         )
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.Default.Edit,
                             contentDescription = "Add icon",
                             modifier = Modifier.align(Alignment.Center)
                         )

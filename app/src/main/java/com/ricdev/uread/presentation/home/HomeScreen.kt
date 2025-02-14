@@ -50,6 +50,7 @@ import com.ricdev.uread.presentation.home.components.SortFilterModal
 import com.ricdev.uread.presentation.sharedComponents.CustomNavigationDrawer
 import com.ricdev.uread.presentation.sharedComponents.Shelves
 import com.ricdev.uread.util.PurchaseHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -92,7 +93,8 @@ fun HomeScreen(
 
 
     LaunchedEffect(Unit) {
-        if(!appPreferences.isPremium && Random.nextFloat() < 0.10f){
+        delay(1000)
+        if(!appPreferences.isPremium && Random.nextFloat() <= 0.10f){
             navController.navigate(Screens.PremiumScreen.route)
         }
     }
@@ -258,7 +260,9 @@ fun HomeScreen(
                     },
                     purchaseHelper = purchaseHelper,
                 )
+                val isAddingBook by viewModel.isAddingBooks.collectAsState()
                 HorizontalPager(
+                    userScrollEnabled = !isAddingBook,
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxWidth()

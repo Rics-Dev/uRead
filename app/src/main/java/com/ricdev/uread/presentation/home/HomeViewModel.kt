@@ -38,6 +38,7 @@ import com.ricdev.uread.domain.use_case.shelves.RemoveBooksFromShelfUseCase
 import com.ricdev.uread.domain.use_case.shelves.RemoveShelfUseCase
 import com.ricdev.uread.presentation.home.states.ImportProgressState
 import com.ricdev.uread.presentation.home.states.SnackbarState
+import com.ricdev.uread.util.ImageUtils
 import com.ricdev.uread.util.PurchaseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -61,7 +62,6 @@ import org.readium.r2.shared.util.getOrElse
 import org.readium.r2.shared.util.toAbsoluteUrl
 import org.readium.r2.streamer.PublicationOpener
 import java.io.File
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -714,13 +714,14 @@ class HomeViewModel
                     // Extract cover art
                     val coverArt = mediaMetadataRetriever.embeddedPicture
                     val coverPath = coverArt?.let {
-                        saveCoverImage(
+                        ImageUtils.saveCoverImage(
                             BitmapFactory.decodeByteArray(
                                 it,
                                 0,
                                 it.size
                             ),
-                            documentFile
+                            documentFile.uri.toString(),
+                            context
                         )
                     }
 
@@ -784,7 +785,7 @@ class HomeViewModel
                         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                         bitmap
                     }
-                    val coverPath = coverBitmap?.let { saveCoverImage( it, documentFile) }
+                    val coverPath = coverBitmap?.let { ImageUtils.saveCoverImage( it, documentFile.uri.toString(), context) }
 
                     firstPage?.close()
 
@@ -830,7 +831,7 @@ class HomeViewModel
         documentFile: DocumentFile
     ): Book {
         val coverBitmap = publication?.cover()
-        val coverPath = coverBitmap?.let { saveCoverImage( it, documentFile) }
+        val coverPath = coverBitmap?.let { ImageUtils.saveCoverImage( it, documentFile.uri.toString(), context) }
 
         return Book(
             uri = documentFile.uri.toString(),
@@ -848,30 +849,6 @@ class HomeViewModel
         )
     }
 
-
-
-    private fun saveCoverImage(bitmap: Bitmap, documentFile: DocumentFile): String? {
-        var fileName = "${documentFile.name ?: System.currentTimeMillis()}.jpg"
-        var file = File(context.filesDir, fileName)
-        var counter = 1
-
-        while (file.exists()) {
-            fileName = "${documentFile.name ?: System.currentTimeMillis()}_$counter.jpg"
-            file = File(context.filesDir, fileName)
-            counter++
-        }
-
-        return try {
-            file.outputStream().use { out ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-                out.flush()
-            }
-            file.absolutePath
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
-        }
-    }
 
 
     fun updateBook(updatedBook: Book, updatedReadingStatus: Boolean = false) {
