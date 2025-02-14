@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -98,13 +99,13 @@ fun PremiumScreen(
                 )
 
                 Text(
-                    text = "Premium Version",
+                    text = stringResource(R.string.premium_version),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
-                    text = "Get access to many amazing features and help the app Development!",
+                    text = stringResource(R.string.premium_description),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
@@ -115,12 +116,12 @@ fun PremiumScreen(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    PremiumFeature("Enjoy Ad-free experience")
-                    PremiumFeature("Get detailed reading statistics")
-                    PremiumFeature("Customizable app theme")
-                    PremiumFeature("Unlimited shelves")
-                    PremiumFeature("Highlight and annotation colors customization")
-                    PremiumFeature("Support the developer")
+                    PremiumFeature(stringResource(R.string.feature_ad_free))
+                    PremiumFeature(stringResource(R.string.feature_reading_stats))
+                    PremiumFeature(stringResource(R.string.feature_app_theme))
+                    PremiumFeature(stringResource(R.string.feature_unlimited_shelves))
+                    PremiumFeature(stringResource(R.string.feature_highlight_colors))
+                    PremiumFeature(stringResource(R.string.feature_support_dev))
                 }
 
                 Spacer(Modifier.height(16.dp))

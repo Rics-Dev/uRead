@@ -200,4 +200,19 @@
     <string name="change_home_background">Ändra startsidans bakgrund</string>
     <string name="saved_book_covers">Sparade bokomslag</string>
     <string name="select_from_gallery">Välj från galleriet</string>
+    <string name="premium_version">Premium-version</string>
+    <string name="premium_description">Få tillgång till fantastiska funktioner och hjälp till med apputvecklingen!</string>
+    <string name="feature_ad_free">Njut av en reklamfri upplevelse</string>
+    <string name="feature_reading_stats">Få detaljerad läsningsstatistik</string>
+    <string name="feature_app_theme">Anpassningsbart apptema</string>
+    <string name="feature_unlimited_shelves">Obegränsade hyllor</string>
+    <string name="feature_highlight_colors">Anpassning av markerings- och anteckningsfärger</string>
+    <string name="feature_support_dev">Stöd utvecklaren</string>
+    <string name="lifetime">Livstid</string>
+    <string name="one_time_payment">Engångsbetalning</string>
+    <string name="privacy">Integritet</string>
+    <string name="terms_of_service">Användarvillkor</string>
+    <string name="unable_to_open_privacy_policy">Kunde inte öppna integritetspolicy</string>
+    <string name="navigate_to">Navigera till</string>
+    <string name="back">Tillbaka</string>
 </resources>

@@ -199,4 +199,19 @@
     <string name="change_home_background">ホーム背景を変更</string>
     <string name="saved_book_covers">保存されたブックカバー</string>
     <string name="select_from_gallery">ギャラリーから選択</string>
+    <string name="premium_version">プレミアム版</string>
+    <string name="premium_description">素晴らしい機能にアクセスしてアプリ開発をサポート！</string>
+    <string name="feature_ad_free">広告なしのエクスペリエンスを楽しむ</string>
+    <string name="feature_reading_stats">詳細な読書統計を取得</string>
+    <string name="feature_app_theme">カスタマイズ可能なアプリテーマ</string>
+    <string name="feature_unlimited_shelves">無制限の本棚</string>
+    <string name="feature_highlight_colors">ハイライトと注釈の色のカスタマイズ</string>
+    <string name="feature_support_dev">開発者をサポート</string>
+    <string name="lifetime">生涯</string>
+    <string name="one_time_payment">一回払い</string>
+    <string name="privacy">プライバシー</string>
+    <string name="terms_of_service">利用規約</string>
+    <string name="unable_to_open_privacy_policy">プライバシーポリシーを開けません</string>
+    <string name="navigate_to">移動する</string>
+    <string name="back">戻る</string>
 </resources>

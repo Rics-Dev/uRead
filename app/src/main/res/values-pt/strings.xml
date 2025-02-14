@@ -199,4 +199,19 @@
     <string name="change_home_background">Mudar o fundo da página inicial</string>
     <string name="saved_book_covers">Capas de livros salvas</string>
     <string name="select_from_gallery">Selecionar da galeria</string>
+    <string name="premium_version">Versão Premium</string>
+    <string name="premium_description">Obtenha acesso a recursos incríveis e ajude no desenvolvimento do aplicativo!</string>
+    <string name="feature_ad_free">Desfrute de uma experiência sem anúncios</string>
+    <string name="feature_reading_stats">Obtenha estatísticas detalhadas de leitura</string>
+    <string name="feature_app_theme">Tema do aplicativo personalizável</string>
+    <string name="feature_unlimited_shelves">Prateleiras ilimitadas</string>
+    <string name="feature_highlight_colors">Personalização de cores de destaque e anotações</string>
+    <string name="feature_support_dev">Apoie o desenvolvedor</string>
+    <string name="lifetime">Vitalício</string>
+    <string name="one_time_payment">Pagamento único</string>
+    <string name="privacy">Privacidade</string>
+    <string name="terms_of_service">Termos de Serviço</string>
+    <string name="unable_to_open_privacy_policy">Não foi possível abrir a política de privacidade</string>
+    <string name="navigate_to">Navegar para</string>
+    <string name="back">Voltar</string>
 </resources>

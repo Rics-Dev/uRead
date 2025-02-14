@@ -199,4 +199,19 @@
     <string name="change_home_background">홈 배경 변경</string>
     <string name="saved_book_covers">저장된 책 표지</string>
     <string name="select_from_gallery">갤러리에서 선택</string>
+    <string name="premium_version">프리미엄 버전</string>
+    <string name="premium_description">놀라운 기능에 액세스하고 앱 개발을 도와주세요!</string>
+    <string name="feature_ad_free">광고 없는 경험을 즐기세요</string>
+    <string name="feature_reading_stats">자세한 독서 통계 확인</string>
+    <string name="feature_app_theme">사용자 지정 가능한 앱 테마</string>
+    <string name="feature_unlimited_shelves">무제한 책장</string>
+    <string name="feature_highlight_colors">하이라이트 및 주석 색상 사용자 지정</string>
+    <string name="feature_support_dev">개발자 지원</string>
+    <string name="lifetime">평생</string>
+    <string name="one_time_payment">일회성 결제</string>
+    <string name="privacy">개인정보</string>
+    <string name="terms_of_service">서비스 약관</string>
+    <string name="unable_to_open_privacy_policy">개인정보 처리방침을 열 수 없습니다</string>
+    <string name="navigate_to">이동하기</string>
+    <string name="back">뒤로</string>
 </resources>

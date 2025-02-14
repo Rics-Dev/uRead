@@ -199,4 +199,20 @@
     <string name="change_home_background">Ana Sayfa Arka Planını Değiştir</string>
     <string name="saved_book_covers">Kaydedilen Kitap Kapakları</string>
     <string name="select_from_gallery">Galeriden Seç</string>
+    <string name="premium_version">Premium Sürüm</string>
+    <string name="premium_description">Harika özelliklere erişin ve uygulama geliştirmesine yardımcı olun!</string>
+    <string name="feature_ad_free">Reklamsız deneyimin keyfini çıkarın</string>
+    <string name="feature_reading_stats">Ayrıntılı okuma istatistikleri alın</string>
+    <string name="feature_app_theme">Özelleştirilebilir uygulama teması</string>
+    <string name="feature_unlimited_shelves">Sınırsız raflar</string>
+    <string name="feature_highlight_colors">Vurgulama ve açıklama renkleri özelleştirme</string>
+    <string name="feature_support_dev">Geliştiriciyi destekle</string>
+    <string name="lifetime">Ömür boyu</string>
+    <string name="one_time_payment">Tek seferlik ödeme</string>
+    <string name="privacy">Gizlilik</string>
+    <string name="terms_of_service">Kullanım Şartları</string>
+    <string name="unable_to_open_privacy_policy">Gizlilik politikası açılamıyor</string>
+    <string name="navigate_to">Şuraya git</string>
+    <string name="back">Geri</string>
+
 </resources>

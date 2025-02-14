@@ -200,4 +200,19 @@
     <string name="change_home_background">होम बैकग्राउंड बदलें</string>
     <string name="saved_book_covers">सहेजे गए पुस्तक कवर</string>
     <string name="select_from_gallery">गैलरी से चुनें</string>
+    <string name="premium_version">प्रीमियम संस्करण</string>
+    <string name="premium_description">कई शानदार सुविधाओं तक पहुंच प्राप्त करें और ऐप विकास में मदद करें!</string>
+    <string name="feature_ad_free">विज्ञापन-मुक्त अनुभव का आनंद लें</string>
+    <string name="feature_reading_stats">विस्तृत पठन आंकड़े प्राप्त करें</string>
+    <string name="feature_app_theme">अनुकूलन योग्य ऐप थीम</string>
+    <string name="feature_unlimited_shelves">असीमित शेल्फ</string>
+    <string name="feature_highlight_colors">हाइलाइट और एनोटेशन रंगों का अनुकूलन</string>
+    <string name="feature_support_dev">डेवलपर का समर्थन करें</string>
+    <string name="lifetime">आजीवन</string>
+    <string name="one_time_payment">एकमुश्त भुगतान</string>
+    <string name="privacy">गोपनीयता</string>
+    <string name="terms_of_service">सेवा की शर्तें</string>
+    <string name="unable_to_open_privacy_policy">गोपनीयता नीति नहीं खोल सकते</string>
+    <string name="navigate_to">पर जाएं</string>
+    <string name="back">वापस</string>
 </resources>

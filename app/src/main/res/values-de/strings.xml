@@ -199,5 +199,20 @@
     <string name="change_home_background">Startseitenhintergrund ändern</string>
     <string name="saved_book_covers">Gespeicherte Buchumschläge</string>
     <string name="select_from_gallery">Aus der Galerie auswählen</string>
+    <string name="premium_version">Premium-Version</string>
+    <string name="premium_description">Erhalten Sie Zugang zu vielen tollen Funktionen und unterstützen Sie die App-Entwicklung!</string>
+    <string name="feature_ad_free">Werbefreies Erlebnis genießen</string>
+    <string name="feature_reading_stats">Detaillierte Lesestatistiken erhalten</string>
+    <string name="feature_app_theme">Anpassbares App-Design</string>
+    <string name="feature_unlimited_shelves">Unbegrenzte Regale</string>
+    <string name="feature_highlight_colors">Anpassung der Markierungs- und Annotationsfarben</string>
+    <string name="feature_support_dev">Entwickler unterstützen</string>
+    <string name="lifetime">Lebenslang</string>
+    <string name="one_time_payment">Einmalige Zahlung</string>
+    <string name="privacy">Datenschutz</string>
+    <string name="terms_of_service">Nutzungsbedingungen</string>
+    <string name="unable_to_open_privacy_policy">Datenschutzerklärung kann nicht geöffnet werden</string>
+    <string name="navigate_to">Navigieren zu</string>
+    <string name="back">Zurück</string>
 
 </resources>

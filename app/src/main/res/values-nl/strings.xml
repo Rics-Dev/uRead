@@ -199,4 +199,19 @@
     <string name="change_home_background">Verander de achtergrond van de startpagina</string>
     <string name="saved_book_covers">Opgeslagen boekomslagen</string>
     <string name="select_from_gallery">Selecteer uit galerij</string>
+    <string name="premium_version">Premium Versie</string>
+    <string name="premium_description">Krijg toegang tot geweldige functies en help bij de app-ontwikkeling!</string>
+    <string name="feature_ad_free">Geniet van een advertentievrije ervaring</string>
+    <string name="feature_reading_stats">Krijg gedetailleerde leesstatistieken</string>
+    <string name="feature_app_theme">Aanpasbaar app-thema</string>
+    <string name="feature_unlimited_shelves">Onbeperkte planken</string>
+    <string name="feature_highlight_colors">Aanpassing van markeer- en annotatie kleuren</string>
+    <string name="feature_support_dev">Ondersteun de ontwikkelaar</string>
+    <string name="lifetime">Levenslang</string>
+    <string name="one_time_payment">Eenmalige betaling</string>
+    <string name="privacy">Privacy</string>
+    <string name="terms_of_service">Servicevoorwaarden</string>
+    <string name="unable_to_open_privacy_policy">Kan privacybeleid niet openen</string>
+    <string name="navigate_to">Navigeer naar</string>
+    <string name="back">Terug</string>
 </resources>

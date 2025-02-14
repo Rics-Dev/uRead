@@ -199,4 +199,19 @@
     <string name="change_home_background">更改主页背景</string>
     <string name="saved_book_covers">保存的书籍封面</string>
     <string name="select_from_gallery">从图库中选择</string>
+    <string name="premium_version">高级版</string>
+    <string name="premium_description">获取众多精彩功能并帮助应用程序开发！</string>
+    <string name="feature_ad_free">享受无广告体验</string>
+    <string name="feature_reading_stats">获取详细的阅读统计</string>
+    <string name="feature_app_theme">可自定义应用主题</string>
+    <string name="feature_unlimited_shelves">无限书架</string>
+    <string name="feature_highlight_colors">高亮和注释颜色自定义</string>
+    <string name="feature_support_dev">支持开发者</string>
+    <string name="lifetime">终身</string>
+    <string name="one_time_payment">一次性付款</string>
+    <string name="privacy">隐私</string>
+    <string name="terms_of_service">服务条款</string>
+    <string name="unable_to_open_privacy_policy">无法打开隐私政策</string>
+    <string name="navigate_to">导航至</string>
+    <string name="back">返回</string>
 </resources>

@@ -200,4 +200,19 @@
     <string name="change_home_background">تغيير خلفية الصفحة الرئيسية</string>
     <string name="saved_book_covers">أغلفة الكتب المحفوظة</string>
     <string name="select_from_gallery">اختر من المعرض</string>
+    <string name="premium_version">النسخة المميزة</string>
+    <string name="premium_description">احصل على ميزات مذهلة وساعد في تطوير التطبيق!</string>
+    <string name="feature_ad_free">استمتع بتجربة خالية من الإعلانات</string>
+    <string name="feature_reading_stats">احصل على إحصاءات قراءة مفصلة</string>
+    <string name="feature_app_theme">سمة تطبيق قابلة للتخصيص</string>
+    <string name="feature_unlimited_shelves">رفوف غير محدودة</string>
+    <string name="feature_highlight_colors">تخصيص ألوان التمييز والتعليقات</string>
+    <string name="feature_support_dev">دعم المطور</string>
+    <string name="lifetime">مدى الحياة</string>
+    <string name="one_time_payment">دفعة واحدة</string>
+    <string name="privacy">الخصوصية</string>
+    <string name="terms_of_service">شروط الخدمة</string>
+    <string name="unable_to_open_privacy_policy">تعذر فتح سياسة الخصوصية</string>
+    <string name="navigate_to">انتقل إلى</string>
+    <string name="back">رجوع</string>
 </resources>

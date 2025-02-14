@@ -199,4 +199,19 @@
     <string name="change_home_background">Изменить фон главной страницы</string>
     <string name="saved_book_covers">Сохраненные обложки книг</string>
     <string name="select_from_gallery">Выбрать из галереи</string>
+    <string name="premium_version">Премиум версия</string>
+    <string name="premium_description">Получите доступ к удивительным функциям и помогите в разработке приложения!</string>
+    <string name="feature_ad_free">Наслаждайтесь использованием без рекламы</string>
+    <string name="feature_reading_stats">Получите подробную статистику чтения</string>
+    <string name="feature_app_theme">Настраиваемая тема приложения</string>
+    <string name="feature_unlimited_shelves">Неограниченное количество полок</string>
+    <string name="feature_highlight_colors">Настройка цветов выделения и аннотаций</string>
+    <string name="feature_support_dev">Поддержите разработчика</string>
+    <string name="lifetime">Пожизненно</string>
+    <string name="one_time_payment">Единоразовый платеж</string>
+    <string name="privacy">Конфиденциальность</string>
+    <string name="terms_of_service">Условия использования</string>
+    <string name="unable_to_open_privacy_policy">Не удалось открыть политику конфиденциальности</string>
+    <string name="navigate_to">Перейти к</string>
+    <string name="back">Назад</string>
 </resources>

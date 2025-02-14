@@ -199,4 +199,19 @@
     <string name="change_home_background">Change Home Background</string>
     <string name="saved_book_covers">Saved Book Covers</string>
     <string name="select_from_gallery">Select From Gallery</string>
+    <string name="premium_version">Premium Version</string>
+    <string name="premium_description">Get access to many amazing features and help the app Development!</string>
+    <string name="feature_ad_free">Enjoy Ad-free experience</string>
+    <string name="feature_reading_stats">Get detailed reading statistics</string>
+    <string name="feature_app_theme">Customizable app theme</string>
+    <string name="feature_unlimited_shelves">Unlimited shelves</string>
+    <string name="feature_highlight_colors">Highlight and annotation colors customization</string>
+    <string name="feature_support_dev">Support the developer</string>
+    <string name="lifetime">Lifetime</string>
+    <string name="one_time_payment">One time payment</string>
+    <string name="privacy">Privacy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="unable_to_open_privacy_policy">Unable to open Privacy Policy</string>
+    <string name="navigate_to">Navigate to</string>
+    <string name="back">Back</string>
 </resources>
