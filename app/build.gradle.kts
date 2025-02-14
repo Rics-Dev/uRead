@@ -34,8 +34,8 @@ android {
         minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 34
-        versionCode = 16
-        versionName = "1.1.8"
+        versionCode = 17
+        versionName = "1.2.0"
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

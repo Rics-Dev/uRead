@@ -27,7 +27,7 @@ object ImageUtils {
 
     fun listSavedBookCovers(context: Context): List<File> {
         return context.filesDir.listFiles { file ->
-            file.isImageFile() && file.name.startsWith(COVER_PREFIX)
+            file.isImageFile() && !file.name.startsWith(HOME_BACKGROUND_PREFIX)
         }.orEmpty().toList()
     }
 
