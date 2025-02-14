@@ -1,5 +1,6 @@
 package com.ricdev.uread.presentation.home
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -13,9 +14,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.ModeEdit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -34,6 +37,7 @@ import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Layout
 import com.ricdev.uread.navigation.Screens
 import com.ricdev.uread.navigation.navigateToScreen
+import com.ricdev.uread.presentation.bookDetails.components.EditMetadataModal
 import com.ricdev.uread.presentation.bookShelf.BookShelfScreen
 import com.ricdev.uread.presentation.home.components.CustomSnackbar
 import com.ricdev.uread.presentation.home.components.CustomBottomAppBar
@@ -83,6 +87,8 @@ fun HomeScreen(
 
     var showLayoutModal by remember { mutableStateOf(false) }
     var showSortModal by remember { mutableStateOf(false) }
+
+    var showMetadataModal by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(Unit) {
@@ -205,6 +211,26 @@ fun HomeScreen(
                        navController = navController
                    )
                }
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = (selectionMode && selectedBooks.size == 1),
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it }),
+                ) {
+                    FloatingActionButton(
+                        shape = CircleShape,
+                        onClick = {
+                            showMetadataModal = true
+//                            val encodedUri = Uri.encode(selectedBooks[0].uri)
+//                            navController.navigate(
+//                                Screens.BookDetailsScreen.route + "/${selectedBooks[0].id}/${encodedUri}"
+//                            )
+                        }
+                    ) {
+                        Icon(Icons.Default.ModeEdit, contentDescription = "Edit Book")
+                    }
+                }
             },
             snackbarHost = {
                 CustomSnackbar(
@@ -369,6 +395,15 @@ fun HomeScreen(
                     appPreferences = appPreferences,
                     viewModel = viewModel,
                     onDismiss = { showSortModal = false },
+                )
+            }
+            if (showMetadataModal) {
+                EditMetadataModal(
+                    book = selectedBooks[0],
+                    onDismiss = {
+                        viewModel.toggleBookSelection(selectedBooks[0])
+                        showMetadataModal = false
+                    }
                 )
             }
         }

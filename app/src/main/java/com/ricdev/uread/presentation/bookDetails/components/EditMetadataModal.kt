@@ -1,17 +1,33 @@
 package com.ricdev.uread.presentation.bookDetails.components
 
+import android.Manifest
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,30 +46,116 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 import com.ricdev.uread.data.model.Book
+import com.ricdev.uread.data.model.FileType
 import com.ricdev.uread.presentation.bookDetails.BookDetailsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMetadataModal(
     book: Book?,
-    viewModel: BookDetailsViewModel,
+    viewModel: BookDetailsViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
 ) {
-    val isUpdating by viewModel.isUpdating.collectAsStateWithLifecycle()
-    val updateError by viewModel.updateError.collectAsStateWithLifecycle()
-    val bookMetadata by viewModel.bookMetadata.collectAsStateWithLifecycle()
+    if (book == null) return
 
-    var title by remember { mutableStateOf(bookMetadata["title"] ?: "") }
-    var authors by remember { mutableStateOf(bookMetadata["author"] ?: "") }
-    var description by remember { mutableStateOf(bookMetadata["description"] ?: "") }
+    val context = LocalContext.current
+    val updateError by viewModel.updateError.collectAsStateWithLifecycle()
+
+    var title by remember { mutableStateOf(book.title) }
+    var titleError by remember { mutableStateOf(false) }
+
+    var coverImage by remember { mutableStateOf(book.coverPath) }
+
+    var authors by remember { mutableStateOf(book.authors) }
+    var authorsError by remember { mutableStateOf(false) }
+
+    var description by remember { mutableStateOf(book.description ?: "") }
+    var publishDate by remember { mutableStateOf(book.publishDate ?: "") }
+    var publisher by remember { mutableStateOf(book.publisher ?: "") }
+    var language by remember { mutableStateOf(book.language ?: "") }
+    var numberOfPages by remember { mutableStateOf(book.numberOfPages?.toString() ?: "") }
+    var subjects by remember { mutableStateOf(book.subjects ?: "") }
+    var narrator by remember { mutableStateOf(book.narrator ?: "") }
+
+    // Content picker launcher
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val coverPath = viewModel.updateCoverImage(context, book.id.toString() ,uri)
+            if (coverPath != null) {
+                coverImage = coverPath
+            }
+        }
+    }
+
+    // Permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.READ_MEDIA_IMAGES, false) ||
+                    permissions.getOrDefault(Manifest.permission.READ_EXTERNAL_STORAGE, false) -> {
+                imagePicker.launch("image/*")
+            }
+        }
+    }
+
+    fun checkAndRequestPermissions() {
+        when {
+            // Android 14+ (API 34)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                ))
+            }
+            // Android 13 (API 33)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ))
+            }
+            // Android 12L and below
+            else -> {
+                permissionLauncher.launch(arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ))
+            }
+        }
+    }
+
+    fun hasPermissions(): Boolean {
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ) == PERMISSION_GRANTED
+            }
+            else -> {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PERMISSION_GRANTED
+            }
+        }
+    }
 
     ModalBottomSheet(
         shape = BottomSheetDefaults.HiddenShape,
         dragHandle = null,
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
             confirmValueChange = { it != SheetValue.PartiallyExpanded }
@@ -78,7 +180,7 @@ fun EditMetadataModal(
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
                     Text(
-                        text = "Edit Metadata",
+                        text = "Edit Book",
                         style = MaterialTheme.typography.titleLarge,
                     )
                 }
@@ -90,21 +192,58 @@ fun EditMetadataModal(
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(16.dp)
             ) {
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                onClick = {
+                                    if (hasPermissions()) {
+                                        imagePicker.launch("image/*")
+                                    } else {
+                                        checkAndRequestPermissions()
+                                    }
+                                }
+                            )
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(coverImage),
+                            contentDescription = "Book cover",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add icon",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Title") },
+                        onValueChange = { title = it; titleError = false },
+                        label = { Text("Title *") },
+                        isError = titleError,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    if (titleError) Text("Required", color = MaterialTheme.colorScheme.error)
 
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = authors,
-                        onValueChange = { authors = it },
-                        label = { Text("Author") },
-                        modifier = Modifier.fillMaxWidth()
+                    onValueChange = { authors = it; authorsError = false },
+                    label = { Text("Authors *") },
+                    isError = authorsError,
+                    modifier = Modifier.fillMaxWidth()
                     )
+                    if (authorsError) Text("Required", color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
@@ -113,6 +252,58 @@ fun EditMetadataModal(
                         label = { Text("Description") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                          value = publishDate,
+                    onValueChange = { publishDate = it },
+                    label = { Text("Publication Date") },
+                    placeholder = { Text("YYYY-MM-DD") },
+                    modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                          value = publisher,
+                    onValueChange = { publisher = it },
+                    label = { Text("Publisher") },
+                    modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+           value = language,
+                    onValueChange = { language = it },
+                    label = { Text("Language") },
+                    modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = numberOfPages,
+                        onValueChange = { numberOfPages = it },
+                        label = { Text("Pages") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = subjects,
+                        onValueChange = { subjects = it },
+                        label = { Text("Subjects (comma-separated)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (book.fileType == FileType.AUDIOBOOK) {
+                        OutlinedTextField(
+                            value = narrator,
+                            onValueChange = { narrator = it },
+                            label = { Text("Narrator") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
             if (updateError != null) {
@@ -130,18 +321,33 @@ fun EditMetadataModal(
             ) {
                 Button(
                     onClick = {
-//                        viewModel.updateMetadata(
-//                            title = title,
-//                            authors = authors,
-//                            description = description,
-//                        )
+                        titleError = title.isBlank()
+                        authorsError = authors.isBlank()
+                        if (titleError || authorsError) return@Button
+
+                        viewModel.updateBook(
+                            book.copy(
+                                title = title.trim(),
+                                coverPath = coverImage,
+                                authors = authors.trim(),
+                                description = description.ifEmpty { null },
+                                publishDate = publishDate.ifEmpty { null },
+                                publisher = publisher.ifEmpty { null },
+                                language = language.ifEmpty { null },
+                                numberOfPages = numberOfPages.toIntOrNull(),
+                                subjects = subjects.ifEmpty { null },
+                                narrator = if (book.fileType == FileType.AUDIOBOOK) narrator.ifEmpty { null } else null
+                            )
+                        )
+                        onDismiss()
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = !isUpdating
                 ) {
-                    Text(if (isUpdating) "Saving..." else "Save")
+                    Text("Save")
                 }
             }
         }
     }
+
+
 }

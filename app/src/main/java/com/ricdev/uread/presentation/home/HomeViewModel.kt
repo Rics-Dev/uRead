@@ -719,7 +719,8 @@ class HomeViewModel
                                 it,
                                 0,
                                 it.size
-                            ), documentFile
+                            ),
+                            documentFile
                         )
                     }
 
@@ -783,7 +784,7 @@ class HomeViewModel
                         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                         bitmap
                     }
-                    val coverPath = coverBitmap?.let { saveCoverImage(it, documentFile) }
+                    val coverPath = coverBitmap?.let { saveCoverImage( it, documentFile) }
 
                     firstPage?.close()
 
@@ -829,7 +830,7 @@ class HomeViewModel
         documentFile: DocumentFile
     ): Book {
         val coverBitmap = publication?.cover()
-        val coverPath = coverBitmap?.let { saveCoverImage(it, documentFile) }
+        val coverPath = coverBitmap?.let { saveCoverImage( it, documentFile) }
 
         return Book(
             uri = documentFile.uri.toString(),
@@ -846,6 +847,8 @@ class HomeViewModel
             locator = "",
         )
     }
+
+
 
     private fun saveCoverImage(bitmap: Bitmap, documentFile: DocumentFile): String? {
         var fileName = "${documentFile.name ?: System.currentTimeMillis()}.jpg"

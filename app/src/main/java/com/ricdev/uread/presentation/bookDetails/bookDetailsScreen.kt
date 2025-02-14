@@ -19,20 +19,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.PeopleAlt
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Translate
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,6 +54,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,9 +63,11 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ricdev.uread.R
 import com.ricdev.uread.data.model.Book
+import com.ricdev.uread.data.model.FileType
 import com.ricdev.uread.presentation.bookDetails.components.BookDescription
 import com.ricdev.uread.presentation.bookDetails.components.BookReview
 import com.ricdev.uread.presentation.bookDetails.components.EditMetadataModal
+//import com.ricdev.uread.presentation.bookDetails.components.EditMetadataModal
 import com.ricdev.uread.presentation.bookDetails.components.ReadingProgress
 import com.ricdev.uread.presentation.bookDetails.components.ReadingStats
 import com.ricdev.uread.presentation.sharedComponents.dialogs.RatingDialog
@@ -95,6 +103,11 @@ fun BookDetailsScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 ),
+                actions = {
+                    IconButton(onClick = { showMetadataModal = true }) {
+                        Icon(Icons.Default.Edit, "Edit Metadata")
+                    }
+                },
             )
         }
     ) { innerPadding ->
@@ -142,7 +155,7 @@ fun BookDetailsScreen(
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        BookCover(book, modifier = Modifier.weight(1f))
+                        BookCover(book.coverPath, modifier = Modifier.weight(1f))
                         Spacer(modifier = Modifier.width(16.dp))
                         BookInfo(book, modifier = Modifier.weight(2f), viewModel)
                     }
@@ -166,7 +179,6 @@ fun BookDetailsScreen(
     if (showMetadataModal) {
         EditMetadataModal(
             book = book,
-            viewModel = viewModel,
             onDismiss = { showMetadataModal = false }
         )
     }
@@ -175,9 +187,9 @@ fun BookDetailsScreen(
 }
 
 @Composable
-fun BookCover(book: Book, modifier: Modifier = Modifier) {
+fun BookCover(bookCover: String?, modifier: Modifier = Modifier) {
     Image(
-        painter = rememberAsyncImagePainter(book.coverPath),
+        painter = rememberAsyncImagePainter(bookCover),
         contentDescription = "Book cover",
         modifier = modifier
             .height(200.dp)
@@ -328,16 +340,3 @@ fun BookInfo(book: Book, modifier: Modifier = Modifier, viewModel: BookDetailsVi
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
