@@ -160,7 +160,9 @@ fun PremiumScreen(
 
             Button(
                 onClick = {
-                    viewModel.purchasePremium(purchaseHelper)
+                    viewModel.purchasePremium(purchaseHelper) {
+                        navController.navigateUp()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -183,7 +185,7 @@ fun PremiumScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .clickable {
-                            showPrivacyPolicyModal = true;
+                            showPrivacyPolicyModal = true
                         }
                 )
                 Spacer(modifier = Modifier.width(8.dp))

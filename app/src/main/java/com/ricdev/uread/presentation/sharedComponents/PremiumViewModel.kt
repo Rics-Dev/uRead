@@ -52,14 +52,26 @@ class PremiumViewModel @Inject constructor(
     }
 
 
-    fun purchasePremium(purchaseHelper: PurchaseHelper) {
+    fun purchasePremium(purchaseHelper: PurchaseHelper, onPurchaseComplete: () -> Unit) {
         purchaseHelper.makePurchase()
         viewModelScope.launch {
             purchaseHelper.isPremium.collect { isPremium ->
                 updatePremiumStatus(isPremium)
+                if (isPremium) {
+                    onPurchaseComplete()
+                }
             }
         }
     }
 
+
+//    fun purchasePremium(purchaseHelper: PurchaseHelper) {
+//        purchaseHelper.makePurchase()
+//        viewModelScope.launch {
+//            purchaseHelper.isPremium.collect { isPremium ->
+//                updatePremiumStatus(isPremium)
+//            }
+//        }
+//    }
 
 }

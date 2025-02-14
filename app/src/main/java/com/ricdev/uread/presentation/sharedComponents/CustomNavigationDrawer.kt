@@ -47,7 +47,7 @@ fun CustomNavigationDrawer(
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
-    var showPremiumScreen by remember { mutableStateOf(false) }
+    val showPremiumScreen by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -72,8 +72,6 @@ fun CustomNavigationDrawer(
                             contentPadding = PaddingValues(8.dp),
                             onClick = {
                                 navController.navigate(Screens.PremiumScreen.route);
-//                                showPremiumScreen = true;
-//                                viewModel.purchasePremium(purchaseHelper)
                             },
                             modifier = Modifier
                                 .offset(y = (if (isPortrait) 36 else 18).dp)
