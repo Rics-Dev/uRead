@@ -154,7 +154,7 @@ class HomeViewModel
                 launch { loadShelves() }
                 launch { observeBooks(preferences) }
                 launch { observeAppPreferences() }
-                if (!preferences.isAssetsBooksFetched) {
+                if (!preferences.isAssetsBooksFetched && preferences.scanDirectories.isEmpty()) {
                     launch { addPublicDomainBooksIfNeeded() }
                 }
             }
@@ -415,6 +415,7 @@ class HomeViewModel
                 )
             } finally {
                 _isAddingBooks.value = false
+                appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(isAssetsBooksFetched = true))
             }
         }
     }
