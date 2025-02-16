@@ -191,33 +191,6 @@ data class PurchaseHelper(val activity: Activity) {
         }
     }
 
-//    var onPurchaseCheckComplete: ((Boolean) -> Unit)? = null
-//    fun checkPurchaseStatus() {
-//        val queryPurchasesParams = QueryPurchasesParams.newBuilder()
-//            .setProductType(BillingClient.ProductType.INAPP)
-//            .build()
-//
-//        billingClient.queryPurchasesAsync(queryPurchasesParams) { billingResult, purchases ->
-//            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-//                purchases.forEach { purchase ->
-//                    if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
-//                        completePurchase(purchase)
-//                    }
-//                }
-//                val isPremium = purchases.any { purchase ->
-//                    purchase.products.contains(productId) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
-//                }
-//                _isPremium.value = isPremium
-//                _buyEnabled.value = !isPremium
-//                // Pass isPremium to callback
-//                onPurchaseCheckComplete?.invoke(isPremium)
-//            } else {
-//                // Handle error and pass false for isPremium
-//                onPurchaseCheckComplete?.invoke(false)
-//            }
-//        }
-//    }
-
     fun checkPurchaseStatus() {
         val queryPurchasesParams = QueryPurchasesParams.newBuilder()
             .setProductType(BillingClient.ProductType.INAPP)
@@ -225,23 +198,21 @@ data class PurchaseHelper(val activity: Activity) {
 
         billingClient.queryPurchasesAsync(queryPurchasesParams) { billingResult, purchases ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                purchases.forEach { purchase ->
-                    if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
-                        completePurchase(purchase)
-                    }
-                }
+                // Determine premium status
                 val isPremium = purchases.any { purchase ->
-                    purchase.products.contains(productId) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
+                    purchase.products.contains(productId) &&
+                            purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                 }
+
+                // Update local state
                 _isPremium.value = isPremium
                 _buyEnabled.value = !isPremium
                 _statusText.value = if (isPremium) "Premium Features Activated" else "Premium Features Available"
-
-                // Notify the ViewModel of the updated status
-                (activity as? MainActivity)?.viewModel?.updatePremiumStatus(isPremium)
             } else {
                 _statusText.value = "Failed to query purchases: ${billingResult.debugMessage}"
             }
         }
     }
+
+
 }

@@ -45,18 +45,20 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        // Keep splash screen visible until loading is complete
         splashScreen.setKeepOnScreenCondition {
             viewModel.isLoading.value
         }
 
-        // Background initialization of MobileAds
+        // Initialize billing first
+        val purchaseHelper = PurchaseHelper(this)
+        purchaseHelper.billingSetup()
+
+        // Initialize ads in background
         CoroutineScope(Dispatchers.IO).launch {
             MobileAds.initialize(this@MainActivity)
         }
 
-
-        val purchaseHelper = PurchaseHelper(this)
-        purchaseHelper.billingSetup()
 
 
         setContent {

@@ -987,7 +987,7 @@ class HomeViewModel
 
     fun updatePremiumStatus(isPremium: Boolean) {
         viewModelScope.launch {
-            val currentPreferences = appPreferences.value
+            val currentPreferences = appPreferencesUtil.appPreferencesFlow.first()
             if (currentPreferences.isPremium != isPremium) {
                 val updatedPreferences = currentPreferences.copy(isPremium = isPremium)
                 Log.d("it's me", "the home viewModel")
