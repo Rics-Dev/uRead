@@ -120,29 +120,34 @@ fun CustomTopAppBar(
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = when (selectedTab) {
                             0 -> if (appPreferences.showEntries) "uRead " else "uRead"
                             else -> shelves.getOrNull(selectedTab - 1)?.name ?: "Unknown Shelf"
-                        }
+                        },
+                        maxLines = 1,
+//                        modifier = Modifier.weight(1f),
+//                        style = MaterialTheme.typography.titleMedium
                     )
                     AnimatedVisibility(visible = appPreferences.showEntries) {
                         Box(
                             modifier = Modifier
+                                .weight(1f)
                                 .background(
                                     color = Color.LightGray.copy(alpha = 0.3f),
                                     shape = RoundedCornerShape(4.dp)
                                 )
                                 .padding(horizontal = 8.dp, vertical = 2.dp)
-
                         ) {
                             Text(
                                 text = when (selectedTab) {
                                     0 -> "$totalBooks"
                                     else -> "$currentShelfBookCount"
                                 },
+                                maxLines = 1,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )

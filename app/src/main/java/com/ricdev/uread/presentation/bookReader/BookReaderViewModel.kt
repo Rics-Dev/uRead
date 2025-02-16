@@ -3,6 +3,7 @@ package com.ricdev.uread.presentation.bookReader
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
@@ -35,9 +36,11 @@ import com.ricdev.uread.domain.use_case.reading_activity.GetReadingActivityByDat
 import com.ricdev.uread.domain.use_case.reading_progress.*
 import com.ricdev.uread.util.PurchaseHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
 import org.readium.navigator.media.tts.TtsNavigator
@@ -210,92 +213,134 @@ class BookReaderViewModel @Inject constructor(
         }
     }
 
-
-
     private fun initializeTtsNavigator(
         navigatorFragment: EpubNavigatorFragment?,
         context: Context,
     ) {
+        if (navigatorFragment == null) return
+
         viewModelScope.launch {
-            val initialLocatorTts =
-                (navigatorFragment as? VisualNavigator)?.firstVisibleElementLocator()
-
-            ttsNavigatorFactory.value?.createNavigator(
-                listener = object : TtsNavigator.Listener {
-                    override fun onStopRequested() {
-                        _isTtsOn.value = false
-                        _isTtsPlaying.value = false
-                    }
-                },
-                initialLocator = initialLocatorTts
-            )?.onSuccess { navigator ->
-                _ttsNavigator.value = navigator
-
-                // Set TTS Preferences
-                val ttsPreferences = AndroidTtsPreferences(
-                    language = Language("en"),
-                    pitch = 1.0,
-                    speed = 1.0
-                )
-                navigator.submitPreferences(ttsPreferences)
-
-                // Highlight Spoken Utterances
-                val visualNavigator: DecorableNavigator = navigatorFragment as DecorableNavigator
-
-                combine(
-                    navigator.location.map { it.utteranceLocator }.distinctUntilChanged(),
-                    _isTtsOn
-                ) { locator, isTtsOn ->
-                    Pair(locator, isTtsOn)
-                }.onEach { (locator, isTtsOn) ->
-                    if (isTtsOn) {
-                        visualNavigator.applyDecorations(
-                            listOf(
-                                Decoration(
-                                    id = "tts-utterance",
-                                    locator = locator,
-                                    style = Decoration.Style.Highlight(tint = Color.Red.toArgb())
-                                )
-                            ), group = "tts"
-                        )
-                    } else {
-                        visualNavigator.applyDecorations(emptyList(), group = "tts")
-                    }
-                }.launchIn(viewModelScope)
-
-                fun <T> Flow<T>.throttleLatest(period: Duration): Flow<T> = flow {
-                    conflate().collect {
-                        emit(it)
-                        delay(period)
-                    }
+            try {
+                val initialLocatorTts = withContext(Dispatchers.Main) {
+                    (navigatorFragment as? VisualNavigator)?.firstVisibleElementLocator()
                 }
 
-                navigator.location
-                    .throttleLatest(1.seconds)
-                    .map { it.tokenLocator ?: it.utteranceLocator }
-                    .distinctUntilChanged()
-                    .onEach { locator ->
-                        navigatorFragment.go(locator)
+                ttsNavigatorFactory.value?.createNavigator(
+                    listener = object : TtsNavigator.Listener {
+                        override fun onStopRequested() {
+                            viewModelScope.launch {
+                                _isTtsOn.value = false
+                                _isTtsPlaying.value = false
+                            }
+                        }
+                    },
+                    initialLocator = initialLocatorTts
+                )?.onSuccess { navigator ->
+                    _ttsNavigator.value = navigator
+
+                    // Set TTS Preferences
+                    val ttsPreferences = AndroidTtsPreferences(
+                        language = _ttsLanguage.value,
+                        pitch = _ttsPitch.value,
+                        speed = _ttsSpeed.value
+                    )
+
+                    try {
+                        navigator.submitPreferences(ttsPreferences)
+                    } catch (e: Exception) {
+                        Log.e("TTS", "Failed to submit preferences: ${e.message}")
                     }
-                    .launchIn(viewModelScope)
 
-                // Handle playback errors
-                navigator.playback
-                    .onEach { playback ->
-                        val failureState = playback.state as? TtsNavigator.State.Failure
-                        val error = failureState?.error
+                    // Highlight Spoken Utterances
+                    val visualNavigator = navigatorFragment as? DecorableNavigator ?: return@onSuccess
 
-                        if (error?.message == AndroidTtsEngine.Error.Output.message) {
-                            AndroidTtsEngine.requestInstallVoice(context)
+                    // Create a separate coroutine for handling decorations
+                    viewModelScope.launch {
+                        try {
+                            combine(
+                                navigator.location.map { it.utteranceLocator }.distinctUntilChanged(),
+                                _isTtsOn
+                            ) { locator, isTtsOn ->
+                                Pair(locator, isTtsOn)
+                            }.collect { (locator, isTtsOn) ->
+                                withContext(Dispatchers.Main) {
+                                    if (isTtsOn) {
+                                        visualNavigator.applyDecorations(
+                                            listOf(
+                                                Decoration(
+                                                    id = "tts-utterance",
+                                                    locator = locator,
+                                                    style = Decoration.Style.Highlight(tint = Color.Red.toArgb())
+                                                )
+                                            ),
+                                            group = "tts"
+                                        )
+                                    } else {
+                                        visualNavigator.applyDecorations(emptyList(), group = "tts")
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("TTS", "Error in decoration handling: ${e.message}")
                         }
                     }
-                    .launchIn(viewModelScope)
-            }?.onFailure { error ->
-                // Handle the error
-                println("Failed to create TTS Navigator: ${error.message}")
+
+                    // Handle navigation
+                    viewModelScope.launch {
+                        try {
+                            navigator.location
+                                .throttleLatest(1.seconds)
+                                .map { it.tokenLocator ?: it.utteranceLocator }
+                                .distinctUntilChanged()
+                                .collect { locator ->
+                                    withContext(Dispatchers.Main) {
+                                        navigatorFragment.go(locator)
+                                    }
+                                }
+                        } catch (e: Exception) {
+                            Log.e("TTS", "Error in navigation handling: ${e.message}")
+                        }
+                    }
+
+                    // Handle playback errors
+                    viewModelScope.launch {
+                        try {
+                            navigator.playback
+                                .collect { playback ->
+                                    val failureState = playback.state as? TtsNavigator.State.Failure
+                                    val error = failureState?.error
+
+                                    if (error?.message == AndroidTtsEngine.Error.Output.message) {
+                                        withContext(Dispatchers.Main) {
+                                            AndroidTtsEngine.requestInstallVoice(context)
+                                        }
+                                    }
+                                }
+                        } catch (e: Exception) {
+                            Log.e("TTS", "Error in playback handling: ${e.message}")
+                        }
+                    }
+                }?.onFailure { error ->
+                    Log.e("TTS", "Failed to create TTS Navigator: ${error.message}")
+                    _isTtsOn.value = false
+                    _isTtsPlaying.value = false
+                }
+            } catch (e: Exception) {
+                Log.e("TTS", "Error in TTS initialization: ${e.message}")
+                _isTtsOn.value = false
+                _isTtsPlaying.value = false
             }
         }
     }
+
+    // Helper function for throttling
+    private fun <T> Flow<T>.throttleLatest(period: Duration): Flow<T> = flow {
+        conflate().collect {
+            emit(it)
+            delay(period)
+        }
+    }
+
 
 
     fun setTtsSpeed(speed: Double) {

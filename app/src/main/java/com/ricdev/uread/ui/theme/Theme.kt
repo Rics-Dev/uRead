@@ -1,7 +1,7 @@
 package com.ricdev.uread.ui.theme
 
-import android.app.Activity
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,11 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ricdev.uread.R
-import com.ricdev.uread.data.model.AppPreferences
 import com.ricdev.uread.data.model.AppTheme
 
 
@@ -25,16 +23,18 @@ fun UReadTheme(
     viewModel: AppThemeViewModel = hiltViewModel(),
     content: @Composable () -> Unit,
 ) {
-
     val context = LocalContext.current
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
-
+    val view = LocalView.current
+    val activity = LocalActivity.current
 
     val darkTheme = when (appPreferences.appTheme) {
         AppTheme.SYSTEM -> isSystemInDarkTheme()
         AppTheme.LIGHT -> false
         AppTheme.DARK -> true
     }
+
+
     val colorScheme = when {
         appPreferences.colorScheme == "Dynamic" -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -73,27 +73,33 @@ fun UReadTheme(
         }
     }
 
-    val view = LocalView.current
-    val activity = LocalContext.current as Activity
 
 
+//    // Set splash screen theme
+//    val splashScreenTheme = if (darkTheme) {
+//        R.style.Theme_App_Starting_Dark
+//    } else {
+//        R.style.Theme_App_Starting_Light
+//    }
+//    activity.setTheme(splashScreenTheme)
     // Set splash screen theme
     val splashScreenTheme = if (darkTheme) {
         R.style.Theme_App_Starting_Dark
     } else {
         R.style.Theme_App_Starting_Light
     }
-    activity.setTheme(splashScreenTheme)
+    activity?.setTheme(splashScreenTheme)
 
-
-
-    SideEffect {
-        val window = activity.window
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val windowInsetsController = WindowInsetsControllerCompat(window, view)
-
-        windowInsetsController.isAppearanceLightStatusBars = !darkTheme
-        windowInsetsController.isAppearanceLightNavigationBars = !darkTheme
+    if (!view.isInEditMode) {
+        SideEffect {
+            activity?.window?.let { window ->
+                // Use WindowCompat.getInsetsController instead of direct window manipulation
+                WindowCompat.getInsetsController(window, view).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
+        }
     }
 
     MaterialTheme(
@@ -102,3 +108,20 @@ fun UReadTheme(
         content = content
     )
 }
+
+
+//    SideEffect {
+//        val window = activity?.window
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        val windowInsetsController = WindowInsetsControllerCompat(window, view)
+//
+//        windowInsetsController.isAppearanceLightStatusBars = !darkTheme
+//        windowInsetsController.isAppearanceLightNavigationBars = !darkTheme
+//    }
+//
+//    MaterialTheme(
+//        colorScheme = colorScheme,
+//        typography = Typography,
+//        content = content
+//    )
+//}

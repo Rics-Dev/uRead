@@ -34,8 +34,6 @@ fun PdfReaderBottomBar(
     currentPage: Int,
     onPageChange: (Int) -> Unit,
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +48,9 @@ fun PdfReaderBottomBar(
         ) {
             IconButton(
                 onClick = {
-                    onPageChange(currentPage)
+                    if (currentPage > 1) {
+                        onPageChange(currentPage - 1)
+                    }
                 },
                 modifier = Modifier
                     .size(40.dp)
@@ -87,21 +87,25 @@ fun PdfReaderBottomBar(
                         text = currentPage.toString(),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Slider(
-                        value = currentPage.toFloat(),
-                        onValueChange = { newValue ->
-                            onPageChange(newValue.toInt())
-                        },
-                        valueRange = 1f..pageCount.toFloat(),
-                        steps = pageCount - 2,
-                        colors = SliderDefaults.colors(
-                            activeTrackColor = Color.DarkGray,
-                            inactiveTrackColor = Color.LightGray
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp)
-                    )
+
+                    if (pageCount > 1) {
+                        Slider(
+                            value = currentPage.toFloat(),
+                            onValueChange = { newValue ->
+                                onPageChange(newValue.toInt())
+                            },
+                            valueRange = 1f..pageCount.toFloat(),
+                            // Remove steps parameter as it's causing issues
+                            colors = SliderDefaults.colors(
+                                activeTrackColor = Color.DarkGray,
+                                inactiveTrackColor = Color.LightGray
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp)
+                        )
+                    }
+
                     Text(
                         text = pageCount.toString(),
                         style = MaterialTheme.typography.titleMedium
@@ -111,38 +115,18 @@ fun PdfReaderBottomBar(
 
             IconButton(
                 onClick = {
-                    onPageChange(currentPage + 2)
+                    if (currentPage < pageCount) {
+                        onPageChange(currentPage + 1)
+                    }
                 },
                 modifier = Modifier
                     .size(40.dp)
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(50.dp))
                     .background(Color.White.copy(alpha = 1f), RoundedCornerShape(50.dp))
                     .padding(0.dp)
-
             ) {
                 Icon(Icons.AutoMirrored.Sharp.ArrowForward, contentDescription = "Forward")
             }
         }
-
-
-        // Buttons Row
-//        Row(
-//            modifier = Modifier
-//                .padding(top = 5.dp)
-//                .shadow(
-//                    elevation = 8.dp,
-//                    shape = RoundedCornerShape(16.dp),
-//                    clip = true
-//                )
-//                .offset(y = (15).dp)
-//                .padding(bottom = 15.dp)
-//                .background(Color.White.copy(alpha = 1f))
-//                .fillMaxWidth()
-//                .padding(vertical = 10.dp),
-//            horizontalArrangement = Arrangement.SpaceAround,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//
-//        }
     }
 }

@@ -15,7 +15,6 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.google.common.collect.ImmutableList
 import com.ricdev.uread.BuildConfig
-import com.ricdev.uread.MainActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 

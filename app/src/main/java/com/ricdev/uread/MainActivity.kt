@@ -18,9 +18,12 @@ import com.ricdev.uread.navigation.SetupNavGraph
 import com.ricdev.uread.util.LanguageHelper
 import com.ricdev.uread.util.PurchaseHelper
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -31,19 +34,25 @@ class MainActivity : AppCompatActivity() {
     private val languageHelper = LanguageHelper()
 
     // experimental
+//    override fun attachBaseContext(newBase: Context) {
+//        val appLanguage = AppLanguage.fromCode(
+//            AppPreferencesUtil.defaultPreferences.language
+//        )
+//        val context = languageHelper.updateBaseContextLocale(newBase, appLanguage)
+//        super.attachBaseContext(context)
+//    }
+
     override fun attachBaseContext(newBase: Context) {
-        val appLanguage = AppLanguage.fromCode(
-            AppPreferencesUtil.defaultPreferences.language
-        )
-        val context = languageHelper.updateBaseContextLocale(newBase, appLanguage)
-        super.attachBaseContext(context)
+        super.attachBaseContext(newBase)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
         enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
+
+        val initialLanguage = AppLanguage.fromCode(AppPreferencesUtil.defaultPreferences.language)
+        languageHelper.updateBaseContextLocale(this, initialLanguage)
 
         // Keep splash screen visible until loading is complete
         splashScreen.setKeepOnScreenCondition {
