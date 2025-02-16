@@ -154,7 +154,7 @@ class HomeViewModel
                 launch { loadShelves() }
                 launch { observeBooks(preferences) }
                 launch { observeAppPreferences() }
-                if (!preferences.isAssetsBooksFetched && preferences.scanDirectories.isEmpty()) {
+                if (preferences.scanDirectories.isEmpty()) {
                     launch { addPublicDomainBooksIfNeeded() }
                 }
             }
@@ -172,7 +172,9 @@ class HomeViewModel
                 insertBookUseCase(book)
             }
         }
-        appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(isAssetsBooksFetched = true))
+//        val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
+//        val updatedAppPreferences = initialPreferences.copy(isAssetsBooksFetched = true)
+//        appPreferencesUtil.updateAppPreferences(updatedAppPreferences)
     }
 
     private fun copyAssetToInternalStorage(fileName: String): File {
@@ -415,7 +417,9 @@ class HomeViewModel
                 )
             } finally {
                 _isAddingBooks.value = false
-                appPreferencesUtil.updateAppPreferences(appPreferences.value.copy(isAssetsBooksFetched = true))
+//                val initialPreferences = appPreferencesUtil.appPreferencesFlow.first()
+//                val updatedAppPreferences = initialPreferences.copy(isAssetsBooksFetched = true)
+//                appPreferencesUtil.updateAppPreferences(updatedAppPreferences)
             }
         }
     }

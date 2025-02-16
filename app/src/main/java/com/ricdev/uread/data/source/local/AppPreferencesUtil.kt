@@ -144,6 +144,7 @@ class AppPreferencesUtil @Inject constructor(
         dataStore.edit { preferences ->
             Log.d("AppPreferencesUtil", "Updating preferences. isFirstLaunch: ${newPreferences.isFirstLaunch}")
             Log.d("AppPreferencesUtil", "Updating preferences. Scan directories: ${newPreferences.scanDirectories}")
+            Log.d("AppPreferencesUtil", "Updating preferences. Premium status: ${newPreferences.isPremium}")
             preferences[IS_FIRST_LAUNCH] = newPreferences.isFirstLaunch
             preferences[IS_ASSETS_BOOKS_FETCHED] = newPreferences.isAssetsBooksFetched
             preferences[SCAN_DIRECTORY] = newPreferences.scanDirectories

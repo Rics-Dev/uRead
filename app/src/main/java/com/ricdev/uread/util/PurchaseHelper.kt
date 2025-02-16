@@ -32,46 +32,12 @@ data class PurchaseHelper(val activity: Activity) {
     private val _formattedPrice = MutableStateFlow("N/A")
     private val _priceCurrencyCode = MutableStateFlow("N/A")
     val formattedPrice = _formattedPrice.asStateFlow()
-    val priceCurrencyCode = _priceCurrencyCode.asStateFlow()
+//    val priceCurrencyCode = _priceCurrencyCode.asStateFlow()
     private val _buyEnabled = MutableStateFlow(false)
     private val _isPremium = MutableStateFlow(false)
     val isPremium = _isPremium.asStateFlow()
     private val _statusText = MutableStateFlow("Initializing...")
 
-//    private object Security {
-//        fun verifyPurchase(base64PublicKey: String, signedData: String, signature: String): Boolean {
-//            if (signedData.isEmpty() || base64PublicKey.isEmpty() || signature.isEmpty()) {
-//                return false
-//            }
-//            try {
-//                val key = generatePublicKey(base64PublicKey)
-//                return verify(key, signedData, signature)
-//            } catch (e: Exception) {
-//                return false
-//            }
-//        }
-//
-//        private fun generatePublicKey(encodedPublicKey: String): PublicKey {
-//            try {
-//                val decodedKey = Base64.decode(encodedPublicKey, Base64.DEFAULT)
-//                val keyFactory = KeyFactory.getInstance("RSA")
-//                return keyFactory.generatePublic(X509EncodedKeySpec(decodedKey))
-//            } catch (e: Exception) {
-//                throw RuntimeException("Error generating public key", e)
-//            }
-//        }
-//
-//        private fun verify(publicKey: PublicKey, signedData: String, signature: String): Boolean {
-//            try {
-//                val sig = Signature.getInstance("SHA1withRSA")
-//                sig.initVerify(publicKey)
-//                sig.update(signedData.toByteArray())
-//                return sig.verify(Base64.decode(signature, Base64.DEFAULT))
-//            } catch (e: Exception) {
-//                return false
-//            }
-//        }
-//    }
 
 
     fun billingSetup() {
@@ -122,7 +88,7 @@ data class PurchaseHelper(val activity: Activity) {
             if (productDetailsList.isNotEmpty()) {
                 productDetails = productDetailsList[0]
                 _productName.value = "Product: " + productDetails?.name
-                productDetails?.toString()?.let { Log.e("Product Name", it) };
+                productDetails?.toString()?.let { Log.e("Product Name", it) }
                 _formattedPrice.value = productDetails?.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A"
                 _priceCurrencyCode.value = productDetails?.oneTimePurchaseOfferDetails?.priceCurrencyCode ?: "N/A"
                 _buyEnabled.value = true
@@ -225,6 +191,32 @@ data class PurchaseHelper(val activity: Activity) {
         }
     }
 
+//    var onPurchaseCheckComplete: ((Boolean) -> Unit)? = null
+//    fun checkPurchaseStatus() {
+//        val queryPurchasesParams = QueryPurchasesParams.newBuilder()
+//            .setProductType(BillingClient.ProductType.INAPP)
+//            .build()
+//
+//        billingClient.queryPurchasesAsync(queryPurchasesParams) { billingResult, purchases ->
+//            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+//                purchases.forEach { purchase ->
+//                    if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+//                        completePurchase(purchase)
+//                    }
+//                }
+//                val isPremium = purchases.any { purchase ->
+//                    purchase.products.contains(productId) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
+//                }
+//                _isPremium.value = isPremium
+//                _buyEnabled.value = !isPremium
+//                // Pass isPremium to callback
+//                onPurchaseCheckComplete?.invoke(isPremium)
+//            } else {
+//                // Handle error and pass false for isPremium
+//                onPurchaseCheckComplete?.invoke(false)
+//            }
+//        }
+//    }
 
     fun checkPurchaseStatus() {
         val queryPurchasesParams = QueryPurchasesParams.newBuilder()
