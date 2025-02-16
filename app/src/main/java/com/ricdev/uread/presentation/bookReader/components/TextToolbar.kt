@@ -414,10 +414,6 @@ fun DefaultColors(
         Color(0xFFE91E63), // Material Pink
         Color(0xFFFF9800), // Material Orange
         Color(0xFF9C27B0), // Material Purple
-        Color(0xFF795548), // Material Brown
-        Color(0xFF607D8B), // Material Blue Grey
-        Color(0xFFFF5722), // Material Deep Orange
-        Color(0xFF009688)  // Material Teal
     )
 
     val colorsToShow = if (colorHistory.isNotEmpty()) {
