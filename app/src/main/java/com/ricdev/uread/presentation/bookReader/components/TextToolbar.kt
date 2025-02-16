@@ -412,7 +412,6 @@ fun DefaultColors(
         Color(0xFFFFEB3B), // Material Yellow
         Color(0xFF2196F3), // Material Blue
         Color(0xFFE91E63), // Material Pink
-        Color(0xFFFF9800), // Material Orange
         Color(0xFF9C27B0), // Material Purple
     )
 
